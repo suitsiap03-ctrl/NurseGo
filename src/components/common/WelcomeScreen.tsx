@@ -19,22 +19,17 @@ import {
   ArrowRight,
   ShieldCheck,
   Sparkles,
-  Database,
   CheckCircle2,
 } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onSelectRole: (role: 'nurse' | 'patient') => void;
   onSelectDemo: (role: 'nurse' | 'patient') => void;
-  onOpenConfig: () => void;
-  isConfigured: boolean;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onSelectRole,
   onSelectDemo,
-  onOpenConfig,
-  isConfigured,
 }) => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
@@ -55,17 +50,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
           <div className="flex items-center gap-2">
             <PWAInstallButton compact />
-            <button
-              onClick={onOpenConfig}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border inline-flex items-center gap-1.5 transition-colors ${
-                isConfigured
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                  : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-              }`}
-            >
-              <Database className="w-3.5 h-3.5" />
-              <span>Supabase: {isConfigured ? 'Aktif' : 'Setup Kunci'}</span>
-            </button>
+
           </div>
         </div>
       </header>

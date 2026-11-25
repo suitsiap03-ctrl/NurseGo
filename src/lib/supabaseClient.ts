@@ -15,50 +15,24 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 export const DEFAULT_SUPABASE_URL = 'https://pwokxvmvyezhacjpzhuz.supabase.co';
 export const PROJECT_ID = 'pwokxvmvyezhacjpzhuz';
 
-const STORAGE_KEY_URL = 'nursego_supabase_url';
-const STORAGE_KEY_ANON = 'nursego_supabase_anon_key';
-
-// Retrieve credentials with priority: localStorage / sessionStorage > Vite env > Default URL
+// Kredensial Supabase berasal dari environment variables saat aplikasi dibangun.
 export function getStoredSupabaseConfig(): { url: string; anonKey: string } {
-  const envUrl = (import.meta as any).env?.VITE_SUPABASE_URL;
-  const envKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
-
-  let storedUrl = '';
-  let storedKey = '';
-
-  try {
-    storedUrl = localStorage.getItem(STORAGE_KEY_URL) || '';
-    storedKey = localStorage.getItem(STORAGE_KEY_ANON) || '';
-  } catch (err) {
-    console.warn('NurseGo: Local storage access error:', err);
-  }
-
-  const url = storedUrl || envUrl || DEFAULT_SUPABASE_URL;
-  const anonKey = storedKey || envKey || '';
-
-  return { url, anonKey };
+  const env = (import.meta as any).env || {};
+  return {
+    url: String(env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL).trim(),
+    anonKey: String(env.VITE_SUPABASE_ANON_KEY || '').trim(),
+  };
 }
 
-export function saveSupabaseConfig(url: string, anonKey: string): void {
-  try {
-    localStorage.setItem(STORAGE_KEY_URL, url.trim());
-    localStorage.setItem(STORAGE_KEY_ANON, anonKey.trim());
-  } catch (err) {
-    console.error('NurseGo: Failed to save config to localStorage:', err);
-  }
-  // Reinitialize client
-  initSupabaseClient(url.trim(), anonKey.trim());
+// Kompatibilitas untuk komponen lama: konfigurasi browser tidak lagi disimpan.
+export function saveSupabaseConfig(_url: string, _anonKey: string): void {
+  const config = getStoredSupabaseConfig();
+  initSupabaseClient(config.url, config.anonKey);
 }
 
 export function clearCustomSupabaseConfig(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY_URL);
-    localStorage.removeItem(STORAGE_KEY_ANON);
-  } catch (err) {
-    console.error('NurseGo: Failed to clear config:', err);
-  }
-  const { url, anonKey } = getStoredSupabaseConfig();
-  initSupabaseClient(url, anonKey);
+  const config = getStoredSupabaseConfig();
+  initSupabaseClient(config.url, config.anonKey);
 }
 
 // Singleton client instance

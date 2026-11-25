@@ -8,7 +8,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/common/Navbar';
 import { WelcomeScreen } from './components/common/WelcomeScreen';
 import { NotificationDrawer } from './components/common/NotificationDrawer';
-import { SupabaseConfigModal } from './components/common/SupabaseConfigModal';
 import { OfflineIndicator } from './components/common/OfflineIndicator';
 
 // Auth Components
@@ -79,11 +78,9 @@ const MainAppContent: React.FC = () => {
     role,
     isDemoMode,
     isLoading,
-    isConfigured,
     isPasswordRecovery,
     authError,
     setAuthError,
-    recheckConfiguration,
     loginAsDemo,
     signOut,
   } = useAuth();
@@ -117,8 +114,6 @@ const MainAppContent: React.FC = () => {
   const [selectedPatientSubtab, setSelectedPatientSubtab] = useState<string | undefined>(undefined);
   const [selectedCareSubtab, setSelectedCareSubtab] = useState<string | undefined>(undefined);
   const [refreshNonce, setRefreshNonce] = useState<number>(0);
-
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState<boolean>(false);
   const [isAddPatientOpen, setIsAddPatientOpen] = useState<boolean>(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -310,8 +305,6 @@ const MainAppContent: React.FC = () => {
             onSelectDemo={(demoRole) => {
               loginAsDemo(demoRole);
             }}
-            onOpenConfig={() => setIsConfigModalOpen(true)}
-            isConfigured={isConfigured}
           />
         )}
 
@@ -358,12 +351,6 @@ const MainAppContent: React.FC = () => {
           />
         )}
 
-        <SupabaseConfigModal
-          isOpen={isConfigModalOpen}
-          onClose={() => setIsConfigModalOpen(false)}
-          onConfigUpdated={recheckConfiguration}
-        />
-
         <OfflineIndicator />
       </div>
     );
@@ -376,7 +363,6 @@ const MainAppContent: React.FC = () => {
       <Navbar
         currentTab={currentTab}
         onSelectTab={handleTabChange}
-        onOpenConfig={() => setIsConfigModalOpen(true)}
         onOpenNotifications={() => setIsNotificationOpen(true)}
         unreadCount={unreadNotifsCount}
       />
@@ -513,7 +499,7 @@ const MainAppContent: React.FC = () => {
             )}
 
             {currentTab === 'profil' && (
-              <NurseProfileView onOpenConfig={() => setIsConfigModalOpen(true)} />
+              <NurseProfileView />
             )}
           </>
         )}
@@ -537,7 +523,7 @@ const MainAppContent: React.FC = () => {
             {currentTab === 'riwayat' && <PatientHistory />}
 
             {currentTab === 'profil' && (
-              <PatientProfileView onOpenConfig={() => setIsConfigModalOpen(true)} />
+              <PatientProfileView />
             )}
           </>
         )}
@@ -562,12 +548,6 @@ const MainAppContent: React.FC = () => {
         onSelectTarget={handleSelectNotificationTarget}
       />
 
-      {/* Database Config Modal */}
-      <SupabaseConfigModal
-        isOpen={isConfigModalOpen}
-        onClose={() => setIsConfigModalOpen(false)}
-        onConfigUpdated={recheckConfiguration}
-      />
 
       {/* Add Patient Modal (Nurse only) */}
       <AddPatientModal

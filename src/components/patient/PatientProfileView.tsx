@@ -30,11 +30,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-interface PatientProfileViewProps {
-  onOpenConfig: () => void;
-}
-
-export const PatientProfileView: React.FC<PatientProfileViewProps> = ({ onOpenConfig }) => {
+export const PatientProfileView: React.FC = () => {
   const {
     user,
     profile,
@@ -966,14 +962,6 @@ export const PatientProfileView: React.FC<PatientProfileViewProps> = ({ onOpenCo
         </h2>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-          <button
-            type="button"
-            onClick={onOpenConfig}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors text-center"
-          >
-            Status Koneksi Supabase
-          </button>
-
           <button
             type="button"
             onClick={() => signOut()}

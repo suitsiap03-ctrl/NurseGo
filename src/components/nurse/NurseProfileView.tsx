@@ -32,10 +32,6 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
-interface NurseProfileViewProps {
-  onOpenConfig: () => void;
-}
-
 const EDUCATION_LABELS: Record<NurseEducationLevel, string> = {
   d3_keperawatan: 'D3 Keperawatan (A.Md.Kep.)',
   s1_keperawatan: 'S1 Keperawatan (S.Kep.)',
@@ -46,7 +42,7 @@ const EDUCATION_LABELS: Record<NurseEducationLevel, string> = {
   spesialis_keperawatan: 'Spesialis Keperawatan (Sp.Kep.)',
 };
 
-export const NurseProfileView: React.FC<NurseProfileViewProps> = ({ onOpenConfig }) => {
+export const NurseProfileView: React.FC = () => {
   const { user, profile, nurseProfile, isDemoMode, signOut, refreshProfile, updatePassword } =
     useAuth();
 
@@ -810,14 +806,6 @@ export const NurseProfileView: React.FC<NurseProfileViewProps> = ({ onOpenConfig
         </h2>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onOpenConfig}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors text-center"
-          >
-            Pengaturan Database Supabase
-          </button>
-
           <button
             type="button"
             onClick={() => signOut()}
