@@ -265,11 +265,11 @@ export const PatientActivation: React.FC<PatientActivationProps> = ({
 
           {requiresEmailConfirm ? (
             <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-left text-xs text-blue-900 space-y-2">
-              <div className="font-semibold">Langkah Terakhir — Verifikasi Email:</div>
+              <div className="font-semibold">Cek email Anda, ya!</div>
               <p className="text-[11px] text-blue-800 leading-relaxed">
-                Klik tautan konfirmasi yang dikirim Supabase Auth ke <strong>{patientEmail}</strong>.
-                Setelah email terverifikasi, masuk ke Portal Pasien dan data perawatan Anda akan
-                langsung tersinkron.
+                Kami sudah mengirim tautan verifikasi ke <strong>{patientEmail}</strong>.
+                Buka email tersebut, lalu klik tautannya untuk menyelesaikan pendaftaran.
+                Setelah itu, Anda bisa masuk ke Portal Pasien.
               </p>
               <button
                 type="button"
@@ -278,9 +278,9 @@ export const PatientActivation: React.FC<PatientActivationProps> = ({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-blue-300 text-blue-800 rounded-lg font-semibold hover:bg-blue-100 disabled:opacity-50"
               >
                 <Send className="w-3.5 h-3.5" />
-                <span>{resending ? 'Mengirim...' : 'Kirim Ulang Email Verifikasi'}</span>
+                <span>{resending ? 'Sedang mengirim...' : 'Kirim Ulang Email'}</span>
               </button>
-              {resendMsg && <p className="text-[11px] font-medium">{resendMsg}</p>}
+              {resendMsg && <p className="text-[11px] font-medium">{resendMsg.startsWith('Gagal') ? 'Email belum berhasil dikirim. Coba beberapa saat lagi.' : 'Email verifikasi sudah dikirim ulang. Silakan cek kotak masuk atau folder spam.'}</p>}
             </div>
           ) : (
             <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl text-left text-xs text-teal-900 space-y-1">
