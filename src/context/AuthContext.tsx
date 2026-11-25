@@ -190,6 +190,12 @@ function translateAuthError(message: string): string {
   if (lower.includes('invalid login credentials')) {
     return 'Email atau kata sandi salah. Silakan periksa kembali.';
   }
+  if (lower.includes('535') || lower.includes('badcredentials') || lower.includes('email sending failed')) {
+    return 'Server email NurseGo sedang menolak autentikasi SMTP Gmail. Email pemulihan belum dapat dikirim sampai pengaturan SMTP diperbaiki.';
+  }
+  if (lower.includes('one-time token not found') || lower.includes('email link is invalid or has expired')) {
+    return 'Tautan pemulihan sudah tidak berlaku atau telah digunakan. Minta tautan reset password yang baru, lalu buka tautan terbaru tersebut.';
+  }
   if (lower.includes('email not confirmed')) {
     return 'Email Anda belum dikonfirmasi. Silakan cek kotak masuk/spam email Anda atau kirim ulang tautan verifikasi.';
   }
