@@ -62,7 +62,11 @@ function detectAuthCallbackRoute(): boolean {
   const searchParams = new URLSearchParams(window.location.search);
   const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   return Boolean(
-    searchParams.get('code') ||
+    searchParams.get('flow') === 'recovery' ||
+      ['nurse', 'patient'].includes(searchParams.get('recovery_portal') || '') ||
+      searchParams.get('type') === 'recovery' ||
+      hashParams.get('type') === 'recovery' ||
+      searchParams.get('code') ||
       searchParams.get('token_hash') ||
       searchParams.get('error') ||
       searchParams.get('error_description') ||
