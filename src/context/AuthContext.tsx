@@ -238,7 +238,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(() => urlHasRecoveryMarker());
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(
+    () => urlHasRecoveryMarker() || Boolean(readRecoveryPortalHint())
+  );
   const [recoveryPortal, setRecoveryPortal] = useState<UserRole | null>(() => readRecoveryPortalHint());
   const [isConfiguredState, setIsConfiguredState] = useState<boolean>(isSupabaseConfigured());
   const handledInitialUserRef = useRef<string | null>(null);
@@ -499,8 +501,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (
       typeof window !== 'undefined' &&
-      (window.location.hash.includes('type=recovery') ||
-        new URLSearchParams(window.location.search).get('type') === 'recovery')
+      (urlHasRecoveryMarker() || Boolean(readRecoveryPortalHint()))
     ) {
       setIsPasswordRecovery(true);
     }
