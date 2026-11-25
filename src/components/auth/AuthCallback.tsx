@@ -102,6 +102,10 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
       const codeParam = searchParams.get('code');
       const tokenHashParam = searchParams.get('token_hash');
       const hasHashAccessToken = Boolean(hashParams.get('access_token'));
+      const recoveryIntent =
+        typeParam === 'recovery' ||
+        searchParams.get('flow') === 'recovery' ||
+        ['nurse', 'patient'].includes(searchParams.get('recovery_portal') || '');
 
       if (typeParam === 'recovery') {
         setFlowKind('recovery');
@@ -129,12 +133,14 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
           const { data: exchangeData, error: exchangeErr } =
             await supabase.auth.exchangeCodeForSession(codeParam);
           if (exchangeErr) {
-            // Re-check session once in case client initialization already consumed the single-use code
-            const retry = await supabase.auth.getSession();
-            if (!retry.data.session) {
-              throw exchangeErr;
+            // The client may already be exchanging the same PKCE code during startup.
+            // Give its auth listener time to persist the resulting session before failing.
+            for (let attempt = 0; attempt < 8 && !session; attempt += 1) {
+              await new Promise((resolve) => setTimeout(resolve, 250));
+              const retry = await supabase.auth.getSession();
+              session = retry.data.session;
             }
-            session = retry.data.session;
+            if (!session) throw exchangeErr;
           } else {
             session = exchangeData.session;
           }
@@ -150,11 +156,13 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
           }
           session = otpData.session;
         }
-        // 4. Wait briefly if hash access_token was present and auth listener is finalizing
-        else if (!session && hasHashAccessToken) {
-          await new Promise((resolve) => setTimeout(resolve, 350));
-          const retry = await supabase.auth.getSession();
-          session = retry.data.session;
+        // 4. Wait for Supabase URL detection to persist implicit/recovery sessions.
+        else if (!session && (hasHashAccessToken || recoveryIntent)) {
+          for (let attempt = 0; attempt < 8 && !session; attempt += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 250));
+            const retry = await supabase.auth.getSession();
+            session = retry.data.session;
+          }
         }
 
         if (!active) return;
