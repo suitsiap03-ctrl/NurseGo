@@ -75,7 +75,7 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
       if (res.success) {
         setResetStatus({
           type: 'success',
-          text: `Permintaan reset kata sandi telah diproses oleh Supabase Auth untuk ${resetEmail.trim()}. Periksa kotak masuk atau folder spam Anda. Jika email tidak masuk, pastikan SMTP & Redirect URL sudah aktif di Dashboard Supabase.`,
+          text: `Jika alamat email terdaftar, tautan untuk membuat kata sandi baru akan dikirim ke kotak masuk Anda. Periksa juga folder spam.`,
         });
       } else {
         setResetStatus({
@@ -113,8 +113,8 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
   const needsEmailConfirm = Boolean(authError && authError.toLowerCase().includes('belum dikonfirmasi'));
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-10 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
+    <div className="min-h-screen relative isolate overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_#d9f3ef_0%,_#f4f8fa_42%,_#eef4f8_100%)] flex flex-col justify-center py-8 sm:py-12 px-3 sm:px-6">
+      <div className="relative z-10 mx-auto w-full max-w-[440px] px-1 sm:px-0">
         <button
           onClick={() => {
             setAuthError(null);
@@ -126,13 +126,13 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
           <span>Kembali ke Pilihan Peran</span>
         </button>
 
-        <div className="bg-white py-8 px-6 shadow-xl rounded-2xl border border-slate-200 sm:px-10">
+        <div className="bg-white/95 backdrop-blur-sm py-7 px-5 sm:py-9 sm:px-9 shadow-[0_24px_70px_-28px_rgba(15,76,80,0.28)] rounded-[28px] border border-white/80 ring-1 ring-slate-200/70">
           <div className="text-center mb-6">
             <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center mx-auto mb-3">
               <Stethoscope className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Masuk sebagai Perawat</h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Masuk sebagai Perawat</h2>
+            <p className="text-sm text-slate-500 mt-2 leading-relaxed">
               Portal Asuhan & Pemantauan Pasien Pascaoperasi
             </p>
           </div>
@@ -156,7 +156,7 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
           )}
 
           {authError && (
-            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 space-y-2">
+            <div className="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-800 space-y-2">
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <span>{authError}</span>
@@ -195,7 +195,7 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
           {showForgotPassword && (
             <form
               onSubmit={handleResetPassword}
-              className="mb-5 p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-950 space-y-2.5"
+              className="mb-5 p-4 bg-sky-50 border border-sky-200 rounded-2xl text-sm text-sky-950 space-y-3"
             >
               <div className="flex items-center justify-between">
                 <span className="font-bold">Reset Kata Sandi via Email</span>
@@ -259,7 +259,7 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="perawat@rumah-sakit.id"
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                  className="w-full pl-10 pr-3 py-3 text-sm bg-slate-50/80 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/15 focus:border-teal-500 transition"
                 />
               </div>
             </div>
@@ -304,7 +304,7 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-teal-700/15 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <span>{loading ? 'Memverifikasi...' : 'Masuk sebagai Perawat'}</span>
               <ArrowRight className="w-4 h-4" />

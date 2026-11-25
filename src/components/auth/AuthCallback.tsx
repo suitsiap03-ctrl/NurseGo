@@ -228,8 +228,8 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
   const effectiveRole = role || resolvedRole;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 max-w-md w-full text-center space-y-5 shadow-xl">
+    <div className="min-h-screen relative isolate overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_#d9f3ef_0%,_#f4f8fa_42%,_#eef4f8_100%)] flex items-center justify-center p-3 sm:p-6">
+      <div className="relative z-10 bg-white/95 backdrop-blur-sm rounded-[28px] border border-white/80 ring-1 ring-slate-200/70 p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-[0_24px_70px_-28px_rgba(15,76,80,0.28)]">
         <div className="flex items-center justify-center gap-2 text-teal-700 font-bold text-sm">
           <div className="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center">
             <HeartPulse className="w-4 h-4" />
@@ -243,8 +243,8 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
               <Loader2 className="w-7 h-7 animate-spin" />
             </div>
             <div className="space-y-1.5">
-              <h1 className="text-lg font-bold text-slate-900">Memproses Verifikasi Akun</h1>
-              <p className="text-xs text-slate-600 leading-relaxed">{message}</p>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Memproses Verifikasi Akun</h1>
+              <p className="text-sm text-slate-600 leading-relaxed">{message}</p>
             </div>
           </>
         )}
@@ -255,7 +255,7 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <div className="space-y-1.5">
-              <h1 className="text-lg font-bold text-slate-900">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 {flowKind === 'recovery'
                   ? 'Tautan Pemulihan Terverifikasi'
                   : effectiveRole === 'nurse'
@@ -264,14 +264,14 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
                   ? 'Akun Pasien Terverifikasi'
                   : 'Verifikasi Berhasil'}
               </h1>
-              <p className="text-xs text-slate-600 leading-relaxed">{message}</p>
+              <p className="text-sm text-slate-600 leading-relaxed">{message}</p>
             </div>
 
             {user ? (
               <button
                 type="button"
                 onClick={() => onComplete(flowKind === 'recovery' ? 'recovery' : 'portal')}
-                className="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs inline-flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-teal-700/15 inline-flex items-center justify-center gap-1.5 transition-colors"
               >
                 <span>
                   {flowKind === 'recovery'
@@ -311,7 +311,7 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
               <AlertCircle className="w-8 h-8" />
             </div>
             <div className="space-y-1.5">
-              <h1 className="text-lg font-bold text-slate-900">Verifikasi Tidak Dapat Diproses</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Verifikasi Tidak Dapat Diproses</h1>
               <p className="text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-xl p-3 leading-relaxed">
                 {message}
               </p>
