@@ -11,6 +11,7 @@
  */
 
 import React from 'react';
+import { PWAInstallButton } from './PWAInstallButton';
 import {
   HeartPulse,
   Stethoscope,
@@ -20,7 +21,6 @@ import {
   Sparkles,
   Database,
   CheckCircle2,
-  Lock
 } from 'lucide-react';
 
 interface WelcomeScreenProps {
@@ -40,7 +40,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
       {/* Top Header Bar */}
       <header className="w-full bg-white border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-xs">
               <HeartPulse className="w-5 h-5" />
@@ -53,17 +53,20 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onOpenConfig}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border inline-flex items-center gap-1.5 transition-colors ${
-              isConfigured
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-            }`}
-          >
-            <Database className="w-3.5 h-3.5" />
-            <span>Supabase: {isConfigured ? 'Aktif' : 'Setup Kunci'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <PWAInstallButton compact />
+            <button
+              onClick={onOpenConfig}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border inline-flex items-center gap-1.5 transition-colors ${
+                isConfigured
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                  : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+              }`}
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>Supabase: {isConfigured ? 'Aktif' : 'Setup Kunci'}</span>
+            </button>
+          </div>
         </div>
       </header>
 

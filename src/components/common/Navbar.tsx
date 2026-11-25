@@ -10,6 +10,7 @@
 
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { PWAInstallButton } from './PWAInstallButton';
 import {
   Activity,
   Users,
@@ -41,7 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNotifications,
   unreadCount = 0,
 }) => {
-  const { user, profile, nurseProfile, role, signOut, isConfigured } = useAuth();
+  const { user, profile, nurseProfile, role, isDemoMode, signOut, isConfigured } = useAuth();
 
   // Navigation tabs for Nurse: 1. Beranda, 2. Pasien, 3. Peringatan, 4. Dokumentasi, 5. Profil
   const nurseTabs = [
@@ -67,8 +68,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     <>
       {/* Top Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4 h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 h-16">
             {/* Zone 1: Brand wordmark */}
             <div className="flex items-center gap-3 shrink-0">
               <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-xs">
@@ -80,6 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
                 <span className="text-[10px] text-teal-700 font-semibold tracking-wide uppercase -mt-0.5">
                   {role === 'nurse' ? 'Portal Perawat' : 'Portal Pasien'}
+                  {isDemoMode ? ' · Demo' : ''}
                 </span>
               </div>
             </div>
@@ -109,7 +111,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             {/* Zone 3: Actions & Notifications */}
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <PWAInstallButton compact />
+
               {/* Notification Bell */}
               {user && (
                 <button

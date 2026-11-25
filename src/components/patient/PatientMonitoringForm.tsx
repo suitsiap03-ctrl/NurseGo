@@ -1,19 +1,17 @@
 /**
  * Patient Monitoring Form for NurseGo
- * 
- * Sesuai Bagian 4.6 Master Prompt:
- * Alur pengisian bertahap (5 Langkah):
- * - Langkah 1: Tanda Vital (TD, Suhu, Nadi, Napas, SpO2 dengan satuan)
- * - Langkah 2: Tingkat Nyeri (Skala 0-10 visual, lokasi, karakter, pemicu, pereda)
- * - Langkah 3: Gejala yang Dirasakan (Demam, mual, muntah, pusing, sesak, batuk, lemas, nafsu makan, BAB + kondisi)
- * - Langkah 4: Kondisi Luka Operasi (Normal, kemerahan, bengkak, hangat, cairan, darah, terbuka, nyeri)
- * - Langkah 5: Kondisi Umum & Ringkasan ("Bagaimana kondisi Anda hari ini?" + ringkasan + konfirmasi simpan)
+ *
+ * - 5-step guided flow: Tanda Vital, Nyeri, Gejala, Kondisi Luka, Kondisi Umum & Ringkasan
+ * - Checks EVERY Supabase `{ error }` before claiming success
+ * - Saves `generalFeeling` (as `general_condition` + `symptom_trend`) and `woundNotes` & additional notes
+ * - Triggers clinical rule alerts & inserts real `notifications` for assigned nurses
  */
 
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getSupabase } from '../../lib/supabaseClient';
 import { evaluateClinicalMonitoring, EvaluatedAlert } from '../../lib/clinicalRules';
+import { notifyAssignedNurses } from '../../lib/notifications';
 import {
   HeartPulse,
   Flame,
@@ -24,19 +22,16 @@ import {
   Frown,
   CheckCircle2,
   ArrowRight,
-  ArrowLeft,
   AlertTriangle,
-  Send,
-  HelpCircle
+  Send
 } from 'lucide-react';
-import { GeneralCondition } from '../../types/database';
 
 interface PatientMonitoringFormProps {
   onSuccess: () => void;
 }
 
 export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ onSuccess }) => {
-  const { user } = useAuth();
+  const { user, profile, isDemoMode } = useAuth();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   // STEP 1: Tanda Vital
@@ -82,12 +77,12 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
   const [hasIncreasedPain, setHasIncreasedPain] = useState<boolean>(false);
   const [woundNotes, setWoundNotes] = useState<string>('');
 
-  // STEP 5: Kondisi Umum & Konfirmasi
+  // STEP 5: Kondisi Umum & Catatan Tambahan
   const [generalFeeling, setGeneralFeeling] = useState<
     'sangat_baik' | 'baik' | 'biasa_saja' | 'kurang_baik' | 'buruk'
   >('baik');
+  const [additionalNotes, setAdditionalNotes] = useState<string>('');
 
-  // Workflow states
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submitResult, setSubmitResult] = useState<{
@@ -101,14 +96,19 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
     );
   };
 
-  // Step Validation
+  const parseVitalNumber = (raw: string): number => {
+    const cleaned = raw.trim().replace(',', '.');
+    if (!cleaned) return NaN;
+    return Number(cleaned);
+  };
+
   const validateStep1 = () => {
-    const sys = Number(systolic);
-    const dia = Number(diastolic);
-    const hr = Number(heartRate);
-    const rr = Number(respiratoryRate);
-    const temp = Number(temperature);
-    const spo2 = Number(oxygenSaturation);
+    const sys = parseVitalNumber(systolic);
+    const dia = parseVitalNumber(diastolic);
+    const hr = parseVitalNumber(heartRate);
+    const rr = parseVitalNumber(respiratoryRate);
+    const temp = parseVitalNumber(temperature);
+    const spo2 = parseVitalNumber(oxygenSaturation);
 
     if (isNaN(sys) || sys < 50 || sys > 260) {
       setErrorMsg('Tekanan darah sistolik harus di antara 50 – 260 mmHg.');
@@ -159,22 +159,28 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
   };
 
   const handleFinalSubmit = async () => {
-    if (!user) return;
-    setSubmitting(true);
+    if (!user || submitting) return;
     setErrorMsg(null);
-    const supabase = getSupabase();
+
     const timestamp = new Date().toISOString();
+    const combinedGeneralNotes = [
+      symptomNotes.trim(),
+      additionalNotes.trim() ? `Catatan tambahan: ${additionalNotes.trim()}` : '',
+    ]
+      .filter(Boolean)
+      .join(' | ');
 
     const vitalsData = {
       patient_id: user.id,
       recorded_by: user.id,
       recorded_at: timestamp,
-      systolic_bp: Number(systolic),
-      diastolic_bp: Number(diastolic),
-      heart_rate: Number(heartRate),
-      respiratory_rate: Number(respiratoryRate),
-      body_temperature: Number(temperature),
-      oxygen_saturation: Number(oxygenSaturation),
+      systolic_bp: parseVitalNumber(systolic),
+      diastolic_bp: parseVitalNumber(diastolic),
+      heart_rate: parseVitalNumber(heartRate),
+      respiratory_rate: parseVitalNumber(respiratoryRate),
+      body_temperature: parseVitalNumber(temperature),
+      oxygen_saturation: parseVitalNumber(oxygenSaturation),
+      notes: additionalNotes.trim() || undefined,
     };
 
     const painData = {
@@ -193,8 +199,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       recorded_by: user.id,
       recorded_at: timestamp,
       symptoms: selectedSymptoms,
-      general_condition: symptomTrend as any,
-      notes: symptomNotes.trim() || undefined,
+      general_condition: generalFeeling,
+      symptom_trend: symptomTrend,
+      notes: combinedGeneralNotes || `Tren gejala: ${symptomTrend}`,
     };
 
     const woundData = {
@@ -212,23 +219,60 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       notes: woundNotes.trim() || undefined,
     };
 
-    try {
-      // 1. Insert to tables
-      await supabase.from('vital_sign_records').insert(vitalsData);
-      await supabase.from('pain_records').insert(painData);
-      await supabase.from('symptom_records').insert(symptomData);
-      await supabase.from('wound_records').insert(woundData);
+    const alertEvaluation = evaluateClinicalMonitoring({
+      vitals: vitalsData,
+      pain: painData,
+      symptoms: symptomData,
+      wound: woundData,
+    });
 
-      // 2. Evaluate Clinical Alert Rules
-      const alertEvaluation = evaluateClinicalMonitoring({
-        vitals: vitalsData,
-        pain: painData,
-        symptoms: symptomData,
-        wound: woundData,
+    if (isDemoMode) {
+      setSubmitResult({
+        success: true,
+        alert: alertEvaluation,
       });
+      return;
+    }
 
+    setSubmitting(true);
+    const supabase = getSupabase();
+
+    try {
+      // 1. Save vital signs
+      const { error: vitErr } = await supabase.from('vital_sign_records').insert(vitalsData);
+      if (vitErr) throw new Error(`Gagal menyimpan tanda vital: ${vitErr.message}`);
+
+      // 2. Save pain record
+      const { error: painErr } = await supabase.from('pain_records').insert(painData);
+      if (painErr) throw new Error(`Gagal menyimpan data nyeri: ${painErr.message}`);
+
+      // 3. Save symptom + general condition (fallback if symptom_trend column not migrated yet)
+      let { error: symErr } = await supabase.from('symptom_records').insert(symptomData);
+      if (symErr && (symErr.message.includes('symptom_trend') || symErr.code === 'PGRST204' || symErr.code === '42703')) {
+        const { symptom_trend: _omit, ...fallbackSymptom } = symptomData;
+        const retrySym = await supabase.from('symptom_records').insert({
+          ...fallbackSymptom,
+          notes: `Tren: ${symptomTrend}${combinedGeneralNotes ? ` · ${combinedGeneralNotes}` : ''}`,
+        });
+        symErr = retrySym.error;
+      }
+      if (symErr) throw new Error(`Gagal menyimpan gejala & kondisi umum: ${symErr.message}`);
+
+      // 4. Save wound record (fallback if is_normal column not migrated yet)
+      let { error: woundErr } = await supabase.from('wound_records').insert(woundData);
+      if (woundErr && (woundErr.message.includes('is_normal') || woundErr.code === 'PGRST204' || woundErr.code === '42703')) {
+        const { is_normal: _omitWoundNormal, ...fallbackWound } = woundData;
+        const retryWound = await supabase.from('wound_records').insert({
+          ...fallbackWound,
+          notes: `Status luka: ${isWoundNormal ? 'Normal' : 'Ada keluhan'}${woundData.notes ? ` · ${woundData.notes}` : ''}`,
+        });
+        woundErr = retryWound.error;
+      }
+      if (woundErr) throw new Error(`Gagal menyimpan kondisi luka: ${woundErr.message}`);
+
+      // 5. Evaluate and insert alert if triggered
       if (alertEvaluation) {
-        const { data: newAlert } = await supabase
+        const { data: newAlert, error: alertErr } = await supabase
           .from('patient_alerts')
           .insert({
             patient_id: user.id,
@@ -241,6 +285,8 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           .select('id')
           .maybeSingle();
 
+        if (alertErr) throw new Error(`Laporan tersimpan, namun gagal membuat peringatan: ${alertErr.message}`);
+
         if (newAlert?.id) {
           await supabase.from('patient_alert_events').insert({
             alert_id: newAlert.id,
@@ -249,6 +295,20 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             created_by: user.id,
           });
         }
+
+        await notifyAssignedNurses(user.id, {
+          title: `[${alertEvaluation.alertLevel.toUpperCase()}] ${alertEvaluation.title}`,
+          message: `${profile?.full_name || 'Pasien'} mengirim laporan dengan indikasi ${alertEvaluation.alertLevel}: ${alertEvaluation.description}`,
+          type: 'alert',
+          linkTarget: `patient:${user.id}:monitoring`,
+        });
+      } else {
+        await notifyAssignedNurses(user.id, {
+          title: 'Laporan Pemantauan Harian Baru',
+          message: `${profile?.full_name || 'Pasien'} telah mengirimkan pemantauan harian (TD ${systolic}/${diastolic}, Suhu ${temperature}°C, Nyeri ${painScale}/10).`,
+          type: 'monitoring',
+          linkTarget: `patient:${user.id}:monitoring`,
+        });
       }
 
       setSubmitResult({
@@ -256,17 +316,16 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
         alert: alertEvaluation,
       });
     } catch (err: any) {
-      setErrorMsg(err.message || 'Gagal menyimpan laporan.');
+      setErrorMsg(err.message || 'Gagal menyimpan laporan ke database.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // SUCCESS SCREEN
   if (submitResult?.success) {
     const alert = submitResult.alert;
     return (
-      <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-8 shadow-md space-y-6 text-center">
+      <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-md space-y-6 text-center">
         <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
           <CheckCircle2 className="w-10 h-10" />
         </div>
@@ -276,7 +335,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             Laporan Pemantauan Berhasil Terkirim!
           </h2>
           <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-            Hasil tanda vital, skala nyeri, dan kondisi luka telah berhasil disimpan ke sistem rekam medis NurseGo dan terhubung dengan perawat pendamping Anda.
+            {isDemoMode
+              ? 'Pratinjau Mode Demo selesai. Masuk menggunakan akun Pasien asli agar data tersimpan ke Supabase.'
+              : 'Hasil tanda vital, skala nyeri, gejala, kondisi umum, dan luka telah tersimpan di Supabase dan dikirimkan ke perawat pendamping Anda.'}
           </p>
         </div>
 
@@ -297,12 +358,12 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             <p className="font-semibold">{alert.title}</p>
             <p className="leading-relaxed opacity-90">{alert.description}</p>
             <p className="text-[11px] font-medium pt-1 border-t border-black/10">
-              Perawat penanggung jawab Anda telah menerima sinyal pemantauan ini.
+              Perawat penanggung jawab Anda telah menerima notifikasi pemantauan ini.
             </p>
           </div>
         ) : (
           <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 font-medium">
-            Kondisi Anda saat ini tercatat dalam batas stabil. Lanjutkan istirahat dan konsumsi obat secara teratur!
+            Kondisi Anda saat ini tercatat dalam batas stabil. Lanjutkan istirahat dan konsumsi obat sesuai jadwal!
           </div>
         )}
 
@@ -318,8 +379,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-16">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
+      <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-xs">
         <h1 className="text-xl font-bold tracking-tight text-slate-900">
           Form Pemantauan Mandiri Harian
         </h1>
@@ -327,13 +387,12 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           Laporkan tanda vital, rasa nyeri, keluhan tubuh, dan kondisi luka jahitan Anda secara berkala.
         </p>
 
-        {/* 5-Step Stepper Indicators */}
         <div className="grid grid-cols-5 gap-1.5 mt-5">
           {[
             { num: 1, label: 'Tanda Vital' },
             { num: 2, label: 'Nyeri' },
             { num: 3, label: 'Gejala' },
-            { num: 4, label: 'Luka Operasi' },
+            { num: 4, label: 'Luka' },
             { num: 5, label: 'Ringkasan' },
           ].map((st) => (
             <div
@@ -360,9 +419,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
         </div>
       )}
 
-      {/* STEP 1: TANDA VITAL */}
+      {/* STEP 1 */}
       {currentStep === 1 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 text-xs">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-4 text-xs">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <HeartPulse className="w-4 h-4 text-teal-600" />
             <h2 className="font-bold text-xs uppercase tracking-wider text-slate-900">
@@ -380,7 +439,6 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                   type="number"
                   value={systolic}
                   onChange={(e) => setSystolic(e.target.value)}
-                  placeholder="120"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-sm"
                 />
                 <span className="font-bold text-slate-400">/</span>
@@ -388,81 +446,64 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                   type="number"
                   value={diastolic}
                   onChange={(e) => setDiastolic(e.target.value)}
-                  placeholder="80"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-sm"
                 />
                 <span className="text-slate-500 font-medium whitespace-nowrap">mmHg</span>
               </div>
-              <span className="text-[10px] text-slate-400 mt-1 block">Rentang acuan normal: 100/60 – 129/84 mmHg</span>
+              <span className="text-[10px] text-slate-400 mt-1 block">Acuan normal: 100/60 – 129/84 mmHg</span>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Suhu Tubuh (°C) *
-              </label>
+              <label className="block font-semibold text-slate-700 mb-1">Suhu Tubuh (°C) *</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   step="0.1"
                   value={temperature}
                   onChange={(e) => setTemperature(e.target.value)}
-                  placeholder="36.5"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-sm"
                 />
                 <span className="text-slate-500 font-medium">°C</span>
               </div>
-              <span className="text-[10px] text-slate-400 mt-1 block">Acuan normal: 36.5°C – 37.5°C</span>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Denyut Nadi (bpm) *
-              </label>
+              <label className="block font-semibold text-slate-700 mb-1">Denyut Nadi (bpm) *</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   value={heartRate}
                   onChange={(e) => setHeartRate(e.target.value)}
-                  placeholder="76"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-sm"
                 />
                 <span className="text-slate-500 font-medium">bpm</span>
               </div>
-              <span className="text-[10px] text-slate-400 mt-1 block">Acuan normal: 60 – 100 denyut/menit</span>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Frekuensi Pernapasan *
-              </label>
+              <label className="block font-semibold text-slate-700 mb-1">Frekuensi Pernapasan *</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   value={respiratoryRate}
                   onChange={(e) => setRespiratoryRate(e.target.value)}
-                  placeholder="18"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-sm"
                 />
                 <span className="text-slate-500 font-medium">x/mnt</span>
               </div>
-              <span className="text-[10px] text-slate-400 mt-1 block">Acuan normal: 12 – 20 tarikan napas/menit</span>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Saturasi Oksigen (SpO2) *
-              </label>
+              <label className="block font-semibold text-slate-700 mb-1">Saturasi Oksigen (SpO2) *</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   value={oxygenSaturation}
                   onChange={(e) => setOxygenSaturation(e.target.value)}
-                  placeholder="98"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-sm"
                 />
                 <span className="text-slate-500 font-medium">%</span>
               </div>
-              <span className="text-[10px] text-slate-400 mt-1 block">Target optimal: 95 – 100%</span>
             </div>
           </div>
 
@@ -470,7 +511,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             <button
               type="button"
               onClick={handleNext}
-              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs inline-flex items-center gap-1.5"
             >
               <span>Lanjut ke Evaluasi Nyeri</span>
               <ArrowRight className="w-4 h-4" />
@@ -479,9 +520,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
         </div>
       )}
 
-      {/* STEP 2: TINGKAT NYERI */}
+      {/* STEP 2 */}
       {currentStep === 2 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 text-xs">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-5 text-xs">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <Flame className="w-4 h-4 text-teal-600" />
             <h2 className="font-bold text-xs uppercase tracking-wider text-slate-900">
@@ -505,15 +546,8 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                   }`}
                 >
                   {painScale} / 10
-                  <span className="text-xs font-semibold ml-1.5">
-                    {painScale === 0 && '(Tidak Ada Nyeri)'}
-                    {painScale >= 1 && painScale <= 3 && '(Nyeri Ringan)'}
-                    {painScale >= 4 && painScale <= 6 && '(Nyeri Sedang)'}
-                    {painScale >= 7 && '(Nyeri Berat)'}
-                  </span>
                 </span>
               </div>
-
               <input
                 type="range"
                 min="0"
@@ -523,33 +557,27 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 onChange={(e) => setPainScale(Number(e.target.value))}
                 className="w-full accent-teal-600 h-2.5 bg-slate-200 rounded-lg cursor-pointer"
               />
-
               <div className="flex justify-between text-[10px] text-slate-400 mt-1 px-1">
                 <span>0 (Tidak Nyeri)</span>
                 <span>3 (Ringan)</span>
                 <span>6 (Sedang)</span>
-                <span>10 (Berat/Hebat)</span>
+                <span>10 (Berat)</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Lokasi Nyeri *
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Lokasi Nyeri *</label>
                 <input
                   type="text"
                   value={painLocation}
                   onChange={(e) => setPainLocation(e.target.value)}
-                  placeholder="Misal: Perut kanan bawah atau sendi lutut"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Karakter / Rasa Nyeri
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Karakter / Rasa Nyeri</label>
                 <select
                   value={painCharacteristic}
                   onChange={(e) => setPainCharacteristic(e.target.value)}
@@ -564,27 +592,21 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Apa yang Membuat Nyeri Bertambah?
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Pemicu Nyeri</label>
                 <input
                   type="text"
                   value={aggravating}
                   onChange={(e) => setAggravating(e.target.value)}
-                  placeholder="Misal: Saat batuk, mengejan, atau berjalan"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Apa yang Membantu Mengurangi Nyeri?
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Pereda Nyeri</label>
                 <input
                   type="text"
                   value={relieving}
                   onChange={(e) => setRelieving(e.target.value)}
-                  placeholder="Misal: Berbaring dengan bantal, minum obat pereda nyeri"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
                 />
               </div>
@@ -602,18 +624,18 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             <button
               type="button"
               onClick={handleNext}
-              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl inline-flex items-center gap-1.5"
             >
-              <span>Lanjut ke Keluhan & Gejala</span>
+              <span>Lanjut ke Gejala</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: GEJALA YANG DIRASAKAN */}
+      {/* STEP 3 */}
       {currentStep === 3 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 text-xs">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-5 text-xs">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <Activity className="w-4 h-4 text-teal-600" />
             <h2 className="font-bold text-xs uppercase tracking-wider text-slate-900">
@@ -622,39 +644,36 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           </div>
 
           <div className="space-y-4">
-            <div>
-              <label className="block font-semibold text-slate-700 mb-2">
-                Pilih keluhan yang Anda rasakan hari ini (Boleh lebih dari satu):
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {symptomList.map((sym) => {
-                  const isChecked = selectedSymptoms.includes(sym);
-                  return (
-                    <button
-                      key={sym}
-                      type="button"
-                      onClick={() => toggleSymptom(sym)}
-                      className={`p-2.5 rounded-lg border text-left transition-colors flex items-center justify-between ${
-                        isChecked
-                          ? 'bg-teal-50 border-teal-500 text-teal-900 font-semibold'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              {symptomList.map((sym) => {
+                const isChecked = selectedSymptoms.includes(sym);
+                return (
+                  <button
+                    key={sym}
+                    type="button"
+                    onClick={() => toggleSymptom(sym)}
+                    className={`p-2.5 rounded-lg border text-left transition-colors flex items-center justify-between ${
+                      isChecked
+                        ? 'bg-teal-50 border-teal-500 text-teal-900 font-semibold'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>{sym}</span>
+                    <span
+                      className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] ${
+                        isChecked ? 'bg-teal-600 text-white border-teal-600' : 'border-slate-300 bg-white'
                       }`}
                     >
-                      <span>{sym}</span>
-                      <span className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] ${
-                        isChecked ? 'bg-teal-600 text-white border-teal-600' : 'border-slate-300 bg-white'
-                      }`}>
-                        {isChecked ? '✓' : ''}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                      {isChecked ? '✓' : ''}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             <div>
               <label className="block font-semibold text-slate-700 mb-2">
-                Perkembangan gejala dibanding kemarin:
+                Perkembangan keluhan dibanding kemarin:
               </label>
               <div className="grid grid-cols-3 gap-3">
                 <button
@@ -662,34 +681,32 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                   onClick={() => setSymptomTrend('membaik')}
                   className={`p-3 rounded-xl border text-center transition-colors ${
                     symptomTrend === 'membaik'
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-900 font-bold shadow-xs'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      ? 'bg-emerald-50 border-emerald-500 text-emerald-900 font-bold'
+                      : 'bg-slate-50 border-slate-200 text-slate-600'
                   }`}
                 >
                   <Smile className="w-5 h-5 mx-auto mb-1 text-emerald-600" />
                   <span>Membaik</span>
                 </button>
-
                 <button
                   type="button"
                   onClick={() => setSymptomTrend('sama')}
                   className={`p-3 rounded-xl border text-center transition-colors ${
                     symptomTrend === 'sama'
-                      ? 'bg-amber-50 border-amber-500 text-amber-900 font-bold shadow-xs'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      ? 'bg-amber-50 border-amber-500 text-amber-900 font-bold'
+                      : 'bg-slate-50 border-slate-200 text-slate-600'
                   }`}
                 >
                   <Meh className="w-5 h-5 mx-auto mb-1 text-amber-600" />
-                  <span>Tidak Berubah</span>
+                  <span>Sama</span>
                 </button>
-
                 <button
                   type="button"
                   onClick={() => setSymptomTrend('memburuk')}
                   className={`p-3 rounded-xl border text-center transition-colors ${
                     symptomTrend === 'memburuk'
-                      ? 'bg-rose-50 border-rose-500 text-rose-900 font-bold shadow-xs'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      ? 'bg-rose-50 border-rose-500 text-rose-900 font-bold'
+                      : 'bg-slate-50 border-slate-200 text-slate-600'
                   }`}
                 >
                   <Frown className="w-5 h-5 mx-auto mb-1 text-rose-600" />
@@ -699,9 +716,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                Catatan Tambahan Keluhan
-              </label>
+              <label className="block font-semibold text-slate-700 mb-1">Catatan Keluhan</label>
               <textarea
                 rows={2}
                 value={symptomNotes}
@@ -723,7 +738,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             <button
               type="button"
               onClick={handleNext}
-              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl inline-flex items-center gap-1.5"
             >
               <span>Lanjut ke Kondisi Luka</span>
               <ArrowRight className="w-4 h-4" />
@@ -732,9 +747,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
         </div>
       )}
 
-      {/* STEP 4: KONDISI LUKA OPERASI */}
+      {/* STEP 4 */}
       {currentStep === 4 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 text-xs">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-5 text-xs">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <ShieldAlert className="w-4 h-4 text-teal-600" />
             <h2 className="font-bold text-xs uppercase tracking-wider text-slate-900">
@@ -743,10 +758,6 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           </div>
 
           <div className="space-y-3">
-            <p className="text-slate-600">
-              Perhatikan area balutan atau bekas jahitan operasi Anda, tandai jika menemukan kondisi berikut:
-            </p>
-
             <label className="flex items-center gap-2.5 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer">
               <input
                 type="checkbox"
@@ -771,96 +782,46 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-              <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasRedness}
-                  onChange={(e) => {
-                    setHasRedness(e.target.checked);
-                    if (e.target.checked) setIsWoundNormal(false);
-                  }}
-                  className="rounded text-teal-600 focus:ring-teal-500 w-4 h-4"
-                />
-                <span>Kemerahan di sekitar jahitan</span>
-              </label>
+              {[
+                { label: 'Kemerahan di sekitar jahitan', checked: hasRedness, set: setHasRedness, danger: false },
+                { label: 'Bengkak di sekitar luka', checked: hasSwelling, set: setHasSwelling, danger: false },
+                { label: 'Teraba hangat/panas saat disentuh', checked: hasWarmth, set: setHasWarmth, danger: false },
+                { label: 'Keluar nanah / cairan keruh (Pus)', checked: hasDischarge, set: setHasDischarge, danger: true },
+                { label: 'Keluar rembesan darah aktif', checked: hasBleeding, set: setHasBleeding, danger: true },
+                { label: 'Tepi luka jahitan terbuka', checked: hasOpenWound, set: setHasOpenWound, danger: true },
+                { label: 'Nyeri luka terasa meningkat tajam', checked: hasIncreasedPain, set: setHasIncreasedPain, danger: false },
+              ].map((item) => (
+                <label
+                  key={item.label}
+                  className={`flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer ${
+                    item.danger ? 'border-rose-200 bg-rose-50/50 hover:bg-rose-50' : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={item.checked}
+                    onChange={(e) => {
+                      item.set(e.target.checked);
+                      if (e.target.checked) setIsWoundNormal(false);
+                    }}
+                    className={`rounded w-4 h-4 ${item.danger ? 'text-rose-600' : 'text-teal-600'}`}
+                  />
+                  <span className={item.danger ? 'font-semibold text-rose-900' : ''}>{item.label}</span>
+                </label>
+              ))}
+            </div>
 
-              <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasSwelling}
-                  onChange={(e) => {
-                    setHasSwelling(e.target.checked);
-                    if (e.target.checked) setIsWoundNormal(false);
-                  }}
-                  className="rounded text-teal-600 focus:ring-teal-500 w-4 h-4"
-                />
-                <span>Bengkak di sekitar luka</span>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Catatan Kondisi Luka / Balutan (Opsional)
               </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasWarmth}
-                  onChange={(e) => {
-                    setHasWarmth(e.target.checked);
-                    if (e.target.checked) setIsWoundNormal(false);
-                  }}
-                  className="rounded text-teal-600 focus:ring-teal-500 w-4 h-4"
-                />
-                <span>Teraba hangat/panas saat disentuh</span>
-              </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasDischarge}
-                  onChange={(e) => {
-                    setHasDischarge(e.target.checked);
-                    if (e.target.checked) setIsWoundNormal(false);
-                  }}
-                  className="rounded text-rose-600 focus:ring-rose-500 w-4 h-4"
-                />
-                <span className="font-semibold text-rose-900">Keluar nanah / cairan keruh (Pus)</span>
-              </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasBleeding}
-                  onChange={(e) => {
-                    setHasBleeding(e.target.checked);
-                    if (e.target.checked) setIsWoundNormal(false);
-                  }}
-                  className="rounded text-rose-600 focus:ring-rose-500 w-4 h-4"
-                />
-                <span className="font-semibold text-rose-900">Keluar rembesan darah aktif</span>
-              </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-50 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasOpenWound}
-                  onChange={(e) => {
-                    setHasOpenWound(e.target.checked);
-                    if (e.target.checked) setIsWoundNormal(false);
-                  }}
-                  className="rounded text-rose-600 focus:ring-rose-500 w-4 h-4"
-                />
-                <span className="font-semibold text-rose-900">Tepi luka jahitan terbuka</span>
-              </label>
-
-              <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer sm:col-span-2">
-                <input
-                  type="checkbox"
-                  checked={hasIncreasedPain}
-                  onChange={(e) => {
-                    setHasIncreasedPain(e.target.checked);
-                    if (e.target.checked) setIsWoundNormal(false);
-                  }}
-                  className="rounded text-teal-600 focus:ring-teal-500 w-4 h-4"
-                />
-                <span>Nyeri luka terasa meningkat tajam</span>
-              </label>
+              <textarea
+                rows={2}
+                value={woundNotes}
+                onChange={(e) => setWoundNotes(e.target.value)}
+                placeholder="Misal: Kasa baru diganti pagi ini, warna luka tampak rapi..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
+              />
             </div>
           </div>
 
@@ -875,18 +836,18 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             <button
               type="button"
               onClick={handleNext}
-              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl inline-flex items-center gap-1.5"
             >
-              <span>Lanjut ke Kondisi Umum & Ringkasan</span>
+              <span>Lanjut ke Ringkasan</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 5: KONDISI UMUM & RINGKASAN */}
+      {/* STEP 5 */}
       {currentStep === 5 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 text-xs">
+        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 space-y-5 text-xs">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <Smile className="w-4 h-4 text-teal-600" />
             <h2 className="font-bold text-xs uppercase tracking-wider text-slate-900">
@@ -897,7 +858,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           <div className="space-y-4">
             <div>
               <label className="block font-semibold text-slate-800 mb-2">
-                "Bagaimana kondisi Anda secara keseluruhan hari ini?" *
+                Bagaimana kondisi Anda secara keseluruhan hari ini? *
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 {[
@@ -923,12 +884,23 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               </div>
             </div>
 
-            {/* Complete Data Summary Box */}
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Catatan Tambahan untuk Perawat (Opsional)
+              </label>
+              <textarea
+                rows={2}
+                value={additionalNotes}
+                onChange={(e) => setAdditionalNotes(e.target.value)}
+                placeholder="Ceritakan aktivitas hari ini, nafsu makan, kualitas tidur, atau pertanyaan untuk perawat..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
+              />
+            </div>
+
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
               <span className="font-bold text-slate-800 block text-xs border-b border-slate-200 pb-1">
                 Ringkasan Data Pemantauan yang Akan Dikirim:
               </span>
-
               <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-700 pt-1">
                 <div>
                   <span className="text-slate-400">Tekanan Darah:</span>
@@ -939,12 +911,8 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                   <div className="font-bold text-slate-900">{temperature} °C</div>
                 </div>
                 <div>
-                  <span className="text-slate-400">Denyut Nadi:</span>
-                  <div className="font-bold text-slate-900">{heartRate} bpm</div>
-                </div>
-                <div>
-                  <span className="text-slate-400">Saturasi SpO2:</span>
-                  <div className="font-bold text-slate-900">{oxygenSaturation} %</div>
+                  <span className="text-slate-400">Denyut Nadi / SpO2:</span>
+                  <div className="font-bold text-slate-900">{heartRate} bpm · {oxygenSaturation}%</div>
                 </div>
                 <div>
                   <span className="text-slate-400">Skala Nyeri:</span>
@@ -954,17 +922,17 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                   <span className="text-slate-400">Kondisi Luka:</span>
                   <div className="font-bold text-slate-900">
                     {hasDischarge || hasBleeding || hasOpenWound
-                      ? '⚠️ Ada Tanda Bahaya Luka'
+                      ? 'Ada Tanda Bahaya Luka'
                       : isWoundNormal
                       ? 'Normal & Kering'
                       : 'Kemerahan/Bengkak'}
                   </div>
                 </div>
+                <div>
+                  <span className="text-slate-400">Kondisi Umum:</span>
+                  <div className="font-bold text-slate-900 capitalize">{generalFeeling.replace('_', ' ')}</div>
+                </div>
               </div>
-            </div>
-
-            <div className="p-3 bg-teal-50/70 border border-teal-200 rounded-xl text-[11px] text-teal-900">
-              Data Anda akan langsung diperiksa oleh sistem peringatan dan tersedia pada dasbor perawat penanggung jawab.
             </div>
           </div>
 
@@ -980,7 +948,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               type="button"
               disabled={submitting}
               onClick={handleFinalSubmit}
-              className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors inline-flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-md inline-flex items-center gap-2 disabled:opacity-50"
             >
               <span>{submitting ? 'Menyimpan...' : 'Simpan & Kirim Pemantauan'}</span>
               <Send className="w-4 h-4" />

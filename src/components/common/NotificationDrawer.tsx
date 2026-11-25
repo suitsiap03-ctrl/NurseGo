@@ -99,6 +99,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
               const isMed = notif.type === 'medication';
               const isAppt = notif.type === 'appointment';
               const isMonitoring = notif.type === 'monitoring';
+              const isSystem = notif.type === 'system';
 
               return (
                 <div
@@ -128,7 +129,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                     {isAlert && <AlertTriangle className="w-4 h-4" />}
                     {isMed && <Pill className="w-4 h-4" />}
                     {isAppt && <Calendar className="w-4 h-4" />}
-                    {isMonitoring && <HeartPulse className="w-4 h-4" />}
+                    {(isMonitoring || isSystem) && <HeartPulse className="w-4 h-4" />}
                   </div>
 
                   <div className="flex-1 space-y-1">
@@ -152,7 +153,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
 
                     {notif.link_target && (
                       <span className="text-[11px] font-semibold text-teal-700 inline-flex items-center gap-1 pt-0.5">
-                        <span>Buka data pasien</span>
+                        <span>{role === 'nurse' ? 'Buka data pasien' : 'Lihat detail perawatan'}</span>
                         <ArrowRight className="w-3 h-3" />
                       </span>
                     )}
