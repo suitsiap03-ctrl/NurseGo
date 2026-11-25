@@ -46,7 +46,7 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({
       try {
         const targetPortal = await finishPasswordRecovery();
         const notice = withSuccessNotice
-          ? 'Kata sandi baru Anda berhasil disimpan. Silakan masuk menggunakan kata sandi baru tersebut.'
+          ? 'Kata sandi baru berhasil disimpan. Sekarang Anda bisa masuk menggunakan kata sandi tersebut.'
           : undefined;
         onRedirectToLogin?.(targetPortal || effectivePortal, notice);
       } finally {
@@ -72,7 +72,7 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({
     e.preventDefault();
     setError(null);
     if (!hasVerifiedSession) {
-      setError('Sesi pemulihan tidak valid atau sudah kedaluwarsa. Silakan minta tautan reset password baru.');
+      setError('Tautan pengaturan ulang kata sandi tidak berlaku atau sudah kedaluwarsa. Silakan minta tautan baru.');
       return;
     }
     if (newPassword.length < 6) {
@@ -138,7 +138,7 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <span>
-                  Token pemulihan kata sandi tidak aktif atau sudah kedaluwarsa. Minta tautan reset baru dari halaman login.
+                  Tautan pengaturan ulang kata sandi sudah tidak berlaku. Silakan minta tautan baru dari halaman masuk.
                 </span>
               </div>
               <button
