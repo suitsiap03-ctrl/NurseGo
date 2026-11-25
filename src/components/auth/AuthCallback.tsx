@@ -168,6 +168,7 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
           const isRecoveryFlow =
             typeParam === 'recovery' ||
             searchParams.get('flow') === 'recovery' ||
+            ['nurse', 'patient'].includes(searchParams.get('recovery_portal') || '') ||
             isRecoverySession(session);
 
           await refreshProfileRef.current();
