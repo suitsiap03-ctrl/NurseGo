@@ -68,6 +68,7 @@ interface AuthContextType {
   authError: string | null;
   setAuthError: (err: string | null) => void;
   clearPasswordRecovery: () => void;
+  beginPasswordRecovery: (portal?: UserRole | null) => void;
   finishPasswordRecovery: () => Promise<UserRole | null>;
   signIn: (
     email: string,
@@ -249,6 +250,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const recheckConfiguration = useCallback(() => {
     setIsConfiguredState(isSupabaseConfigured());
+  }, []);
+
+  const beginPasswordRecovery = useCallback((portal?: UserRole | null) => {
+    const resolvedPortal = portal || readRecoveryPortalHint();
+    if (resolvedPortal === 'nurse' || resolvedPortal === 'patient') {
+      saveRecoveryPortalHint(resolvedPortal);
+      setRecoveryPortal(resolvedPortal);
+    }
+    setIsPasswordRecovery(true);
+    isPasswordRecoveryRef.current = true;
   }, []);
 
   const clearPasswordRecovery = useCallback(() => {
@@ -1184,6 +1195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authError,
         setAuthError,
         clearPasswordRecovery,
+        beginPasswordRecovery,
         finishPasswordRecovery,
         signIn,
         signUpNurse,
