@@ -778,20 +778,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
-        const { error: profErr } = await supabase.from('profiles').upsert({
-          id: newUserId,
-          email: data.email.trim(),
-          full_name: normalizedFullName || data.fullName.trim(),
-          role: 'nurse',
-          phone: data.phone?.trim() || null,
-        });
-        if (profErr) {
-          const msg = `Akun autentikasi terbuat, namun gagal menyimpan profil dasar: ${profErr.message}`;
-          setAuthError(msg);
-          return { success: false, error: msg };
-        }
-
-        const { error: nurseErr } = await supabase.from('nurse_profiles').upsert({
+        // The auth.users trigger creates the base profile securely before this session is returned.
+        // Update the trigger-created nurse row; do not attempt a client-side INSERT blocked by RLS.
+        const { error: nurseErr } = await supabase.from('nurse_profiles').update({
           id: newUserId,
           str_number: data.strNumber.trim(),
           str_expiry_date: data.strExpiryDate || null,
@@ -926,18 +915,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const hasActiveSession = Boolean(activeSession);
 
       if (hasActiveSession && activeSession) {
-        const { error: profErr } = await supabase.from('profiles').upsert({
-          id: patientUserId,
-          email: cleanEmail,
-          full_name: normalizedName,
-          role: 'patient',
-        });
-        if (profErr) {
-          const msg = `Akun terbuat, namun gagal menyimpan profil pasien: ${profErr.message}`;
-          setAuthError(msg);
-          return { success: false, error: msg };
-        }
-
+        // The auth.users trigger has already created the patient profile and patient_profiles row.
+        // Complete the invitation through the SECURITY DEFINER RPC only.
         const { data: actData, error: actRpcErr } = await supabase.rpc('complete_patient_activation', {
           p_token: cleanToken,
         });
