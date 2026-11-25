@@ -110,6 +110,13 @@ function saveRecoveryPortalHint(portal: UserRole) {
 
 function readRecoveryPortalHint(): UserRole | null {
   try {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlPortal = params.get('recovery_portal');
+      if (params.get('flow') === 'recovery' && (urlPortal === 'nurse' || urlPortal === 'patient')) {
+        return urlPortal;
+      }
+    }
     const raw = localStorage.getItem(RECOVERY_PORTAL_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
@@ -139,7 +146,9 @@ function urlHasRecoveryMarker(): boolean {
   return (
     searchParams.get('type') === 'recovery' ||
     hashParams.get('type') === 'recovery' ||
-    searchParams.get('flow') === 'recovery'
+    searchParams.get('flow') === 'recovery' ||
+    (searchParams.get('flow') === 'recovery' &&
+      ['nurse', 'patient'].includes(searchParams.get('recovery_portal') || ''))
   );
 }
 
@@ -998,7 +1007,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     const supabase = getSupabase();
     try {
-      const redirectTo = getAuthCallbackUrl();
+      const callbackUrl = getAuthCallbackUrl();
+      const redirectTo = callbackUrl
+        ? `${callbackUrl}?flow=recovery${portal ? `&recovery_portal=${portal}` : ''}`
+        : undefined;
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo,
       });
@@ -1031,12 +1043,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Complete or cancel password recovery by signing out the temporary recovery session and returning the target portal
   const finishPasswordRecovery = useCallback(async (): Promise<UserRole | null> => {
     const resolvedTarget: UserRole | null =
+      recoveryPortal ||
+      readRecoveryPortalHint() ||
       role ||
       (user?.user_metadata?.role === 'nurse' || user?.user_metadata?.role === 'patient'
         ? (user.user_metadata.role as UserRole)
-        : null) ||
-      recoveryPortal ||
-      readRecoveryPortalHint();
+        : null);
 
     const supabase = getSupabase();
     try {
