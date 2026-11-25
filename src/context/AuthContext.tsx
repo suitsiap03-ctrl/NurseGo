@@ -793,7 +793,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           hospital_name: data.hospitalName || 'RS / Klinik Mitra',
           str_document_url: strUrl,
           diploma_document_url: diplomaUrl,
-        });
+        }).eq('id', newUserId);
         if (nurseErr) {
           const msg = `Profil dasar tersimpan, namun gagal menyimpan kredensial perawat: ${nurseErr.message}`;
           setAuthError(msg);
