@@ -12,7 +12,8 @@ import {
   PROJECT_ID,
   DEFAULT_SUPABASE_URL,
 } from '../../lib/supabaseClient';
-import { Database, CheckCircle2, AlertTriangle, XCircle, RefreshCw, X, ShieldCheck, Key, ExternalLink } from 'lucide-react';
+import { Database, CheckCircle2, XCircle, RefreshCw, X, ShieldCheck, Key, ExternalLink } from 'lucide-react';
+import { PasswordInput } from './PasswordInput';
 
 interface SupabaseConfigModalProps {
   isOpen: boolean;
@@ -137,20 +138,15 @@ export const SupabaseConfigModal: React.FC<SupabaseConfigModalProps> = ({
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                <Key className="w-4 h-4" />
-              </div>
-              <input
-                type="password"
-                value={anonKey}
-                onChange={(e) => setAnonKey(e.target.value)}
-                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-slate-300 rounded-lg font-mono text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
+            <PasswordInput
+              value={anonKey}
+              onChange={(e) => setAnonKey(e.target.value)}
+              placeholder="eyJhbGciOi... atau sb_publishable_..."
+              leftIcon={<Key className="w-4 h-4" />}
+              className="w-full pl-9 py-2 text-sm bg-white border border-slate-300 rounded-lg font-mono text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+            />
             <p className="mt-1 text-xs text-slate-500">
-              Kunci anon ini aman digunakan di sisi peramban (browser) untuk operasi Supabase Auth & RLS.
+              Gunakan Publishable Key (`sb_publishable_...`) atau Legacy Anon Key (`eyJ...`) untuk browser. Jangan gunakan secret/service_role key.
             </p>
           </div>
 

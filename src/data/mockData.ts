@@ -866,3 +866,6 @@ export const DEMO_NOTIFICATIONS_PATIENT: NotificationItem[] = [
     created_at: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
   },
 ];
+
+export const DEMO_VITALS: VitalSignRecord[] = DEMO_PATIENTS.map((dp) => dp.latestVitals);
+export const DEMO_ALERTS: PatientAlert[] = DEMO_PATIENTS.flatMap((dp) => dp.activeAlerts);

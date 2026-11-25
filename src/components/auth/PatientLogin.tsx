@@ -1,110 +1,247 @@
 /**
  * Patient Login Page for NurseGo
- * 
- * Sesuai Bagian 4.1 Master Prompt:
- * - Logo NurseGo
- * - Judul "Masuk sebagai Pasien"
- * - Kolom email & password (toggle tampilkan/sembunyikan)
- * - Pilihan "Ingat saya" & "Lupa password?"
- * - Tombol "Masuk"
- * - Keterangan: Akun pasien diperoleh melalui undangan perawat (bukan pendaftaran bebas)
- * - Tombol kembali ke halaman pilihan portal
- * - Tautan aktivasi akun via undangan
- * - Tombol masuk cepat akun demo
+ *
+ * - Real Supabase Auth login with strict 'patient' role check
+ * - Real Supabase resetPasswordForEmail & resend verification email UI
+ * - Link to Invitation Activation & clearly separated Demo Preview
  */
 
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { PasswordInput } from '../common/PasswordInput';
 import {
   User,
   Lock,
   Mail,
-  Eye,
-  EyeOff,
   ArrowLeft,
   ArrowRight,
   AlertCircle,
+  CheckCircle2,
   KeyRound,
   Sparkles,
-  Info
+  Info,
+  Send
 } from 'lucide-react';
 
 interface PatientLoginProps {
   onBackToPortalSelector: () => void;
   onGoToActivation: () => void;
   onSelectDemo: () => void;
+  externalSuccessMsg?: string | null;
+  onDismissExternalSuccess?: () => void;
 }
 
 export const PatientLogin: React.FC<PatientLoginProps> = ({
   onBackToPortalSelector,
   onGoToActivation,
   onSelectDemo,
+  externalSuccessMsg,
+  onDismissExternalSuccess,
 }) => {
-  const { signIn, authError, setAuthError } = useAuth();
+  const { signIn, resetPassword, resendVerificationEmail, authError, setAuthError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
+
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetStatus, setResetStatus] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendStatus, setResendStatus] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
     setLoading(true);
     setAuthError(null);
+    setResendStatus(null);
     try {
-      await signIn(email, password);
+      await signIn(email, password, 'patient', rememberMe);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) return;
+    setResetLoading(true);
+    setResetStatus(null);
+    try {
+      const res = await resetPassword(resetEmail.trim(), 'patient');
+      if (res.success) {
+        setResetStatus({
+          type: 'success',
+          text: `Jika alamat email terdaftar, tautan untuk membuat kata sandi baru akan dikirim ke kotak masuk Anda. Periksa juga folder spam.`,
+        });
+      } else {
+        setResetStatus({
+          type: 'error',
+          text: res.error || 'Gagal mengirim email reset kata sandi.',
+        });
+      }
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email.trim()) return;
+    setResendLoading(true);
+    setResendStatus(null);
+    try {
+      const res = await resendVerificationEmail(email.trim());
+      if (res.success) {
+        setResendStatus({
+          type: 'success',
+          text: `Email verifikasi baru dikirim ulang ke ${email.trim()}.`,
+        });
+      } else {
+        setResendStatus({
+          type: 'error',
+          text: res.error || 'Gagal mengirim ulang email verifikasi.',
+        });
+      }
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  const needsEmailConfirm = Boolean(authError && authError.toLowerCase().includes('belum dikonfirmasi'));
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
-        {/* Back Button */}
+    <div className="min-h-screen relative isolate overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_#d9f3ef_0%,_#f4f8fa_42%,_#eef4f8_100%)] flex flex-col justify-center py-8 sm:py-12 px-3 sm:px-6">
+      <div className="relative z-10 mx-auto w-full max-w-[440px] px-1 sm:px-0">
         <button
-          onClick={onBackToPortalSelector}
+          onClick={() => {
+            setAuthError(null);
+            onBackToPortalSelector();
+          }}
           className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Pilihan Peran</span>
         </button>
 
-        <div className="bg-white py-8 px-6 shadow-xl rounded-2xl border border-slate-200 sm:px-10">
-          {/* Header */}
+        <div className="bg-white/95 backdrop-blur-sm py-7 px-5 sm:py-9 sm:px-9 shadow-[0_24px_70px_-28px_rgba(15,76,80,0.28)] rounded-[28px] border border-white/80 ring-1 ring-slate-200/70">
           <div className="text-center mb-6">
             <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center mx-auto mb-3">
               <User className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Masuk sebagai Pasien</h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Masuk sebagai Pasien</h2>
+            <p className="text-sm text-slate-500 mt-2 leading-relaxed">
               Portal Pemulihan & Pemantauan Kesehatan Mandiri
             </p>
           </div>
 
+          {externalSuccessMsg && (
+            <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-start justify-between gap-2">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>{externalSuccessMsg}</span>
+              </div>
+              {onDismissExternalSuccess && (
+                <button
+                  type="button"
+                  onClick={onDismissExternalSuccess}
+                  className="text-[11px] font-semibold text-emerald-700 hover:underline shrink-0"
+                >
+                  Tutup
+                </button>
+              )}
+            </div>
+          )}
+
           {authError && (
-            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <span>{authError}</span>
+            <div className="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-800 space-y-2">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <span>{authError}</span>
+              </div>
+              {needsEmailConfirm && email.trim() && (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-rose-300 text-rose-700 rounded-md font-semibold hover:bg-rose-100 disabled:opacity-50"
+                >
+                  <Send className="w-3 h-3" />
+                  <span>{resendLoading ? 'Mengirim...' : 'Kirim Ulang Email Verifikasi'}</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {resendStatus && (
+            <div
+              className={`mb-4 p-3 rounded-lg text-xs border flex items-start gap-2 ${
+                resendStatus.type === 'success'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-rose-50 border-rose-200 text-rose-800'
+              }`}
+            >
+              {resendStatus.type === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              )}
+              <span>{resendStatus.text}</span>
             </div>
           )}
 
           {showForgotPassword && (
-            <div className="mb-4 p-3.5 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 space-y-1.5">
-              <span className="font-semibold block">Lupa Kata Sandi?</span>
+            <form
+              onSubmit={handleResetPassword}
+              className="mb-5 p-4 bg-sky-50 border border-sky-200 rounded-2xl text-sm text-sky-950 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold">Reset Kata Sandi via Email</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setResetStatus(null);
+                  }}
+                  className="text-[11px] text-blue-700 underline font-semibold"
+                >
+                  Tutup
+                </button>
+              </div>
               <p className="text-[11px] text-blue-800">
-                Hubungi perawat penanggung jawab Anda atau periksa tautan pemulihan kata sandi yang dikirimkan ke email terdaftar.
+                Masukkan email terdaftar Anda untuk menerima tautan pemulihan kata sandi dari Supabase Auth.
               </p>
-              <button
-                type="button"
-                onClick={() => setShowForgotPassword(false)}
-                className="text-[11px] text-blue-700 underline font-semibold"
-              >
-                Tutup
-              </button>
-            </div>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  required
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="pasien@email.com"
+                  className="flex-1 min-w-0 px-2.5 py-1.5 bg-white border border-blue-300 rounded-lg text-slate-900"
+                />
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg disabled:opacity-50"
+                >
+                  {resetLoading ? 'Mengirim...' : 'Kirim'}
+                </button>
+              </div>
+              {resetStatus && (
+                <p
+                  className={`text-[11px] p-2 rounded-lg border ${
+                    resetStatus.type === 'success'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      : 'bg-rose-50 border-rose-200 text-rose-800'
+                  }`}
+                >
+                  {resetStatus.text}
+                </p>
+              )}
+            </form>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -122,7 +259,7 @@ export const PatientLogin: React.FC<PatientLoginProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="pasien@gmail.com"
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+                  className="w-full pl-10 pr-3 py-3 text-sm bg-slate-50/80 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/15 focus:border-teal-500 transition"
                 />
               </div>
             </div>
@@ -131,26 +268,14 @@ export const PatientLogin: React.FC<PatientLoginProps> = ({
               <label className="block font-semibold text-slate-700 mb-1">
                 Kata Sandi
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-9 pr-10 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-teal-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+              <PasswordInput
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                leftIcon={<Lock className="w-4 h-4" />}
+                className="w-full pl-9 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-teal-500"
+              />
             </div>
 
             <div className="flex items-center justify-between text-xs pt-1">
@@ -161,12 +286,15 @@ export const PatientLogin: React.FC<PatientLoginProps> = ({
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded text-teal-600 focus:ring-teal-500"
                 />
-                <span>Ingat saya</span>
+                <span>Ingat sesi masuk</span>
               </label>
 
               <button
                 type="button"
-                onClick={() => setShowForgotPassword(true)}
+                onClick={() => {
+                  setResetEmail(email);
+                  setShowForgotPassword(true);
+                }}
                 className="font-medium text-teal-700 hover:text-teal-900 hover:underline"
               >
                 Lupa password?
@@ -183,34 +311,38 @@ export const PatientLogin: React.FC<PatientLoginProps> = ({
             </button>
           </form>
 
-          {/* Invitation Activation Notice (Bagian 4.1 Master Prompt) */}
           <div className="mt-6 pt-5 border-t border-slate-100 space-y-3">
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-left text-[11px] text-slate-600 flex items-start gap-2">
               <Info className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
               <div>
                 <span className="font-semibold text-slate-800 block">Pendaftaran Pasien Khusus:</span>
-                Akun pasien dibuat berdasarkan undangan resmi dari perawat yang menangani Anda di rumah sakit.
+                Akun pasien dibuat melalui kode undangan dari perawat penanggung jawab Anda di rumah sakit.
               </div>
             </div>
 
             <button
               type="button"
-              onClick={onGoToActivation}
+              onClick={() => {
+                setAuthError(null);
+                onGoToActivation();
+              }}
               className="w-full py-2 px-3 text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors border border-teal-200/80 inline-flex items-center justify-center gap-1.5"
             >
               <KeyRound className="w-3.5 h-3.5 text-teal-600" />
               <span>Punya Kode Undangan? Aktivasi Akun di Sini</span>
             </button>
 
-            {/* Quick Demo Access */}
-            <div className="pt-1">
+            <div className="pt-2 border-t border-dashed border-slate-200">
+              <span className="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 text-center mb-2">
+                Mode Pratinjau Offline (Tanpa Database)
+              </span>
               <button
                 type="button"
                 onClick={onSelectDemo}
                 className="w-full py-2 px-3 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200 inline-flex items-center justify-center gap-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                <span>Masuk Akun Demo (Budi Santoso - Apendektomi)</span>
+                <span>Coba Demo Pasien (Data Simulasi)</span>
               </button>
             </div>
           </div>

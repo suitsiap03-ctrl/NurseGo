@@ -15,55 +15,82 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 export const DEFAULT_SUPABASE_URL = 'https://pwokxvmvyezhacjpzhuz.supabase.co';
 export const PROJECT_ID = 'pwokxvmvyezhacjpzhuz';
 
-const STORAGE_KEY_URL = 'nursego_supabase_url';
-const STORAGE_KEY_ANON = 'nursego_supabase_anon_key';
-
-// Retrieve credentials with priority: localStorage / sessionStorage > Vite env > Default URL
+// Kredensial Supabase berasal dari environment variables saat aplikasi dibangun.
 export function getStoredSupabaseConfig(): { url: string; anonKey: string } {
-  const envUrl = (import.meta as any).env?.VITE_SUPABASE_URL;
-  const envKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
-
-  let storedUrl = '';
-  let storedKey = '';
-
-  try {
-    storedUrl = localStorage.getItem(STORAGE_KEY_URL) || '';
-    storedKey = localStorage.getItem(STORAGE_KEY_ANON) || '';
-  } catch (err) {
-    console.warn('NurseGo: Local storage access error:', err);
-  }
-
-  const url = storedUrl || envUrl || DEFAULT_SUPABASE_URL;
-  const anonKey = storedKey || envKey || '';
-
-  return { url, anonKey };
+  const env = (import.meta as any).env || {};
+  return {
+    url: String(env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL).trim(),
+    anonKey: String(env.VITE_SUPABASE_ANON_KEY || '').trim(),
+  };
 }
 
-export function saveSupabaseConfig(url: string, anonKey: string): void {
-  try {
-    localStorage.setItem(STORAGE_KEY_URL, url.trim());
-    localStorage.setItem(STORAGE_KEY_ANON, anonKey.trim());
-  } catch (err) {
-    console.error('NurseGo: Failed to save config to localStorage:', err);
-  }
-  // Reinitialize client
-  initSupabaseClient(url.trim(), anonKey.trim());
+// Kompatibilitas untuk komponen lama: konfigurasi browser tidak lagi disimpan.
+export function saveSupabaseConfig(_url: string, _anonKey: string): void {
+  const config = getStoredSupabaseConfig();
+  initSupabaseClient(config.url, config.anonKey);
 }
 
 export function clearCustomSupabaseConfig(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY_URL);
-    localStorage.removeItem(STORAGE_KEY_ANON);
-  } catch (err) {
-    console.error('NurseGo: Failed to clear config:', err);
-  }
-  const { url, anonKey } = getStoredSupabaseConfig();
-  initSupabaseClient(url, anonKey);
+  const config = getStoredSupabaseConfig();
+  initSupabaseClient(config.url, config.anonKey);
 }
 
 // Singleton client instance
 let clientInstance: SupabaseClient | null = null;
 let currentConfig = getStoredSupabaseConfig();
+
+const REMEMBER_PREF_KEY = 'nursego_remember_session';
+
+export function setRememberSession(remember: boolean): void {
+  try {
+    if (remember) {
+      localStorage.setItem(REMEMBER_PREF_KEY, 'true');
+    } else {
+      localStorage.setItem(REMEMBER_PREF_KEY, 'false');
+    }
+  } catch {
+    // ignore storage restriction
+  }
+}
+
+function shouldPersistInLocalStorage(): boolean {
+  try {
+    return localStorage.getItem(REMEMBER_PREF_KEY) !== 'false';
+  } catch {
+    return true;
+  }
+}
+
+const dynamicAuthStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      return localStorage.getItem(key) ?? sessionStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      if (shouldPersistInLocalStorage()) {
+        localStorage.setItem(key, value);
+        sessionStorage.removeItem(key);
+      } else {
+        sessionStorage.setItem(key, value);
+        localStorage.removeItem(key);
+      }
+    } catch {
+      // ignore storage restriction
+    }
+  },
+  removeItem: (key: string): void => {
+    try {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    } catch {
+      // ignore storage restriction
+    }
+  },
+};
 
 export function initSupabaseClient(url: string, anonKey: string): SupabaseClient {
   currentConfig = { url, anonKey };
@@ -77,6 +104,7 @@ export function initSupabaseClient(url: string, anonKey: string): SupabaseClient
       autoRefreshToken: true,
       detectSessionInUrl: true,
       storageKey: 'nursego_supabase_auth_token',
+      storage: dynamicAuthStorage,
     },
   });
 
@@ -98,6 +126,19 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(anonKey && anonKey.trim().length > 20 && !anonKey.includes('placeholder'));
 }
 
+export function isMissingRpcError(err: any): boolean {
+  if (!err) return false;
+  const code = String(err.code || '').toUpperCase();
+  const msg = String(err.message || '').toLowerCase();
+  return (
+    code === '42883' ||
+    code === 'PGRST202' ||
+    msg.includes('could not find the function') ||
+    msg.includes('does not exist') ||
+    msg.includes('schema cache')
+  );
+}
+
 export interface ConnectionTestResult {
   success: boolean;
   message: string;
@@ -110,8 +151,16 @@ export interface ConnectionTestResult {
  * Conducts a real, active diagnostic test against the Supabase backend.
  */
 export async function testSupabaseConnection(overrideUrl?: string, overrideKey?: string): Promise<ConnectionTestResult> {
-  const url = overrideUrl || getStoredSupabaseConfig().url;
+  const url = (overrideUrl || getStoredSupabaseConfig().url || '').trim();
   const anonKey = overrideKey || getStoredSupabaseConfig().anonKey;
+
+  if (!url || !/^https?:\/\//i.test(url)) {
+    return {
+      success: false,
+      message: 'URL Supabase tidak valid atau kosong.',
+      technicalDetails: 'VITE_SUPABASE_URL harus berupa URL https:// yang valid.',
+    };
+  }
 
   if (!anonKey || anonKey.trim().length < 20 || anonKey.includes('placeholder')) {
     return {
@@ -157,7 +206,7 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
           success: true,
           message: 'Koneksi ke Supabase berhasil! (RLS terpasang sesuai standar keamanan).',
           tablesVerified: ['auth.users', 'surgery_types (RLS protected)'],
-          technicalDetails: `Database connected. RLS status: ${msg}`,
+          technicalDetails: `Database connected. Auth API: ${authHealthy ? 'OK' : 'Tidak merespons'}. RLS status: ${msg}`,
         };
       }
 
@@ -165,14 +214,14 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
         return {
           success: false,
           message: 'Terhubung ke database, namun tabel surgery_types belum ditemukan.',
-          technicalDetails: `Tabel tidak ditemukan: ${msg}`,
+          technicalDetails: `Auth API: ${authHealthy ? 'OK' : 'Tidak merespons'}. Tabel tidak ditemukan: ${msg}`,
         };
       }
 
       return {
         success: false,
         message: `Koneksi gagal: ${msg}`,
-        technicalDetails: `Code: ${code}, Details: ${surgError.details || surgError.hint || msg}`,
+        technicalDetails: `Auth API: ${authHealthy ? 'OK' : 'Tidak merespons'}. Code: ${code}, Details: ${surgError.details || surgError.hint || msg}`,
       };
     }
 
@@ -182,7 +231,7 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
       tablesVerified: surgeries && surgeries.length > 0 
         ? surgeries.map((s: any) => s.name || `Tipe Operasi #${s.id}`)
         : ['surgery_types'],
-      technicalDetails: `Status: 200 OK. Ditemukan ${surgeries ? surgeries.length : 0} tipe operasi terdaftar.`,
+      technicalDetails: `Status: 200 OK. Auth API: ${authHealthy ? 'OK' : 'Tidak merespons'}. Ditemukan ${surgeries ? surgeries.length : 0} tipe operasi terdaftar.`,
     };
   } catch (err: any) {
     return {

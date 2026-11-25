@@ -194,17 +194,27 @@ export function evaluateClinicalMonitoring(data: {
 
   // 4. Gejala & Kondisi Umum
   if (data.symptoms) {
-    if (data.symptoms.general_condition === 'memburuk') {
+    const cond = data.symptoms.general_condition;
+    const trend = data.symptoms.symptom_trend;
+    const symptomCount = data.symptoms.symptoms?.length || 0;
+
+    if (cond === 'buruk' || cond === 'memburuk' || trend === 'memburuk') {
       flags.push({
         level: 'urgent',
         source: 'symptom',
-        note: 'Pasien melaporkan kondisi umum dirasakan memburuk dibanding hari sebelumnya.',
+        note: 'Pasien melaporkan kondisi umum buruk atau keluhan dirasakan memburuk dibanding hari sebelumnya.',
       });
-    } else if (data.symptoms.general_condition === 'sama' && (data.symptoms.symptoms?.length || 0) >= 3) {
+    } else if (
+      cond === 'kurang_baik' ||
+      ((cond === 'sama' || trend === 'sama') && symptomCount >= 3)
+    ) {
       flags.push({
         level: 'waspada',
         source: 'symptom',
-        note: `Terdapat beberapa keluhan bersamaan: ${(data.symptoms.symptoms || []).join(', ')}.`,
+        note:
+          symptomCount > 0
+            ? `Kondisi kurang optimal dengan keluhan: ${(data.symptoms.symptoms || []).join(', ')}.`
+            : 'Pasien melaporkan kondisi umum kurang baik dan perlu tindak lanjut perawat.',
       });
     }
   }

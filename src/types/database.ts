@@ -10,6 +10,7 @@ export type AlertStatus = 'aktif' | 'ditinjau' | 'selesai';
 export type GeneralCondition = 'sangat_baik' | 'baik' | 'biasa_saja' | 'kurang_baik' | 'buruk' | 'membaik' | 'sama' | 'memburuk';
 export type AdherenceStatus = 'diminum' | 'terlambat' | 'tidak_diminum' | 'belum_diketahui';
 export type AppointmentStatus = 'terjadwal' | 'selesai' | 'dibatalkan';
+export type AssignmentStatus = 'active' | 'pending_nurse' | 'pending_patient' | 'rejected' | 'ended';
 
 export type NurseEducationLevel = 
   | 'd3_keperawatan'
@@ -68,6 +69,7 @@ export interface SurgeryType {
   category?: string;
   estimated_recovery_days?: number;
   description?: string;
+  is_mvp?: boolean;
   created_at?: string;
 }
 
@@ -90,10 +92,44 @@ export interface PatientNurseAssignment {
   patient_id: string;
   nurse_id: string;
   is_active: boolean;
+  status?: AssignmentStatus;
+  initiated_by?: string | null;
+  relationship_role?: string;
+  notes?: string | null;
   assigned_at?: string;
+  patient_approved_at?: string | null;
+  nurse_approved_at?: string | null;
+  ended_at?: string | null;
   created_at?: string;
   patient?: Profile & { patient_profile?: PatientProfile; surgery?: PatientSurgery };
   nurse?: Profile & { nurse_profile?: NurseProfile };
+}
+
+export interface RelationshipSummary {
+  id: string;
+  patient_id: string;
+  nurse_id: string;
+  is_active: boolean;
+  status: AssignmentStatus;
+  initiated_by?: string | null;
+  relationship_role?: string;
+  notes?: string | null;
+  assigned_at?: string;
+  patient_approved_at?: string | null;
+  nurse_approved_at?: string | null;
+  ended_at?: string | null;
+  counterpart_id: string;
+  counterpart_role: UserRole;
+  counterpart_name: string;
+  counterpart_email: string;
+  counterpart_phone?: string | null;
+  professional_title?: string | null;
+  hospital_name?: string | null;
+  department?: string | null;
+  verification_status?: VerificationStatus | null;
+  education_level?: NurseEducationLevel | null;
+  has_ners_profession?: boolean | null;
+  academic_degree?: string | null;
 }
 
 export interface PatientInvitation {
@@ -101,10 +137,22 @@ export interface PatientInvitation {
   nurse_id: string;
   patient_email: string;
   patient_name: string;
+  patient_phone?: string;
+  date_of_birth?: string;
+  gender?: string;
+  surgery_type_id?: number | string;
+  surgery_date?: string;
+  discharge_date?: string;
+  surgeon_name?: string;
+  hospital_name?: string;
+  clinical_notes?: string;
   token: string;
   status: 'pending' | 'sent' | 'delivered' | 'accepted' | 'expired';
   expires_at?: string;
+  accepted_by?: string;
+  accepted_at?: string;
   created_at?: string;
+  surgery_type?: SurgeryType;
 }
 
 export interface VitalSignRecord {
@@ -143,6 +191,7 @@ export interface SymptomRecord {
   recorded_at: string;
   symptoms: string[]; // e.g. ["Demam", "Mual", "Muntah", "Pusing", "Sesak napas", "Batuk", "Lemas", "Nafsu makan menurun", "Gangguan buang air"]
   general_condition: GeneralCondition;
+  symptom_trend?: string;
   notes?: string;
   created_at?: string;
 }
@@ -268,4 +317,26 @@ export interface PostOpEducation {
   medications: string[];
   danger_signs: string[];
   follow_up: string[];
+}
+
+export interface PatientMessage {
+  id: string;
+  patient_id: string;
+  nurse_id: string;
+  sender_id: string;
+  sender_role: UserRole;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface PatientEducationAssignment {
+  id: string;
+  patient_id: string;
+  nurse_id: string;
+  title: string;
+  category: string;
+  content: string;
+  is_read: boolean;
+  created_at: string;
 }

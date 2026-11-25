@@ -10,6 +10,7 @@
 
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { PWAInstallButton } from './PWAInstallButton';
 import {
   Activity,
   Users,
@@ -20,8 +21,6 @@ import {
   Pill,
   ClipboardList,
   LogOut,
-  Database,
-  CheckCircle2,
   AlertCircle,
   Bell
 } from 'lucide-react';
@@ -29,7 +28,6 @@ import {
 interface NavbarProps {
   currentTab: string;
   onSelectTab: (tab: string) => void;
-  onOpenConfig: () => void;
   onOpenNotifications: () => void;
   unreadCount?: number;
 }
@@ -37,11 +35,10 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   currentTab,
   onSelectTab,
-  onOpenConfig,
   onOpenNotifications,
   unreadCount = 0,
 }) => {
-  const { user, profile, nurseProfile, role, signOut, isConfigured } = useAuth();
+  const { user, profile, nurseProfile, role, isDemoMode, signOut } = useAuth();
 
   // Navigation tabs for Nurse: 1. Beranda, 2. Pasien, 3. Peringatan, 4. Dokumentasi, 5. Profil
   const nurseTabs = [
@@ -67,8 +64,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     <>
       {/* Top Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4 h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 h-16">
             {/* Zone 1: Brand wordmark */}
             <div className="flex items-center gap-3 shrink-0">
               <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-xs">
@@ -80,6 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
                 <span className="text-[10px] text-teal-700 font-semibold tracking-wide uppercase -mt-0.5">
                   {role === 'nurse' ? 'Portal Perawat' : 'Portal Pasien'}
+                  {isDemoMode ? ' · Demo' : ''}
                 </span>
               </div>
             </div>
@@ -109,7 +107,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             {/* Zone 3: Actions & Notifications */}
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <PWAInstallButton compact />
+
               {/* Notification Bell */}
               {user && (
                 <button
@@ -124,34 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   )}
                 </button>
               )}
-
-              {/* Supabase status trigger */}
-              <button
-                type="button"
-                onClick={onOpenConfig}
-                title="Status Koneksi Database Supabase"
-                className={`px-2.5 py-1.5 text-xs font-medium rounded-lg inline-flex items-center gap-1.5 border transition-colors whitespace-nowrap ${
-                  isConfigured
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                    : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-                }`}
-              >
-                <Database className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Supabase:</span>
-                {isConfigured ? (
-                  <span className="flex items-center gap-1 font-semibold text-emerald-700">
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>Aktif</span>
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 font-semibold text-amber-700">
-                    <AlertCircle className="w-3 h-3" />
-                    <span>Setup Key</span>
-                  </span>
-                )}
-              </button>
-
-              {user ? (
+{user ? (
                 <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                   <div className="hidden lg:flex flex-col text-right">
                     <span className="text-xs font-semibold text-slate-800 truncate max-w-[150px]">
