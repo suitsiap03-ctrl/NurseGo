@@ -46,7 +46,7 @@ function translateCallbackError(rawCode?: string | null, rawDesc?: string | null
 }
 
 export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
-  const { user, role, isPasswordRecovery, refreshProfile } = useAuth();
+  const { user, role, isPasswordRecovery, refreshProfile, beginPasswordRecovery } = useAuth();
   const [status, setStatus] = useState<CallbackStatus>('processing');
   const [flowKind, setFlowKind] = useState<'signup' | 'recovery' | 'other'>('signup');
   const [message, setMessage] = useState<string>('Sedang memeriksa tautan Anda...');
@@ -171,10 +171,14 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
             ['nurse', 'patient'].includes(searchParams.get('recovery_portal') || '') ||
             isRecoverySession(session);
 
-          await refreshProfileRef.current();
-          if (!active) return;
-
           if (isRecoveryFlow) {
+            const portalParam = searchParams.get('recovery_portal');
+            const recoveryTarget = portalParam === 'nurse' || portalParam === 'patient'
+              ? portalParam
+              : metaRole === 'nurse' || metaRole === 'patient'
+                ? metaRole
+                : role;
+            beginPasswordRecovery(recoveryTarget);
             setFlowKind('recovery');
             setStatus('success');
             setMessage(
@@ -183,6 +187,9 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
             onCompleteRef.current('recovery');
             return;
           }
+
+          await refreshProfileRef.current();
+          if (!active) return;
 
           setStatus('success');
           if (metaRole === 'nurse') {
