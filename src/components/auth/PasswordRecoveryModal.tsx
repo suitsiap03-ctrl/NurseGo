@@ -33,11 +33,11 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({
   const [success, setSuccess] = useState(false);
 
   const effectivePortal: UserRole | null =
-    role ||
+    recoveryPortal ||
     (user?.user_metadata?.role === 'nurse' || user?.user_metadata?.role === 'patient'
       ? (user.user_metadata.role as UserRole)
       : null) ||
-    recoveryPortal;
+    role;
 
   const handleGoToLogin = useCallback(
     async (withSuccessNotice: boolean) => {
