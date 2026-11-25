@@ -34,22 +34,22 @@ function translateCallbackError(rawCode?: string | null, rawDesc?: string | null
   const desc = (rawDesc || '').toLowerCase();
 
   if (code.includes('otp_expired') || desc.includes('expired')) {
-    return 'Tautan verifikasi atau pemulihan sudah kedaluwarsa. Silakan minta kirim ulang tautan baru dari halaman masuk atau registrasi.';
+    return 'Tautan ini sudah kedaluwarsa. Silakan minta tautan baru dari halaman masuk.';
   }
   if (code.includes('access_denied') || desc.includes('invalid') || desc.includes('already')) {
-    return 'Tautan autentikasi tidak valid atau sudah pernah digunakan sebelumnya.';
+    return 'Tautan ini tidak valid atau sudah pernah digunakan. Silakan minta tautan baru.';
   }
   if (rawDesc) {
     return rawDesc;
   }
-  return 'Gagal memproses verifikasi autentikasi dari tautan email.';
+  return 'Tautan email belum bisa diproses. Silakan coba minta tautan baru.';
 }
 
 export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
   const { user, role, isPasswordRecovery, refreshProfile } = useAuth();
   const [status, setStatus] = useState<CallbackStatus>('processing');
   const [flowKind, setFlowKind] = useState<'signup' | 'recovery' | 'other'>('signup');
-  const [message, setMessage] = useState<string>('Memverifikasi tautan autentikasi Anda...');
+  const [message, setMessage] = useState<string>('Sedang memeriksa tautan Anda...');
   const [resolvedRole, setResolvedRole] = useState<'nurse' | 'patient' | null>(null);
   const hasProcessedRef = useRef(false);
   const refreshProfileRef = useRef(refreshProfile);
@@ -93,7 +93,7 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
         if (!active) return;
         setStatus('error');
         setMessage(
-          'Konfigurasi Supabase (VITE_SUPABASE_ANON_KEY) belum tersedia sehingga tautan autentikasi tidak dapat diverifikasi.'
+          'Maaf, tautan belum bisa diproses saat ini. Silakan coba lagi beberapa saat lagi.'
         );
         return;
       }
@@ -177,7 +177,7 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
             setFlowKind('recovery');
             setStatus('success');
             setMessage(
-              'Tautan pemulihan kata sandi terverifikasi. Mengarahkan ke halaman buat kata sandi baru...'
+              'Tautan berhasil diperiksa. Sebentar, Anda akan diarahkan untuk membuat kata sandi baru...'
             );
             onCompleteRef.current('recovery');
             return;
@@ -186,14 +186,14 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
           setStatus('success');
           if (metaRole === 'nurse') {
             setMessage(
-              'Email akun Perawat berhasil diverifikasi dan profil Anda telah terhubung ke sistem NurseGo.'
+              'Email Anda berhasil diverifikasi. Silakan lanjutkan ke Portal Perawat.'
             );
           } else if (metaRole === 'patient') {
             setMessage(
-              'Email akun Pasien berhasil diverifikasi dan aktivasi portal pemantauan Anda siap digunakan.'
+              'Email Anda berhasil diverifikasi. Silakan lanjutkan ke Portal Pasien.'
             );
           } else {
-            setMessage('Autentikasi berhasil diverifikasi. Anda dapat melanjutkan ke portal NurseGo.');
+            setMessage('Email berhasil diverifikasi. Anda bisa melanjutkan ke halaman masuk.');
           }
           return;
         }
@@ -202,14 +202,14 @@ export const AuthCallback: React.FC<AuthCallbackProps> = ({ onComplete }) => {
         if (tokenHashParam) {
           setStatus('success');
           setMessage(
-            'Email Anda berhasil diverifikasi. Silakan masuk menggunakan email dan kata sandi akun NurseGo Anda.'
+            'Email Anda sudah terverifikasi. Silakan masuk menggunakan email dan kata sandi yang telah dibuat.'
           );
           return;
         }
 
         setStatus('error');
         setMessage(
-          'Tidak ditemukan token atau kode verifikasi yang valid pada URL ini. Silakan buka tautan terbaru dari email Anda.'
+          'Tautan tidak dapat dikenali. Silakan buka tautan terbaru yang kami kirim ke email Anda.'
         );
       } catch (err: any) {
         if (!active) return;
