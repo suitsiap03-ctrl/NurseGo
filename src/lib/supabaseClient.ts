@@ -157,7 +157,7 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
   if (!url || !/^https?:\/\//i.test(url)) {
     return {
       success: false,
-      message: 'URL Supabase tidak valid atau kosong.',
+      message: 'Alamat server tidak valid atau kosong.',
       technicalDetails: 'VITE_SUPABASE_URL harus berupa URL https:// yang valid.',
     };
   }
@@ -165,8 +165,8 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
   if (!anonKey || anonKey.trim().length < 20 || anonKey.includes('placeholder')) {
     return {
       success: false,
-      message: 'Kunci Anon / Publishable Key Supabase belum dimasukkan.',
-      technicalDetails: 'Missing or placeholder VITE_SUPABASE_ANON_KEY. Mohon masukkan Supabase Publishable Key untuk proyek pwokxvmvyezhacjpzhuz.',
+      message: 'Kunci akses publik belum dimasukkan.',
+      technicalDetails: 'Missing or placeholder VITE_SUPABASE_ANON_KEY. Silakan masukkan kunci akses publik yang sesuai.',
     };
   }
 
@@ -204,7 +204,7 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
       if (code === 'PGRST116' || code === '42501' || msg.includes('permission denied')) {
         return {
           success: true,
-          message: 'Koneksi ke Supabase berhasil! (RLS terpasang sesuai standar keamanan).',
+          message: 'Koneksi berhasil dan pengamanan akses data aktif.',
           tablesVerified: ['auth.users', 'surgery_types (RLS protected)'],
           technicalDetails: `Database connected. Auth API: ${authHealthy ? 'OK' : 'Tidak merespons'}. RLS status: ${msg}`,
         };
@@ -227,7 +227,7 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
 
     return {
       success: true,
-      message: 'Koneksi ke database Supabase berhasil dan terverifikasi!',
+      message: 'Koneksi database berhasil dan terverifikasi!',
       tablesVerified: surgeries && surgeries.length > 0 
         ? surgeries.map((s: any) => s.name || `Tipe Operasi #${s.id}`)
         : ['surgery_types'],
@@ -236,7 +236,7 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
   } catch (err: any) {
     return {
       success: false,
-      message: 'Gagal menghubungi server Supabase. Periksa URL atau koneksi jaringan.',
+      message: 'Gagal menghubungi server. Periksa alamat server atau koneksi jaringan.',
       technicalDetails: err.message || String(err),
     };
   }
