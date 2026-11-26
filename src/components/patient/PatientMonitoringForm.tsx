@@ -50,6 +50,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
   const [heartRate, setHeartRate] = useState<string>('');
   const [respiratoryRate, setRespiratoryRate] = useState<string>('');
   const [oxygenSaturation, setOxygenSaturation] = useState<string>('');
+  const [vitalsNotMeasuredReason, setVitalsNotMeasuredReason] = useState<string>('');
 
   // STEP 2: Tingkat Nyeri
   const [painScale, setPainScale] = useState<number | null>(null);
@@ -115,35 +116,30 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
   };
 
   const validateStep1 = () => {
-    const sys = parseVitalNumber(systolic);
-    const dia = parseVitalNumber(diastolic);
-    const hr = parseVitalNumber(heartRate);
-    const rr = parseVitalNumber(respiratoryRate);
-    const temp = parseVitalNumber(temperature);
-    const spo2 = parseVitalNumber(oxygenSaturation);
-
-    if (isNaN(sys) || sys < 50 || sys > 260) {
-      setErrorMsg('Angka atas tekanan darah harus di antara 50–260 mmHg. Periksa kembali angka pada alat pengukur.');
+    const entries = [
+      { value: systolic, label: 'Angka atas tekanan darah', min: 50, max: 260, unit: 'mmHg' },
+      { value: diastolic, label: 'Angka bawah tekanan darah', min: 30, max: 160, unit: 'mmHg' },
+      { value: temperature, label: 'Suhu tubuh', min: 32, max: 43, unit: '°C' },
+      { value: heartRate, label: 'Denyut nadi', min: 30, max: 220, unit: 'bpm' },
+      { value: respiratoryRate, label: 'Frekuensi napas', min: 6, max: 60, unit: 'x/menit' },
+      { value: oxygenSaturation, label: 'Saturasi oksigen', min: 50, max: 100, unit: '%' },
+    ];
+    const hasSys = systolic.trim() !== '';
+    const hasDia = diastolic.trim() !== '';
+    if (hasSys !== hasDia) {
+      setErrorMsg('Tekanan darah harus diisi berpasangan. Masukkan angka atas dan angka bawah dari hasil alat yang sama.');
       return false;
     }
-    if (isNaN(dia) || dia < 30 || dia > 160) {
-      setErrorMsg('Angka bawah tekanan darah harus di antara 30–160 mmHg. Periksa kembali angka pada alat pengukur.');
-      return false;
+    for (const entry of entries) {
+      if (!entry.value.trim()) continue;
+      const value = parseVitalNumber(entry.value);
+      if (!Number.isFinite(value) || value < entry.min || value > entry.max) {
+        setErrorMsg(`${entry.label} harus berada di antara ${entry.min}–${entry.max} ${entry.unit}. Periksa kembali hasil pengukuran.`);
+        return false;
+      }
     }
-    if (isNaN(temp) || temp < 32 || temp > 43) {
-      setErrorMsg('Suhu tubuh harus di antara 32°C – 43°C.');
-      return false;
-    }
-    if (isNaN(hr) || hr < 30 || hr > 220) {
-      setErrorMsg('Denyut nadi harus di antara 30 – 220 bpm.');
-      return false;
-    }
-    if (isNaN(rr) || rr < 6 || rr > 60) {
-      setErrorMsg('Frekuensi napas harus di antara 6 – 60 x/menit.');
-      return false;
-    }
-    if (isNaN(spo2) || spo2 < 50 || spo2 > 100) {
-      setErrorMsg('Saturasi oksigen (SpO2) harus di antara 50 – 100%.');
+    if (entries.every((entry) => !entry.value.trim()) && !vitalsNotMeasuredReason) {
+      setErrorMsg('Pilih alasan jika belum ada tanda vital yang dapat diukur. Anda tetap bisa melanjutkan tanpa mengisi angka.');
       return false;
     }
     setErrorMsg(null);
@@ -206,17 +202,22 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       .filter(Boolean)
       .join(' | ');
 
+    const hasAnyVital = [systolic, diastolic, temperature, heartRate, respiratoryRate, oxygenSaturation].some((value) => value.trim() !== '');
     const vitalsData = {
       patient_id: user.id,
+      surgery_id: patientSurgery?.id || null,
       recorded_by: user.id,
       recorded_at: timestamp,
-      systolic_bp: parseVitalNumber(systolic),
-      diastolic_bp: parseVitalNumber(diastolic),
-      heart_rate: parseVitalNumber(heartRate),
-      respiratory_rate: parseVitalNumber(respiratoryRate),
-      body_temperature: parseVitalNumber(temperature),
-      oxygen_saturation: parseVitalNumber(oxygenSaturation),
-      notes: additionalNotes.trim() || undefined,
+      systolic_bp: systolic.trim() ? parseVitalNumber(systolic) : null,
+      diastolic_bp: diastolic.trim() ? parseVitalNumber(diastolic) : null,
+      heart_rate: heartRate.trim() ? parseVitalNumber(heartRate) : null,
+      respiratory_rate: respiratoryRate.trim() ? parseVitalNumber(respiratoryRate) : null,
+      body_temperature: temperature.trim() ? parseVitalNumber(temperature) : null,
+      oxygen_saturation: oxygenSaturation.trim() ? parseVitalNumber(oxygenSaturation) : null,
+      notes: [
+        vitalsNotMeasuredReason ? `Tanda vital belum lengkap: ${vitalsNotMeasuredReason}` : '',
+        additionalNotes.trim(),
+      ].filter(Boolean).join(' · ') || null,
     };
 
     const painData = {
@@ -272,7 +273,13 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
     };
 
     const alertEvaluation = evaluateClinicalMonitoring({
-      vitals: vitalsData,
+      vitals: {
+        ...(systolic.trim() && diastolic.trim() ? { systolic_bp: vitalsData.systolic_bp, diastolic_bp: vitalsData.diastolic_bp } : {}),
+        ...(temperature.trim() ? { body_temperature: vitalsData.body_temperature } : {}),
+        ...(heartRate.trim() ? { heart_rate: vitalsData.heart_rate } : {}),
+        ...(respiratoryRate.trim() ? { respiratory_rate: vitalsData.respiratory_rate } : {}),
+        ...(oxygenSaturation.trim() ? { oxygen_saturation: vitalsData.oxygen_saturation } : {}),
+      },
       pain: painData,
       symptoms: symptomData,
       wound: woundData,
@@ -365,7 +372,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       } else {
         await notifyAssignedNurses(user.id, {
           title: 'Laporan Pemantauan Harian Baru',
-          message: `${profile?.full_name || 'Pasien'} telah mengirimkan pemantauan harian (TD ${systolic}/${diastolic}, Suhu ${temperature}°C, Nyeri ${painScale}/10).`,
+          message: `${profile?.full_name || 'Pasien'} telah mengirimkan pemantauan harian. ${hasAnyVital ? 'Tanda vital yang tersedia ikut dicatat. ' : 'Belum ada angka tanda vital yang diukur. ' }Skala nyeri ${painScale}/10.`,
           type: 'monitoring',
           linkTarget: `patient:${user.id}:monitoring`,
         });
@@ -444,7 +451,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           Form Pemantauan Mandiri Harian
         </h1>
         <p className="text-xs text-slate-500 mt-1">
-          Isi berdasarkan hasil pengukuran dan pengamatan yang benar-benar Anda lakukan. Jangan menebak atau mengisi perkiraan. Jika tidak dapat mengukur, hubungi perawat pendamping.
+          Laporkan apa yang benar-benar Anda ukur dan rasakan. Tanda vital boleh dikosongkan jika alat tidak tersedia atau Anda belum dapat mengukurnya. Jangan pernah menebak angka.
         </p>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] leading-relaxed text-amber-900">
           <strong>Perhatian:</strong> Peringatan otomatis bukan diagnosis dan aplikasi bukan layanan gawat darurat. Jika mengalami sesak berat, perdarahan banyak, pingsan, atau kondisi memburuk, segera cari pertolongan medis.
@@ -488,13 +495,34 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
             <HeartPulse className="w-4 h-4 text-teal-600" />
             <h2 className="font-bold text-xs uppercase tracking-wider text-slate-900">
-              Langkah 1: Pengukuran Tanda Vital
+              Langkah 1: Tanda Vital (Jika Tersedia)
             </h2>
+          </div>
+
+          <div className="rounded-xl border border-sky-200 bg-sky-50 p-3.5 space-y-2.5">
+            <div className="flex items-start gap-2">
+              <Activity className="w-4 h-4 text-sky-700 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-bold text-sky-950">Tidak wajib memiliki semua alat untuk mengirim laporan.</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-sky-900">Isi hanya hasil yang benar-benar diukur. Jika tidak punya tensimeter, termometer, atau oksimeter, biarkan kolom terkait kosong. Perawat tetap dapat menerima laporan nyeri, gejala, luka, dan kondisi umum Anda.</p>
+              </div>
+            </div>
+            <details className="rounded-lg bg-white/80 border border-sky-100 p-3">
+              <summary className="cursor-pointer font-semibold text-sky-900">Panduan singkat mengukur tanda vital</summary>
+              <div className="mt-2 space-y-2 text-[11px] leading-relaxed text-slate-700">
+                <p><strong>Tekanan darah:</strong> duduk tenang sekitar 5 menit, punggung tersangga, kaki menapak dan tidak menyilang. Pasang manset pada lengan sesuai petunjuk alat, letakkan lengan setinggi jantung, lalu catat angka atas dan bawah.</p>
+                <p><strong>Suhu tubuh:</strong> gunakan termometer sesuai petunjuk alat. Tunggu sampai hasil muncul dan catat dalam °C.</p>
+                <p><strong>Denyut nadi:</strong> saat duduk tenang, raba nadi pergelangan tangan dengan telunjuk dan jari tengah (bukan ibu jari), hitung selama 60 detik.</p>
+                <p><strong>Frekuensi napas:</strong> saat istirahat, hitung naik-turunnya dada selama 60 detik. Jangan sengaja mengubah pola napas saat menghitung.</p>
+                <p><strong>SpO₂:</strong> pasang oksimeter pada jari yang hangat, diamkan tangan, tunggu angka stabil, lalu catat hasilnya. Ikuti petunjuk alat.</p>
+                <p className="text-sky-900">Jika belum pernah diajari, minta perawat mendemonstrasikan dan mendampingi pengukuran. Jangan menunda pertolongan karena tidak memiliki alat.</p>
+              </div>
+            </details>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="block font-semibold text-slate-700 mb-1">Tekanan Darah *</label>
+              <label className="block font-semibold text-slate-700 mb-1">Tekanan Darah <span className="font-normal text-slate-400">(opsional)</span></label>
               <div className="mb-3 max-w-lg rounded-xl border border-teal-100 bg-teal-50/70 p-3 text-[11px] leading-relaxed text-teal-950">
                 <p><strong>Angka atas (SYS)</strong> adalah tekanan saat jantung memompa darah.</p>
                 <p className="mt-1"><strong>Angka bawah (DIA)</strong> adalah tekanan saat jantung beristirahat di antara denyutan.</p>
@@ -515,7 +543,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Suhu Tubuh (°C) *</label>
+              <label className="block font-semibold text-slate-700 mb-1">Suhu Tubuh (°C) <span className="font-normal text-slate-400">(opsional)</span></label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -532,7 +560,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Denyut Nadi (bpm) *</label>
+              <label className="block font-semibold text-slate-700 mb-1">Denyut Nadi (bpm) <span className="font-normal text-slate-400">(opsional)</span></label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -548,7 +576,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Frekuensi Pernapasan *</label>
+              <label className="block font-semibold text-slate-700 mb-1">Frekuensi Pernapasan <span className="font-normal text-slate-400">(opsional)</span></label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -564,7 +592,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Saturasi Oksigen (SpO2) *</label>
+              <label className="block font-semibold text-slate-700 mb-1">Saturasi Oksigen (SpO₂) <span className="font-normal text-slate-400">(opsional)</span></label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -578,6 +606,19 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 <span className="text-slate-500 font-medium">%</span>
               </div>
             </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2">
+            <label htmlFor="vitals-not-measured" className="block font-semibold text-slate-800">Jika belum mengukur tanda vital, apa alasannya?</label>
+            <select id="vitals-not-measured" value={vitalsNotMeasuredReason} onChange={(e) => setVitalsNotMeasuredReason(e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-xs text-slate-800 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none">
+              <option value="">Pilih jika belum mengukur (opsional bila ada angka)</option>
+              <option value="Tidak memiliki alat pengukur">Tidak memiliki alat pengukur</option>
+              <option value="Belum memahami cara mengukur">Belum memahami cara mengukur</option>
+              <option value="Alat sedang tidak tersedia atau rusak">Alat tidak tersedia atau rusak</option>
+              <option value="Kondisi tidak memungkinkan untuk mengukur">Kondisi belum memungkinkan untuk mengukur</option>
+              <option value="Pengukuran dibantu perawat atau fasilitas kesehatan">Akan diukur saat dibantu perawat/fasilitas kesehatan</option>
+            </select>
+            <p className="text-[10px] leading-relaxed text-slate-500">Anda tetap dapat melanjutkan. Alasan ini membantu perawat mengetahui mengapa angka belum tercatat.</p>
           </div>
 
           <div className="pt-4 flex justify-end">
