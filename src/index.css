@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap");
 
 :root {
   font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
@@ -1753,4 +1753,33 @@ html[data-theme="dark"] ::selection { background: #276b69; color: #fff; }
 
 @media (prefers-reduced-motion: reduce) {
   .nursego-entry-portal, .nursego-entry-primary, .nursego-entry-demo { transition: none !important; }
+}
+
+
+/* NurseGo typography: friendly UI with a confident geometric display face. */
+:root {
+  --ng-font-body: 'Nunito Sans', 'Segoe UI', Roboto, Arial, sans-serif;
+  --ng-font-display: 'Outfit', 'Nunito Sans', 'Segoe UI', sans-serif;
+  font-family: var(--ng-font-body) !important;
+}
+html, body, button, input, select, textarea, optgroup {
+  font-family: var(--ng-font-body) !important;
+}
+h1, h2, h3, h4, h5, h6,
+.nursego-welcome-intro h1,
+.nursego-portal-card h2,
+.nursego-public-title,
+.nursego-section-title,
+.nursego-entry-title,
+.nursego-entry-portal h2 {
+  font-family: var(--ng-font-display) !important;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+.nursego-brand,
+.nursego-brand-mark,
+.nursego-entry-brand,
+.nursego-entry-title span,
+.nursego-public-title span {
+  font-family: var(--ng-font-display) !important;
 }
