@@ -178,7 +178,7 @@ export const PatientCare: React.FC<PatientCareProps> = ({ initialSubTab }) => {
         if (relRes.error) {
           if (isMissingRpcError(relRes.error)) {
             setRpcNotice(
-              'Fungsi backend tim multi-perawat (`004_live_sync_consent_rpcs_and_mvp.sql`) belum diterapkan di Supabase. Pesan menggunakan perawat aktif terverifikasi.'
+              'Fitur pengelolaan beberapa perawat belum tersedia. Pesan tetap dapat dikirim kepada perawat pendamping aktif.'
             );
           } else {
             setFetchError((prev) => prev || `Sebagian data tim perawat gagal dimuat: ${relRes.error.message}`);
