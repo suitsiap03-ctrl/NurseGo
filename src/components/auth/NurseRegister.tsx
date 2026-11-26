@@ -119,8 +119,8 @@ export const NurseRegister: React.FC<NurseRegisterProps> = ({ onBackToLogin }) =
         setAuthError('Konfirmasi kata sandi tidak cocok.');
         return;
       }
-      if (password.length < 6) {
-        setAuthError('Kata sandi minimal 6 karakter.');
+      if (password.length < 8) {
+        setAuthError('Kata sandi minimal 8 karakter.');
         return;
       }
       setStep(2);
@@ -361,7 +361,7 @@ export const NurseRegister: React.FC<NurseRegisterProps> = ({ onBackToLogin }) =
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Min. 6 karakter"
+                      placeholder="Min. 8 karakter"
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:bg-white"
                     />
                   </div>
