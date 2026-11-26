@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
 
 :root {
   font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
@@ -2197,7 +2197,7 @@ h1, h2, h3, h4, h5, h6,
 
 
 /* Desktop navigation floats as a compact glass panel, echoing the mobile dock. */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .nursego-ios-header {
     position: sticky;
     top: 0;
@@ -2228,7 +2228,7 @@ h1, h2, h3, h4, h5, h6,
     box-shadow: inset 0 0 0 1px #d3ebdf;
   }
 }
-@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
   .nursego-desktop-nav-shell { animation: nursego-nav-float-in .35s ease-out both; }
   @keyframes nursego-nav-float-in {
     from { opacity: 0; transform: translateY(-7px); }
@@ -2240,8 +2240,20 @@ html[data-theme="dark"] .nursego-desktop-nav-shell {
   border-color: rgba(80, 117, 108, .55);
   box-shadow: 0 8px 30px rgba(0,0,0,.24);
 }
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .nursego-desktop-nav-shell { padding-left: 12px; padding-right: 12px; }
 }
 
 
+
+/* Stable chart sizing: every Recharts instance gets a measurable canvas on first paint. */
+.nursego-page-enter .recharts-responsive-container {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 1px !important;
+  min-height: 260px !important;
+}
+.nursego-page-enter .recharts-wrapper,
+.nursego-page-enter .recharts-surface { max-width: 100%; }
