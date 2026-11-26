@@ -340,3 +340,89 @@ body::after {
   .nursego-portal-card { box-shadow: 0 12px 30px rgba(16, 70, 82, .07); }
   .nursego-hero { box-shadow: 0 16px 36px rgba(7, 94, 99, .16); }
 }
+
+
+/* Premium landing-page identity */
+.nursego-premium-welcome {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.nursego-premium-welcome::before,
+.nursego-premium-welcome::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.nursego-premium-welcome::before {
+  width: min(54vw, 620px);
+  height: min(54vw, 620px);
+  top: 14%;
+  left: -24%;
+  border: 1px solid rgba(13, 148, 136, .11);
+  box-shadow: 0 0 0 34px rgba(13,148,136,.025), 0 0 0 78px rgba(13,148,136,.018);
+}
+.nursego-premium-welcome::after {
+  width: min(46vw, 520px);
+  height: min(46vw, 520px);
+  right: -20%;
+  bottom: 4%;
+  border: 1px solid rgba(56, 189, 248, .13);
+  box-shadow: 0 0 0 32px rgba(56,189,248,.025), 0 0 0 76px rgba(56,189,248,.018);
+}
+.nursego-brand-mark {
+  background: linear-gradient(145deg, #0faaa0, #086b70 72%);
+  border: 1px solid rgba(255,255,255,.24);
+  box-shadow: 0 9px 22px rgba(8, 111, 112, .24), inset 0 1px 0 rgba(255,255,255,.24);
+}
+.nursego-welcome-intro h1 {
+  background: linear-gradient(105deg, #123b46 5%, #087d7a 54%, #247ea5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+.nursego-welcome-intro > p:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #087d7a;
+}
+.nursego-welcome-intro > p:last-child::before,
+.nursego-welcome-intro > p:last-child::after {
+  content: "";
+  display: inline-block;
+  width: 25px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(13,148,136,.65));
+}
+.nursego-welcome-intro > p:last-child::after {
+  transform: rotate(180deg);
+}
+.nursego-portal-icon {
+  background: linear-gradient(145deg, #e0faf5, #d5f1f5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 7px 16px rgba(13,148,136,.08);
+  border: 1px solid rgba(13,148,136,.10);
+}
+.nursego-portal-icon-patient {
+  background: linear-gradient(145deg, #e5f5ff, #e1f7f5);
+}
+.nursego-portal-card h2 { color: #123b46; }
+.nursego-portal-card button:first-child {
+  background: linear-gradient(105deg, #0d9488, #087b82 60%, #176f91);
+  box-shadow: 0 8px 18px rgba(8, 123, 130, .18);
+}
+.nursego-portal-card button:first-child:hover {
+  background: linear-gradient(105deg, #0f9f93, #087b82 60%, #176f91);
+  box-shadow: 0 11px 23px rgba(8, 123, 130, .25);
+}
+.nursego-portal-card button:nth-child(2) {
+  border-color: rgba(13,148,136,.16);
+  background: linear-gradient(100deg, rgba(226,250,245,.90), rgba(235,247,255,.92));
+}
+@media (prefers-reduced-motion: reduce) {
+  .nursego-premium-welcome::before,
+  .nursego-premium-welcome::after { display: none; }
+}
