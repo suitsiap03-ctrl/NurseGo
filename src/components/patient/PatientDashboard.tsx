@@ -255,7 +255,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigateTa
   return (
     <div className="space-y-6 pb-12">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-teal-700 to-teal-900 rounded-2xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
+      <div className="nursego-hero bg-gradient-to-r from-teal-700 via-teal-800 to-teal-900 rounded-2xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
         <div className="relative z-10 space-y-2">
           <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-semibold bg-teal-500/30 text-teal-100 border border-teal-400/30 uppercase tracking-wide">
             {recoveryLabel}
