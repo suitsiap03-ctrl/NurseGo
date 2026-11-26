@@ -1,25 +1,11 @@
 /**
- * Notification Drawer for NurseGo (Nurse & Patient)
- * 
- * Features:
- * - Unread count badges
- * - Category icons & color tags
- * - Quick action to navigate or view details
- * - Mark as read / Mark all as read
+ * NurseGo notification popover.
+ * Compact top-anchored panel with a calm, staggered top-down reveal.
  */
-
 import React from 'react';
 import { NotificationItem, UserRole } from '../../types/database';
 import {
-  X,
-  Bell,
-  AlertTriangle,
-  HeartPulse,
-  Pill,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  ArrowRight
+  X, Bell, AlertTriangle, HeartPulse, Pill, Calendar, ArrowRight
 } from 'lucide-react';
 
 interface NotificationDrawerProps {
@@ -33,76 +19,90 @@ interface NotificationDrawerProps {
 }
 
 export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
-  isOpen,
-  onClose,
-  notifications,
-  role,
-  onMarkAsRead,
-  onMarkAllAsRead,
-  onSelectTarget,
+  isOpen, onClose, notifications, role, onMarkAsRead, onMarkAllAsRead, onSelectTarget,
 }) => {
   if (!isOpen) return null;
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
-    <div className="nursego-drawer-backdrop fixed inset-0 z-50 flex justify-end bg-slate-900/45 backdrop-blur-sm">
-      <div className="nursego-drawer-panel bg-white w-full max-w-none h-full min-h-0 shadow-2xl flex flex-col border-0">
-        {/* Header */}
-        <div className="p-4 sm:px-6 border-b border-slate-100 flex items-center justify-between shrink-0 pt-[max(1rem,env(safe-area-inset-top))]">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center relative">
-              <Bell className="w-4 h-4" />
+    <div
+      className="nursego-notification-backdrop fixed inset-0 z-[70]"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="nursego-notification-title"
+        className="nursego-notification-panel"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-slate-100 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+              <Bell className="h-[18px] w-[18px]" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                  {unreadCount}
+                <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-white bg-rose-500 px-1 text-[9px] font-bold text-white">
+                  {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-slate-900">Pemberitahuan</h2>
-              <p className="text-[11px] text-slate-500">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h2 id="nursego-notification-title" className="text-sm font-bold text-slate-900">Pemberitahuan</h2>
+                {unreadCount > 0 && <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold text-teal-700">{unreadCount} belum dibaca</span>}
+              </div>
+              <p className="mt-0.5 truncate text-[11px] text-slate-500">
                 {role === 'nurse' ? 'Aktivitas pemantauan & peringatan pasien' : 'Pengingat obat & perawatan harian'}
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             {unreadCount > 0 && (
-              <button
-                onClick={onMarkAllAsRead}
-                className="text-[11px] text-teal-700 hover:text-teal-900 font-medium px-2 py-1 rounded"
-              >
-                Tandai semua dibaca
+              <button onClick={onMarkAllAsRead} className="hidden sm:inline-flex rounded-lg px-2.5 py-2 text-[11px] font-semibold text-teal-700 transition-colors hover:bg-teal-50">
+                Tandai dibaca
               </button>
             )}
-            <button
-              onClick={onClose}
-              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
-            >
-              <X className="w-5 h-5" />
+            <button type="button" onClick={onClose} aria-label="Tutup pemberitahuan" className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700">
+              <X className="h-4 w-4" />
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Notification List */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain divide-y divide-slate-100 text-xs">
+        {unreadCount > 0 && (
+          <div className="px-4 pt-2 sm:hidden">
+            <button onClick={onMarkAllAsRead} className="text-[11px] font-semibold text-teal-700">Tandai semua sudah dibaca</button>
+          </div>
+        )}
+
+        <div className="nursego-notification-list min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {notifications.length === 0 ? (
-            <div className="p-12 text-center text-slate-400 space-y-2">
-              <Bell className="w-8 h-8 mx-auto text-slate-300" />
-              <p className="font-medium text-slate-700">Tidak ada pemberitahuan</p>
-              <p className="text-[11px] text-slate-400">Seluruh jadwal dan pemantauan telah diperbarui.</p>
+            <div className="flex min-h-52 flex-col items-center justify-center px-6 py-10 text-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400"><Bell className="h-5 w-5" /></div>
+              <p className="text-sm font-semibold text-slate-700">Belum ada pemberitahuan</p>
+              <p className="mt-1 max-w-[230px] text-xs leading-relaxed text-slate-400">Pembaruan aktivitas dan pengingat akan muncul di sini.</p>
             </div>
           ) : (
-            notifications.map((notif) => {
+            notifications.map((notif, index) => {
               const isAlert = notif.type === 'alert';
               const isMed = notif.type === 'medication';
               const isAppt = notif.type === 'appointment';
               const isMonitoring = notif.type === 'monitoring';
               const isSystem = notif.type === 'system';
+              const Icon = isAlert ? AlertTriangle : isMed ? Pill : isAppt ? Calendar : HeartPulse;
+              const tone = isAlert
+                ? 'bg-rose-50 text-rose-600'
+                : isMed
+                ? 'bg-amber-50 text-amber-700'
+                : isAppt
+                ? 'bg-blue-50 text-blue-700'
+                : 'bg-teal-50 text-teal-700';
 
               return (
-                <div
+                <button
+                  type="button"
                   key={notif.id}
                   onClick={() => {
                     onMarkAsRead(notif.id);
@@ -111,64 +111,39 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                       onClose();
                     }
                   }}
-                  className={`p-4 transition-colors cursor-pointer hover:bg-slate-50 flex items-start gap-3 ${
-                    !notif.is_read ? 'bg-teal-50/40' : ''
-                  }`}
+                  style={{ animationDelay: `${Math.min(index, 8) * 65}ms` }}
+                  className={`nursego-notification-item group flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-slate-50 sm:px-5 ${!notif.is_read ? 'bg-teal-50/45' : 'bg-white'}`}
                 >
-                  <div
-                    className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center mt-0.5 ${
-                      isAlert
-                        ? 'bg-rose-100 text-rose-700'
-                        : isMed
-                        ? 'bg-amber-100 text-amber-700'
-                        : isAppt
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-teal-100 text-teal-700'
-                    }`}
-                  >
-                    {isAlert && <AlertTriangle className="w-4 h-4" />}
-                    {isMed && <Pill className="w-4 h-4" />}
-                    {isAppt && <Calendar className="w-4 h-4" />}
-                    {(isMonitoring || isSystem) && <HeartPulse className="w-4 h-4" />}
-                  </div>
-
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <h4
-                        className={`text-xs ${
-                          !notif.is_read ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'
-                        }`}
-                      >
-                        {notif.title}
-                      </h4>
-                      <span className="text-[10px] text-slate-400">
-                        {new Date(notif.created_at).toLocaleTimeString('id-ID', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                  <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tone}`}>
+                    <Icon className="h-[17px] w-[17px]" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-start justify-between gap-3">
+                      <span className={`text-xs leading-5 ${!notif.is_read ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>{notif.title}</span>
+                      <span className="shrink-0 pt-0.5 text-[10px] tabular-nums text-slate-400">
+                        {new Date(notif.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                    </div>
-
-                    <p className="text-slate-600 text-[11px] leading-relaxed">{notif.message}</p>
-
+                    </span>
+                    <span className="mt-0.5 block text-[11px] leading-[1.55] text-slate-600">{notif.message}</span>
                     {notif.link_target && (
-                      <span className="text-[11px] font-semibold text-teal-700 inline-flex items-center gap-1 pt-0.5">
-                        <span>{role === 'nurse' ? 'Buka data pasien' : 'Lihat detail perawatan'}</span>
-                        <ArrowRight className="w-3 h-3" />
+                      <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-teal-700">
+                        {role === 'nurse' ? 'Buka data pasien' : 'Lihat detail perawatan'}
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                       </span>
                     )}
-                  </div>
-                </div>
+                  </span>
+                  {!notif.is_read && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-teal-500" aria-label="Belum dibaca" />}
+                </button>
               );
             })
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] border-t border-slate-100 text-center text-[11px] text-slate-400 shrink-0">
-          NurseGo Notification System · Terintegrasi Real-time
-        </div>
-      </div>
+        <footer className="flex shrink-0 items-center justify-between border-t border-slate-100 px-4 py-3 text-[10px] text-slate-400 sm:px-5">
+          <span>NurseGo · Pemberitahuan real-time</span>
+          <span className="font-medium text-slate-400">{notifications.length} aktivitas</span>
+        </footer>
+      </section>
     </div>
   );
 };
