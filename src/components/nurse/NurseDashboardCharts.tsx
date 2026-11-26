@@ -217,7 +217,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       return (
         <div className="h-[280px] sm:h-[310px] w-full flex flex-col items-center justify-center bg-slate-50/70 rounded-xl border border-slate-200 text-xs text-slate-500 gap-2">
           <RefreshCw className="w-5 h-5 animate-spin text-teal-600" />
-          <span>Memuat data grafik pemantauan aktual dari Supabase...</span>
+          <span>Memuat data grafik pemantauan...</span>
         </div>
       );
     }
