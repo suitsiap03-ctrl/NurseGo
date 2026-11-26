@@ -1149,6 +1149,21 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                         <span className="text-emerald-700 font-medium text-[11px]">Tidak ada keluhan tambahan</span>
                       )}
                     </div>
+                    {s.surgery_specific_data?.answers && s.surgery_specific_data.answers.length > 0 && (
+                      <div className="rounded-lg border border-teal-100 bg-teal-50/60 p-3 space-y-2">
+                        <p className="font-bold text-[11px] text-teal-900">
+                          Pemantauan khusus · {s.surgery_specific_data.surgery_name || 'Jenis operasi'}
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {s.surgery_specific_data.answers.map((answer) => (
+                            <div key={answer.key} className="rounded-md bg-white/80 border border-teal-100 px-2.5 py-2">
+                              <p className="text-[10px] text-slate-500">{answer.label}</p>
+                              <p className="text-[11px] font-semibold text-slate-800 mt-0.5">{answer.value}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {s.notes && (
                       <p className="text-[11px] text-slate-600 bg-slate-50 p-2 rounded">{s.notes}</p>
                     )}
