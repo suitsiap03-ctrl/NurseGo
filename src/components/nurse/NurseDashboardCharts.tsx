@@ -273,8 +273,8 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       }
 
       return (
-        <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="relative min-h-[300px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+          <ResponsiveContainer width="100%" height={260} minWidth={0}>
             <BarChart
               data={dailyActivitySeries}
               margin={{ top: 14, right: 16, left: 0, bottom: 4 }}
@@ -345,7 +345,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
 
       return (
         <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={260} minWidth={0}>
             <LineChart data={vitalSignChartSeries} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
@@ -464,7 +464,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
 
     return (
       <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={260} minWidth={0}>
           <LineChart data={singleSeriesData} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
@@ -534,7 +534,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
               {patientPickerOpen && (
                 <>
                   <button type="button" aria-label="Tutup pilihan pasien" className="fixed inset-0 z-[80] cursor-default" onClick={() => setPatientPickerOpen(false)} />
-                  <div role="listbox" aria-label="Daftar pasien grafik" className="absolute right-0 top-full z-[100] mt-2 w-[min(280px,calc(100vw-32px))] max-h-[min(55vh,360px)] overflow-y-auto overscroll-contain rounded-xl border border-emerald-100 bg-white p-1.5 shadow-2xl">
+                  <div role="listbox" aria-label="Daftar pasien grafik" className="fixed left-4 right-4 top-1/2 z-[100] mx-auto w-[min(360px,calc(100vw-32px))] max-h-[min(60vh,420px)] -translate-y-1/2 overflow-y-auto overscroll-contain rounded-2xl border border-emerald-100 bg-white p-2 shadow-2xl">
                     <button type="button" role="option" aria-selected={effectivePatientId === 'all'} onClick={() => { setSelectedPatientId('all'); setPatientPickerOpen(false); }} className={`w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-semibold ${effectivePatientId === 'all' ? 'bg-emerald-50 text-emerald-800' : 'text-slate-700 hover:bg-slate-50'}`}>
                       <span>Semua Pasien ({patients.length})</span>{effectivePatientId === 'all' && <Check className="w-3.5 h-3.5" />}
                     </button>
