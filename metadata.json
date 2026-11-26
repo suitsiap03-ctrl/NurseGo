@@ -1,6 +1,6 @@
 {
   "name": "NurseGo – Postoperative Home Care Monitoring System",
-  "description": "Aplikasi akademik sistem informasi keperawatan untuk pemantauan pasien pascaoperasi di rumah berbasis web terintegrasi Supabase.",
+  "description": "Aplikasi akademik sistem informasi keperawatan untuk pemantauan pasien pascaoperasi di rumah berbasis web terintegrasi.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
