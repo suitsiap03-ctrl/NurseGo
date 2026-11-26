@@ -406,6 +406,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
         <p className="text-xs text-slate-500 mt-1">
           Isi berdasarkan hasil pengukuran dan pengamatan yang benar-benar Anda lakukan. Jangan menebak atau mengisi perkiraan. Jika tidak dapat mengukur, hubungi perawat pendamping.
         </p>
+        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] leading-relaxed text-amber-900">
+          <strong>Perhatian:</strong> Peringatan otomatis bukan diagnosis dan aplikasi bukan layanan gawat darurat. Jika mengalami sesak berat, perdarahan banyak, pingsan, atau kondisi memburuk, segera cari pertolongan medis.
+        </div>
 
         <div className="grid grid-cols-5 gap-1.5 mt-5">
           {[
@@ -576,7 +579,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 <span className="font-semibold text-slate-800">Skala Nyeri yang Dirasakan:</span>
                 <span
                   className={`text-base font-extrabold px-3 py-1 rounded-lg tabular-nums ${
-                    painScale === 0
+                    painScale === null
+                      ? 'bg-slate-100 text-slate-500'
+                      : painScale === 0
                       ? 'bg-emerald-100 text-emerald-800'
                       : painScale <= 3
                       ? 'bg-teal-100 text-teal-800'
