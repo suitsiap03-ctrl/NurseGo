@@ -56,6 +56,12 @@ type ChartMode = 'activity' | 'vitals';
 type VitalMetric = 'bp' | 'temp' | 'pulse' | 'spo2' | 'pain';
 type RangeDays = 7 | 14 | 30;
 
+const chartNumber = (value: unknown): number | undefined => {
+  if (value === null || value === undefined || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export interface DailyActivityPoint {
   dateKey: string;
   label: string;
@@ -195,7 +201,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       return {
         label: `${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} ${d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
         fullDate: `${patientName} · ${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} ${d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
-        pain: Number(p.pain_scale),
+        pain: chartNumber(p.pain_scale),
       };
     });
   }, [scopedPain, patientNameMap]);
@@ -207,11 +213,11 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       return {
         label: `${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} ${d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
         fullDate: `${patientName} · ${d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} ${d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
-        systolic: Number(v.systolic_bp),
-        diastolic: Number(v.diastolic_bp),
-        temp: Number(v.body_temperature),
-        pulse: Number(v.heart_rate),
-        spo2: Number(v.oxygen_saturation),
+        systolic: chartNumber(v.systolic_bp),
+        diastolic: chartNumber(v.diastolic_bp),
+        temp: chartNumber(v.body_temperature),
+        pulse: chartNumber(v.heart_rate),
+        spo2: chartNumber(v.oxygen_saturation),
       };
     });
   }, [scopedVitals, patientNameMap]);
@@ -246,36 +252,10 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       );
     }
 
-    if (patients.length === 0) {
-      return (
-        <div className="h-[240px] w-full flex flex-col items-center justify-center bg-slate-50/70 rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500 gap-1.5">
-          <BarChart3 className="w-8 h-8 text-slate-300 mb-1" />
-          <p className="font-semibold text-slate-700">Belum ada pasien terhubung</p>
-          <p className="text-slate-400 max-w-sm">
-            Grafik tren pemantauan dan peringatan klinis akan tampil secara otomatis setelah pasien terhubung dan mengirim laporan.
-          </p>
-        </div>
-      );
-    }
-
     if (chartMode === 'activity') {
-      if (!hasAnyActivityInRange) {
-        return (
-          <div className="h-[240px] w-full flex flex-col items-center justify-center bg-slate-50/70 rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500 gap-1.5">
-            <BarChart3 className="w-8 h-8 text-slate-300 mb-1" />
-            <p className="font-semibold text-slate-700">
-              Belum ada aktivitas pemantauan atau peringatan dalam {rangeDays} hari terakhir
-            </p>
-            <p className="text-slate-400 max-w-sm">
-              Coba perluas rentang hari atau tunggu laporan pemantauan terbaru dari pasien.
-            </p>
-          </div>
-        );
-      }
-
       return (
-        <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+        <div className="relative h-[320px] sm:h-[360px] w-full min-w-[280px] min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={80}>
             <BarChart
               data={dailyActivitySeries}
               margin={{ top: 14, right: 16, left: 0, bottom: 4 }}
@@ -325,24 +305,10 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
     const activeSeriesLength =
       vitalMetric === 'pain' ? painChartSeries.length : vitalSignChartSeries.length;
 
-    if (activeSeriesLength === 0) {
-      return (
-        <div className="h-[240px] w-full flex flex-col items-center justify-center bg-slate-50/70 rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500 gap-1.5">
-          <TrendingUp className="w-8 h-8 text-slate-300 mb-1" />
-          <p className="font-semibold text-slate-700">
-            Belum ada data {vitalMetric === 'pain' ? 'skala nyeri' : 'tanda vital'} dalam {rangeDays} hari terakhir
-          </p>
-          <p className="text-slate-400 max-w-sm">
-            Data pasien akan otomatis muncul di grafik segera setelah laporan dikirimkan.
-          </p>
-        </div>
-      );
-    }
-
     if (vitalMetric === 'bp') {
-      const bpVals = vitalSignChartSeries.flatMap((d) => [d.systolic, d.diastolic]).filter(Number.isFinite);
-      const minBp = Math.max(40, Math.floor((Math.min(...bpVals) - 10) / 10) * 10);
-      const maxBp = Math.min(220, Math.ceil((Math.max(...bpVals, 145) + 10) / 10) * 10);
+      const bpVals = vitalSignChartSeries.flatMap((d) => [d.systolic, d.diastolic]).filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
+      const minBp = bpVals.length ? Math.max(40, Math.floor((Math.min(...bpVals) - 10) / 10) * 10) : 60;
+      const maxBp = bpVals.length ? Math.min(220, Math.ceil((Math.max(...bpVals, 145) + 10) / 10) * 10) : 180;
 
       return (
         <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
@@ -452,19 +418,19 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
     const singleSeriesData: Array<Record<string, string | number>> =
       vitalMetric === 'pain' ? painChartSeries : vitalSignChartSeries;
     const nums = singleSeriesData
-      .map((d) => Number(d[cfg.dataKey]))
-      .filter((n) => Number.isFinite(n));
+      .map((d) => chartNumber(d[cfg.dataKey]))
+      .filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
     const minVal =
       vitalMetric === 'pain'
         ? 0
-        : Math.max(cfg.minFloor, Number((Math.min(...nums, cfg.refLow ?? Infinity) - cfg.pad).toFixed(1)));
+        : nums.length ? Math.max(cfg.minFloor, Number((Math.min(...nums, cfg.refLow ?? Infinity) - cfg.pad).toFixed(1))) : cfg.minFloor;
     const maxVal =
       vitalMetric === 'pain'
         ? 10
-        : Math.min(cfg.maxCeil, Number((Math.max(...nums, cfg.refHigh ?? -Infinity) + cfg.pad).toFixed(1)));
+        : nums.length ? Math.min(cfg.maxCeil, Number((Math.max(...nums, cfg.refHigh ?? -Infinity) + cfg.pad).toFixed(1))) : cfg.maxCeil;
 
     return (
-      <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+      <div className="relative h-[300px] sm:h-[340px] w-full min-w-[280px] overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
         <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <LineChart data={singleSeriesData} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
