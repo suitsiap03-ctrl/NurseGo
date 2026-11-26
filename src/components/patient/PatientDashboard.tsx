@@ -106,7 +106,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigateTa
         if (relErr) {
           setRpcNotice(
             isMissingRpcError(relErr)
-              ? 'Fungsi backend relasi multi-perawat (`004_live_sync_consent_rpcs_and_mvp.sql`) belum diterapkan di Supabase. Permintaan penautan perawat baru belum dapat dimuat hingga migrasi dijalankan.'
+              ? 'Fitur pengelolaan beberapa perawat belum tersedia. Silakan coba kembali nanti.'
               : `Sebagian data relasi tidak dapat dimuat (${relErr.message}).`
           );
         }
