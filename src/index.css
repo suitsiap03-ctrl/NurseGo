@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, Cantarell, sans-serif;
   color-scheme: light;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -14,56 +15,94 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle motion system: lively but calm, with reduced-motion support. */
+/* Calm, fluid motion: short travel distances, eased starts/stops, and restrained stagger. */
 @keyframes nursego-fade-up {
-  from { opacity: 0; transform: translate3d(0, 14px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+  0% { opacity: 0; transform: translate3d(0, 10px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
 }
-@keyframes nursego-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nursego-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
 @keyframes nursego-modal-pop {
-  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.97); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  0% { opacity: 0; transform: translate3d(0, 8px, 0) scale(.985); }
+  65% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.002); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 @keyframes nursego-float {
   0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(0, -9px, 0); }
+  50% { transform: translate3d(0, -7px, 0); }
 }
-.nursego-page-enter > * > * { animation: nursego-fade-up .55s cubic-bezier(.2,.75,.25,1) both; }
-.nursego-page-enter > * > *:nth-child(2) { animation-delay: .06s; }
-.nursego-page-enter > * > *:nth-child(3) { animation-delay: .12s; }
-.nursego-page-enter > * > *:nth-child(4) { animation-delay: .18s; }
-.nursego-page-enter > * > *:nth-child(5) { animation-delay: .24s; }
-.nursego-page-enter > * > *:nth-child(6) { animation-delay: .30s; }
-.nursego-page-enter button:not(:disabled) { transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease; }
-.nursego-page-enter button:not(:disabled):hover { transform: translateY(-1px); }
-.nursego-page-enter button:not(:disabled):active { transform: translateY(0) scale(.98); }
-.nursego-page-enter [class*="rounded-xl"], .nursego-page-enter [class*="rounded-2xl"] { transition: box-shadow .22s ease, border-color .22s ease; }
-.nursego-page-enter [class*="rounded-xl"]:hover, .nursego-page-enter [class*="rounded-2xl"]:hover { box-shadow: 0 8px 24px rgba(15, 118, 110, .07); }
-.nursego-hero { position: relative; isolation: isolate; }
-.nursego-hero::before, .nursego-hero::after { content: ""; position: absolute; z-index: -1; border-radius: 9999px; pointer-events: none; }
-.nursego-hero::before { width: 190px; height: 190px; right: 7%; top: -95px; background: rgba(153, 246, 228, .14); filter: blur(2px); animation: nursego-float 7s ease-in-out infinite; }
-.nursego-hero::after { width: 120px; height: 120px; right: 24%; bottom: -72px; background: rgba(255,255,255,.09); filter: blur(1px); animation: nursego-float 9s ease-in-out infinite reverse; }
-.animate-fade-in { animation: nursego-fade-in .2s ease-out both; }
-.animate-modal-pop { animation: nursego-modal-pop .24s cubic-bezier(.2,.8,.2,1) both; }
+.nursego-page-enter > * > * {
+  animation: nursego-fade-up 680ms cubic-bezier(.22, 1, .36, 1) both;
+  backface-visibility: hidden;
+}
+.nursego-page-enter > * > *:nth-child(2) { animation-delay: 45ms; }
+.nursego-page-enter > * > *:nth-child(3) { animation-delay: 90ms; }
+.nursego-page-enter > * > *:nth-child(4) { animation-delay: 135ms; }
+.nursego-page-enter > * > *:nth-child(5) { animation-delay: 180ms; }
+.nursego-page-enter > * > *:nth-child(6) { animation-delay: 225ms; }
+
+.nursego-page-enter button:not(:disabled) {
+  transition: transform 260ms cubic-bezier(.22, 1, .36, 1),
+              box-shadow 260ms ease,
+              background-color 220ms ease,
+              border-color 220ms ease;
+}
+.nursego-page-enter button:not(:disabled):hover { transform: translate3d(0, -1px, 0); }
+.nursego-page-enter button:not(:disabled):active { transform: translate3d(0, 0, 0) scale(.985); }
+
+.nursego-page-enter [class*="rounded-xl"],
+.nursego-page-enter [class*="rounded-2xl"] {
+  transition: box-shadow 280ms ease, border-color 240ms ease;
+}
+.nursego-page-enter [class*="rounded-xl"]:hover,
+.nursego-page-enter [class*="rounded-2xl"]:hover {
+  box-shadow: 0 8px 24px rgba(15, 118, 110, .055);
+}
+
+.nursego-hero { position: relative; isolation: isolate; overflow: hidden; }
+.nursego-hero::before,
+.nursego-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 9999px;
+  pointer-events: none;
+  will-change: transform;
+}
+.nursego-hero::before {
+  width: 190px;
+  height: 190px;
+  right: 7%;
+  top: -95px;
+  background: rgba(153, 246, 228, .14);
+  filter: blur(2px);
+  animation: nursego-float 8s cubic-bezier(.45, 0, .55, 1) infinite;
+}
+.nursego-hero::after {
+  width: 120px;
+  height: 120px;
+  right: 24%;
+  bottom: -72px;
+  background: rgba(255,255,255,.09);
+  filter: blur(1px);
+  animation: nursego-float 10s cubic-bezier(.45, 0, .55, 1) infinite reverse;
+}
+.animate-fade-in { animation: nursego-fade-in 260ms ease-out both; }
+.animate-modal-pop { animation: nursego-modal-pop 360ms cubic-bezier(.22, 1, .36, 1) both; }
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }
 
 /* Custom scrollbar for dense data panels */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
