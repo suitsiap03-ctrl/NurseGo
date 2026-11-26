@@ -84,7 +84,7 @@ export const PatientActivation: React.FC<PatientActivationProps> = ({
     setTokenPreview(null);
     if (!isSupabaseConfigured()) {
       setTokenCheckMsg(
-        'Kunci Supabase (VITE_SUPABASE_ANON_KEY) belum dikonfigurasi. Kembali ke layar awal dan buka Setup Kunci Supabase untuk memverifikasi kode undangan secara live.'
+        'Koneksi layanan belum dikonfigurasi. Kembali ke layar awal dan buka Pengaturan Koneksi untuk memverifikasi kode undangan.'
       );
       return;
     }
@@ -125,7 +125,7 @@ export const PatientActivation: React.FC<PatientActivationProps> = ({
       } else {
         setTokenCheckMsg(
           isMissingRpcError(rpcErr)
-            ? 'Fungsi verifikasi undangan `verify_patient_invitation` belum terpasang di Supabase. Pastikan migrasi SQL sudah dijalankan.'
+            ? 'Fitur verifikasi undangan belum tersedia. Silakan hubungi perawat yang mengirim undangan.'
             : 'Token belum dapat divalidasi otomatis sebelum aktivasi. Pastikan kode benar atau hubungi perawat.'
         );
       }
