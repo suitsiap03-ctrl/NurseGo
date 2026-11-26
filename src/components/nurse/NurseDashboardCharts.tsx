@@ -10,8 +10,6 @@ import React, { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ResponsiveContainer,
-  BarChart,
-  Bar,
   LineChart,
   Line,
   XAxis,
@@ -249,50 +247,71 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
     }
 
     if (chartMode === 'activity') {
+      const activityMax = Math.max(
+        1,
+        ...dailyActivitySeries.flatMap((point) => [point.monitoringCount, point.alertCount])
+      );
+      const hasActivity = dailyActivitySeries.some(
+        (point) => point.monitoringCount > 0 || point.alertCount > 0
+      );
+      const gridValues = [activityMax, Math.ceil(activityMax * 2 / 3), Math.ceil(activityMax / 3), 0];
+
       return (
-        <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height={280} minWidth={1} debounce={80}>
-            <BarChart
-              data={dailyActivitySeries}
-              margin={{ top: 14, right: 16, left: 0, bottom: 4 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-              <XAxis
-                dataKey="label"
-                tick={{ fontSize: 11, fill: '#64748b' }}
-                minTickGap={14}
-                tickMargin={6}
-              />
-              <YAxis
-                width={36}
-                allowDecimals={false}
-                tick={{ fontSize: 11, fill: '#64748b' }}
-              />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '10px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '12px',
-                }}
-                labelFormatter={(_, payload) => payload?.[0]?.payload?.fullDate || ''}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '6px' }} />
-              <Bar
-                dataKey="monitoringCount"
-                name="Laporan Monitoring"
-                fill="#0d9488"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={32}
-              />
-              <Bar
-                dataKey="alertCount"
-                name="Peringatan Klinis"
-                fill="#e11d48"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={32}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50/50 p-3 sm:p-4">
+          <div className="flex h-[230px] w-full min-w-0 gap-2">
+            <div className="flex w-7 shrink-0 flex-col justify-between pb-7 pt-1 text-right text-[10px] tabular-nums text-slate-400">
+              {gridValues.map((value, index) => (
+                <span key={index}>{value}</span>
+              ))}
+            </div>
+            <div className="relative flex min-w-0 flex-1 flex-col">
+              <div className="pointer-events-none absolute inset-x-0 bottom-7 top-1 flex flex-col justify-between">
+                {gridValues.map((value, index) => (
+                  <div key={index} className="w-full border-t border-dashed border-slate-200" />
+                ))}
+              </div>
+              <div className="relative flex min-h-0 flex-1 items-end justify-around gap-1">
+                {dailyActivitySeries.map((point, index) => (
+                  <div
+                    key={point.dateKey}
+                    title={`${point.fullDate}\nLaporan monitoring: ${point.monitoringCount}\nPeringatan klinis: ${point.alertCount}`}
+                    className="flex h-full min-w-0 flex-1 items-end justify-center gap-[2px]"
+                  >
+                    <div
+                      className="w-2 max-w-[42%] rounded-t-[3px] bg-teal-600"
+                      style={{ height: `${(point.monitoringCount / activityMax) * 100}%` }}
+                    />
+                    <div
+                      className="w-2 max-w-[42%] rounded-t-[3px] bg-rose-500"
+                      style={{ height: `${(point.alertCount / activityMax) * 100}%` }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex h-7 shrink-0 items-center justify-around gap-1 overflow-hidden border-t border-slate-300/70">
+                {dailyActivitySeries.map((point, index) => (
+                  <span key={point.dateKey} className="min-w-0 flex-1 truncate text-center text-[9px] text-slate-500">
+                    {index % 2 === 0 || index === dailyActivitySeries.length - 1 ? point.label : ''}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          {!hasActivity && (
+            <p className="mt-1 text-center text-xs text-slate-500">
+              Belum ada laporan monitoring atau peringatan pada rentang waktu ini.
+            </p>
+          )}
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
+            <span className="inline-flex items-center gap-2 text-teal-700">
+              <span className="h-3 w-3 rounded-sm bg-teal-600" />
+              Laporan Monitoring
+            </span>
+            <span className="inline-flex items-center gap-2 text-rose-600">
+              <span className="h-3 w-3 rounded-sm bg-rose-500" />
+              Peringatan Klinis
+            </span>
+          </div>
         </div>
       );
     }
