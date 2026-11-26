@@ -215,6 +215,9 @@ function translateAuthError(message: string): string {
   if (lower.includes('rate limit') || lower.includes('too many requests') || lower.includes('security purposes')) {
     return 'Terlalu banyak permintaan ke server autentikasi. Mohon tunggu beberapa saat lalu coba lagi.';
   }
+  if (lower.includes('password should contain at least one character of each')) {
+    return 'Kata sandi harus memiliki minimal 1 huruf kecil (a–z), 1 huruf besar (A–Z), dan 1 angka (0–9).';
+  }
   if (lower.includes('password should be at least')) {
     return 'Kata sandi minimal harus 8 karakter.';
   }
