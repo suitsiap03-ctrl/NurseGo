@@ -129,6 +129,37 @@ export function buildDailyActivitySeries(
   }));
 }
 
+const InteractiveTrendChart: React.FC<{
+  series: Array<{ name: string; color: string; values: Array<{ label: string; fullDate: string; value?: number }> }>;
+  unit: string; min: number; max: number; emptyText: string;
+}> = ({ series, unit, min, max, emptyText }) => {
+  const [active, setActive] = useState<{ seriesIndex: number; pointIndex: number } | null>(null);
+  const count = Math.max(0, ...series.map((line) => line.values.length));
+  const valid = series.some((line) => line.values.some((point) => typeof point.value === 'number' && Number.isFinite(point.value)));
+  const left = 48, right = 580, top = 20, bottom = 205;
+  const y = (value: number) => bottom - ((value - min) / Math.max(1, max - min)) * (bottom - top);
+  const x = (index: number) => count <= 1 ? (left + right) / 2 : left + (index / (count - 1)) * (right - left);
+  const activePoint = active ? series[active.seriesIndex]?.values[active.pointIndex] : null;
+  if (!valid) return <div className="flex h-[280px] flex-col items-center justify-center gap-2 rounded-xl bg-slate-50 text-center text-sm text-slate-500"><Activity className="h-7 w-7 text-slate-300" /><span>{emptyText}</span><span className="text-xs">Grafik akan terisi setelah data pemantauan dicatat.</span></div>;
+  return <div className="w-full min-w-0">
+    <div className="h-[280px] w-full overflow-hidden rounded-xl bg-slate-50/70 p-2">
+      <svg viewBox="0 0 600 250" preserveAspectRatio="none" className="h-full w-full" role="group" aria-label="Grafik tren klinis interaktif">
+        {[0,1,2,3,4].map((step) => { const value = max - ((max-min)*step)/4; return <g key={step}><line x1={left} x2={right} y1={y(value)} y2={y(value)} stroke="#cbd5e1" strokeDasharray="4 5" /><text x={left-8} y={y(value)+4} textAnchor="end" fontSize="11" fill="#64748b">{Number(value.toFixed(1))}</text></g>; })}
+        {series.map((line, seriesIndex) => {
+          const points = line.values.map((point, pointIndex) => ({ ...point, pointIndex })).filter((point) => typeof point.value === 'number' && Number.isFinite(point.value));
+          const path = points.map((point,i) => (i===0?'M':'L')+' '+x(point.pointIndex)+' '+y(point.value as number)).join(' ');
+          return <g key={line.name}><path d={path} fill="none" stroke={line.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{strokeDasharray:1200,strokeDashoffset:1200,animation:'nursego-chart-draw 1.1s ease-out forwards'}} />
+            {points.map((point) => <g key={point.pointIndex} onClick={() => setActive({seriesIndex,pointIndex:point.pointIndex})} onKeyDown={(event) => {if(event.key==='Enter'||event.key===' ') setActive({seriesIndex,pointIndex:point.pointIndex});}} role="button" tabIndex={0} aria-label={line.name+': '+point.value+' '+unit+', '+point.fullDate} className="cursor-pointer"><circle cx={x(point.pointIndex)} cy={y(point.value as number)} r={active?.seriesIndex===seriesIndex&&active.pointIndex===point.pointIndex?9:6} fill={line.color} stroke="white" strokeWidth="2"/><circle cx={x(point.pointIndex)} cy={y(point.value as number)} r="13" fill="transparent"/></g>)}
+          </g>;
+        })}
+        {series[0]?.values.map((point,index) => (index%Math.max(1,Math.ceil(count/5))===0||index===count-1)?<text key={index} x={x(index)} y="232" textAnchor="middle" fontSize="11" fill="#64748b">{point.label}</text>:null)}
+      </svg>
+    </div>
+    <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">{series.map((line)=><span key={line.name} className="inline-flex items-center gap-2" style={{color:line.color}}><span className="h-2.5 w-2.5 rounded-full" style={{backgroundColor:line.color}}/>{line.name}</span>)}</div>
+    {activePoint?<div className="mt-3 rounded-xl border border-teal-200 bg-teal-50/70 p-3 text-sm animate-[nursego-chart-in_220ms_ease-out]"><div className="flex items-center justify-between gap-2"><strong className="text-slate-800">{activePoint.fullDate}</strong><button type="button" onClick={()=>setActive(null)} className="rounded-md px-2 py-1 text-xs text-teal-800 hover:bg-teal-100">Tutup</button></div><p className="mt-1 font-semibold" style={{color:series[active.seriesIndex].color}}>{series[active.seriesIndex].name}: {activePoint.value} {unit}</p></div>:<p className="mt-2 text-center text-xs text-slate-500">Ketuk titik pada grafik untuk melihat detail pengukuran.</p>}
+  </div>;
+};
+
 export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
   patients,
   vitals,
@@ -323,50 +354,12 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       const maxBp = bpVals.length ? Math.min(220, Math.ceil((Math.max(...bpVals, 145) + 10) / 10) * 10) : 180;
 
       return (
-        <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height={280} minWidth={1}>
-            <LineChart data={vitalSignChartSeries} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis
-                dataKey="label"
-                tick={{ fontSize: 11, fill: '#64748b' }}
-                minTickGap={18}
-                tickMargin={6}
-              />
-              <YAxis width={40} domain={[minBp, maxBp]} tick={{ fontSize: 11, fill: '#64748b' }} />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '10px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '12px',
-                }}
-                labelFormatter={(_, payload) => payload?.[0]?.payload?.fullDate || ''}
-                formatter={(value: any, name: any) => [`${value} mmHg`, String(name ?? '')]}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '6px' }} />
-              <ReferenceLine y={140} stroke="#f43f5e" strokeDasharray="3 3" />
-              <Line
-                type="monotone"
-                dataKey="systolic"
-                name="Sistolik (mmHg)"
-                stroke="#0d9488"
-                strokeWidth={2.5}
-                dot={{ r: 4, fill: '#0d9488', stroke: '#fff', strokeWidth: 1.5 }}
-                activeDot={{ r: 6 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="diastolic"
-                name="Diastolik (mmHg)"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                strokeDasharray="4 2"
-                dot={{ r: 3.5, fill: '#3b82f6', stroke: '#fff', strokeWidth: 1.5 }}
-                activeDot={{ r: 5 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <InteractiveTrendChart unit="mmHg" min={minBp} max={maxBp} emptyText="Belum ada data tekanan darah pada rentang ini."
+          series={[
+            {name:'Sistolik',color:'#0d9488',values:vitalSignChartSeries.map((point)=>({label:point.label.split(' ')[0],fullDate:point.fullDate,value:point.systolic}))},
+            {name:'Diastolik',color:'#3b82f6',values:vitalSignChartSeries.map((point)=>({label:point.label.split(' ')[0],fullDate:point.fullDate,value:point.diastolic}))},
+          ]}
+        />
       );
     }
 
@@ -442,45 +435,9 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
         : nums.length ? Math.min(cfg.maxCeil, Number((Math.max(...nums, cfg.refHigh ?? -Infinity) + cfg.pad).toFixed(1))) : cfg.maxCeil;
 
     return (
-      <div className="relative h-[300px] sm:h-[340px] w-full min-w-[280px] overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-        <ResponsiveContainer width="100%" height={280} minWidth={1}>
-          <LineChart data={singleSeriesData} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 11, fill: '#64748b' }}
-              minTickGap={18}
-              tickMargin={6}
-            />
-            <YAxis width={42} domain={[minVal, maxVal]} tick={{ fontSize: 11, fill: '#64748b' }} />
-            <Tooltip
-              contentStyle={{
-                borderRadius: '10px',
-                border: '1px solid #e2e8f0',
-                fontSize: '12px',
-              }}
-              labelFormatter={(_, payload) => payload?.[0]?.payload?.fullDate || ''}
-              formatter={(value: any) => [`${value} ${cfg.unit}`, cfg.label]}
-            />
-            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '6px' }} />
-            {cfg.refHigh !== undefined && (
-              <ReferenceLine y={cfg.refHigh} stroke="#f59e0b" strokeDasharray="4 4" />
-            )}
-            {cfg.refLow !== undefined && (
-              <ReferenceLine y={cfg.refLow} stroke="#ef4444" strokeDasharray="4 4" />
-            )}
-            <Line
-              type="monotone"
-              dataKey={cfg.dataKey}
-              name={`${cfg.label} (${cfg.unit})`}
-              stroke={cfg.color}
-              strokeWidth={2.5}
-              dot={{ r: 4, fill: cfg.color, stroke: '#fff', strokeWidth: 1.5 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <InteractiveTrendChart unit={cfg.unit} min={minVal} max={maxVal} emptyText={'Belum ada data '+cfg.label.toLowerCase()+' pada rentang ini.'}
+        series={[{name:cfg.label,color:cfg.color,values:singleSeriesData.map((point)=>({label:String(point.label??'').split(' ')[0],fullDate:String(point.fullDate??''),value:chartNumber(point[cfg.dataKey])}))}]}
+      />
     );
   };
 
