@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getSupabase } from '../../lib/supabaseClient';
 import { evaluateClinicalMonitoring, EvaluatedAlert } from '../../lib/clinicalRules';
 import { notifyAssignedNurses } from '../../lib/notifications';
+import { getSurgeryMonitoringQuestions } from '../../lib/surgeryMonitoring';
 import {
   HeartPulse,
   Flame,
@@ -31,7 +32,15 @@ interface PatientMonitoringFormProps {
 }
 
 export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ onSuccess }) => {
-  const { user, profile, isDemoMode } = useAuth();
+  const { user, profile, patientSurgery, isDemoMode } = useAuth();
+  const surgeryQuestions = getSurgeryMonitoringQuestions(
+    patientSurgery?.surgery_type?.name,
+    patientSurgery?.surgery_type_id
+  );
+  const [surgerySpecificAnswers, setSurgerySpecificAnswers] = useState<Record<string, string>>({});
+  const visibleSurgeryQuestions = surgeryQuestions.filter(
+    (question) => !question.dependsOn || surgerySpecificAnswers[question.dependsOn] === question.dependsValue
+  );
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   // STEP 1: Tanda Vital
@@ -157,6 +166,13 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
         setErrorMsg('Pilih perkembangan keluhan dan tandai gejala yang dirasakan, atau pilih “Tidak ada keluhan”.');
         return;
       }
+      const unansweredSurgeryQuestion = visibleSurgeryQuestions.find(
+        (question) => !String(surgerySpecificAnswers[question.key] ?? '').trim()
+      );
+      if (unansweredSurgeryQuestion) {
+        setErrorMsg(`Lengkapi pemantauan khusus: ${unansweredSurgeryQuestion.label}`);
+        return;
+      }
       setErrorMsg(null);
       setCurrentStep(4);
     } else if (currentStep === 4) {
@@ -214,14 +230,30 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       relieving_factors: relieving.trim() || undefined,
     };
 
+    const surgeryAnswers = visibleSurgeryQuestions.map((question) => ({
+      key: question.key,
+      label: question.label,
+      value: surgerySpecificAnswers[question.key],
+    }));
+    const surgerySpecificData = surgeryQuestions.length > 0 ? {
+      surgery_name: patientSurgery?.surgery_type?.name || 'Jenis operasi terdaftar',
+      surgery_id: patientSurgery?.id || null,
+      answers: surgeryAnswers,
+    } : {};
+    const surgerySummary = surgeryAnswers.length > 0
+      ? `Pemantauan khusus (${surgerySpecificData.surgery_name}): ${surgeryAnswers.map((answer) => `${answer.label}: ${answer.value}`).join('; ')}`
+      : '';
+
     const symptomData = {
       patient_id: user.id,
+      surgery_id: patientSurgery?.id || null,
+      surgery_specific_data: surgerySpecificData,
       recorded_by: user.id,
       recorded_at: timestamp,
       symptoms: selectedSymptoms,
       general_condition: generalFeeling ?? 'baik',
       symptom_trend: symptomTrend ?? 'sama',
-      notes: combinedGeneralNotes || `Tren gejala: ${symptomTrend}`,
+      notes: [combinedGeneralNotes || `Tren gejala: ${symptomTrend}`, surgerySummary].filter(Boolean).join(' | '),
     };
 
     const woundData = {
@@ -268,11 +300,16 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
 
       // 3. Save symptom + general condition (fallback if symptom_trend column not migrated yet)
       let { error: symErr } = await supabase.from('symptom_records').insert(symptomData);
-      if (symErr && (symErr.message.includes('symptom_trend') || symErr.code === 'PGRST204' || symErr.code === '42703')) {
-        const { symptom_trend: _omit, ...fallbackSymptom } = symptomData;
+      if (symErr && (symErr.message.includes('surgery_specific_data') || symErr.code === 'PGRST204' || symErr.code === '42703')) {
+        const { surgery_specific_data: _omitSpecific, ...withoutSpecific } = symptomData;
+        const retrySpecific = await supabase.from('symptom_records').insert(withoutSpecific);
+        symErr = retrySpecific.error;
+      }
+      if (symErr && symErr.message.includes('symptom_trend')) {
+        const { symptom_trend: _omitTrend, ...fallbackSymptom } = symptomData;
         const retrySym = await supabase.from('symptom_records').insert({
           ...fallbackSymptom,
-          notes: `Tren: ${symptomTrend}${combinedGeneralNotes ? ` · ${combinedGeneralNotes}` : ''}`,
+          notes: [surgerySummary, `Tren: ${symptomTrend}`, combinedGeneralNotes].filter(Boolean).join(' · '),
         });
         symErr = retrySym.error;
       }
@@ -754,6 +791,49 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 </button>
               </div>
             </div>
+
+            {surgeryQuestions.length > 0 && (
+              <div className="rounded-xl border border-teal-200 bg-teal-50/60 p-4 space-y-3">
+                <div>
+                  <h3 className="font-bold text-teal-900">Pemantauan khusus {patientSurgery?.surgery_type?.name || 'operasi Anda'}</h3>
+                  <p className="mt-1 text-[11px] leading-relaxed text-teal-800">Pertanyaan ini disesuaikan dengan jenis operasi yang tercatat. Jawab berdasarkan kondisi yang benar-benar Anda alami. Jika tidak yakin, pilih “Tidak yakin” dan sampaikan kepada perawat.</p>
+                </div>
+                {visibleSurgeryQuestions.map((question) => (
+                  <div key={question.key} className="space-y-1.5">
+                    <label htmlFor={`surgery-monitor-${question.key}`} className="block font-semibold text-slate-800">{question.label} *</label>
+                    {question.help && <p className="text-[10px] text-slate-500">{question.help}</p>}
+                    {question.type === 'number' ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          id={`surgery-monitor-${question.key}`}
+                          type="number"
+                          min="0"
+                          max="5000"
+                          step="1"
+                          inputMode="decimal"
+                          value={surgerySpecificAnswers[question.key] || ''}
+                          onChange={(event) => setSurgerySpecificAnswers((previous) => ({ ...previous, [question.key]: event.target.value }))}
+                          placeholder="Masukkan hasil pengukuran"
+                          className="w-full rounded-lg border border-teal-200 bg-white px-3 py-2 text-slate-900"
+                        />
+                        <span className="text-slate-600">{question.unit}</span>
+                      </div>
+                    ) : (
+                      <select
+                        id={`surgery-monitor-${question.key}`}
+                        value={surgerySpecificAnswers[question.key] || ''}
+                        onChange={(event) => setSurgerySpecificAnswers((previous) => ({ ...previous, [question.key]: event.target.value }))}
+                        className="w-full rounded-lg border border-teal-200 bg-white px-3 py-2 text-slate-900"
+                      >
+                        <option value="">Pilih jawaban</option>
+                        {(question.options || []).map((option) => <option key={option} value={option}>{option}</option>)}
+                      </select>
+                    )}
+                  </div>
+                ))}
+                <p className="text-[10px] leading-relaxed text-amber-800">Jika mengalami sesak berat, nyeri dada, perdarahan banyak, pingsan, atau perubahan kondisi yang berat, segera cari pertolongan medis. Jangan menunggu balasan aplikasi.</p>
+              </div>
+            )}
 
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Catatan Keluhan</label>
