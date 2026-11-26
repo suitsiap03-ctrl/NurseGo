@@ -146,7 +146,7 @@ export interface PatientInvitation {
   surgeon_name?: string;
   hospital_name?: string;
   clinical_notes?: string;
-  token: string;
+  token: string | null;
   status: 'pending' | 'sent' | 'delivered' | 'accepted' | 'expired';
   expires_at?: string;
   accepted_by?: string;
