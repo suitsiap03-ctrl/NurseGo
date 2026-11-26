@@ -125,12 +125,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       { value: respiratoryRate, label: 'Frekuensi napas', min: 6, max: 60, unit: 'x/menit' },
       { value: oxygenSaturation, label: 'Saturasi oksigen', min: 50, max: 100, unit: '%' },
     ];
-    const hasSys = systolic.trim() !== '';
-    const hasDia = diastolic.trim() !== '';
-    if (hasSys !== hasDia) {
-      setErrorMsg('Tekanan darah harus diisi berpasangan. Masukkan angka atas dan angka bawah dari hasil alat yang sama.');
-      return false;
-    }
+    // Setiap tanda vital boleh dilewati. Tekanan darah hanya dicatat jika kedua angkanya tersedia.
     for (const entry of entries) {
       if (!entry.value.trim()) continue;
       const value = parseVitalNumber(entry.value);
@@ -138,10 +133,6 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
         setErrorMsg(`${entry.label} harus berada di antara ${entry.min}–${entry.max} ${entry.unit}. Periksa kembali hasil pengukuran.`);
         return false;
       }
-    }
-    if (entries.every((entry) => !entry.value.trim()) && !vitalsNotMeasuredReason) {
-      setErrorMsg('Pilih alasan jika belum ada tanda vital yang dapat diukur. Anda tetap bisa melanjutkan tanpa mengisi angka.');
-      return false;
     }
     setErrorMsg(null);
     return true;
@@ -208,8 +199,8 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       surgery_id: patientSurgery?.id || null,
       recorded_by: user.id,
       recorded_at: timestamp,
-      systolic_bp: systolic.trim() ? parseVitalNumber(systolic) : null,
-      diastolic_bp: diastolic.trim() ? parseVitalNumber(diastolic) : null,
+      systolic_bp: systolic.trim() && diastolic.trim() ? parseVitalNumber(systolic) : null,
+      diastolic_bp: systolic.trim() && diastolic.trim() ? parseVitalNumber(diastolic) : null,
       heart_rate: heartRate.trim() ? parseVitalNumber(heartRate) : null,
       respiratory_rate: respiratoryRate.trim() ? parseVitalNumber(respiratoryRate) : null,
       body_temperature: temperature.trim() ? parseVitalNumber(temperature) : null,
@@ -538,7 +529,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                   <label htmlFor="patient-bp-diastolic" className="mb-1 block text-[11px] font-semibold text-slate-700">Angka bawah</label>
                   <input id="patient-bp-diastolic" type="number" min="30" max="160" inputMode="numeric" placeholder="Contoh 80" value={diastolic} onChange={(e) => setDiastolic(e.target.value)} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-base focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none transition" />
                 </div>
-                <span className="col-span-3 text-[10px] text-slate-500">Satuan: mmHg · Contoh hasil 120/80 berarti angka atas 120 dan angka bawah 80.</span>
+                <span className="col-span-3 text-[10px] text-slate-500">Satuan: mmHg · Isi keduanya jika hasil tekanan darah tersedia. Jika hanya satu angka diketahui, boleh dikosongkan dan lanjutkan.</span>
               </div>
             </div>
 
@@ -609,7 +600,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2">
-            <label htmlFor="vitals-not-measured" className="block font-semibold text-slate-800">Jika belum mengukur tanda vital, apa alasannya?</label>
+            <label htmlFor="vitals-not-measured" className="block font-semibold text-slate-800">Alasan belum mengukur (boleh dikosongkan)</label>
             <select id="vitals-not-measured" value={vitalsNotMeasuredReason} onChange={(e) => setVitalsNotMeasuredReason(e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-xs text-slate-800 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none">
               <option value="">Pilih jika belum mengukur (opsional bila ada angka)</option>
               <option value="Tidak memiliki alat pengukur">Tidak memiliki alat pengukur</option>
@@ -618,7 +609,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               <option value="Kondisi tidak memungkinkan untuk mengukur">Kondisi belum memungkinkan untuk mengukur</option>
               <option value="Pengukuran dibantu perawat atau fasilitas kesehatan">Akan diukur saat dibantu perawat/fasilitas kesehatan</option>
             </select>
-            <p className="text-[10px] leading-relaxed text-slate-500">Anda tetap dapat melanjutkan. Alasan ini membantu perawat mengetahui mengapa angka belum tercatat.</p>
+            <p className="text-[10px] leading-relaxed text-slate-500">Bagian ini sepenuhnya opsional. Anda bisa langsung lanjut meskipun semua tanda vital dan alasan belum diisi.</p>
           </div>
 
           <div className="pt-4 flex justify-end">
