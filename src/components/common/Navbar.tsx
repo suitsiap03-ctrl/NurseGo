@@ -112,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
               {user ? (
                 <div className="flex items-center gap-1.5 pl-1.5 sm:pl-2 border-l border-slate-200 shrink-0">
-                  <div className={`$hidden xl:flex flex-col text-right min-w-0 max-w-[130px]`}>
+                  <div className="hidden xl:flex flex-col text-right min-w-0 max-w-[130px]">
                     <span className="text-xs font-semibold text-slate-800 truncate max-w-[150px]">
                       {nurseProfile?.professional_title || profile?.full_name || user.email?.split('@')[0]}
                     </span>
