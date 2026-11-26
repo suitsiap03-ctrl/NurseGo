@@ -253,7 +253,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       symptoms: selectedSymptoms,
       general_condition: generalFeeling ?? 'baik',
       symptom_trend: symptomTrend ?? 'sama',
-      notes: [combinedGeneralNotes || `Tren gejala: ${symptomTrend}`, surgerySummary].filter(Boolean).join(' | '),
+      notes: combinedGeneralNotes || `Tren gejala: ${symptomTrend}`,
     };
 
     const woundData = {
@@ -302,11 +302,14 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       let { error: symErr } = await supabase.from('symptom_records').insert(symptomData);
       if (symErr && (symErr.message.includes('surgery_specific_data') || symErr.code === 'PGRST204' || symErr.code === '42703')) {
         const { surgery_specific_data: _omitSpecific, ...withoutSpecific } = symptomData;
-        const retrySpecific = await supabase.from('symptom_records').insert(withoutSpecific);
+        const retrySpecific = await supabase.from('symptom_records').insert({
+          ...withoutSpecific,
+          notes: [withoutSpecific.notes, surgerySummary].filter(Boolean).join(' | '),
+        });
         symErr = retrySpecific.error;
       }
       if (symErr && symErr.message.includes('symptom_trend')) {
-        const { symptom_trend: _omitTrend, ...fallbackSymptom } = symptomData;
+        const { symptom_trend: _omitTrend, surgery_specific_data: _omitSpecific, ...fallbackSymptom } = symptomData;
         const retrySym = await supabase.from('symptom_records').insert({
           ...fallbackSymptom,
           notes: [surgerySummary, `Tren: ${symptomTrend}`, combinedGeneralNotes].filter(Boolean).join(' · '),
