@@ -1278,3 +1278,183 @@ html[data-theme="dark"] .nursego-ios-bottom-nav .nursego-ios-tab-active {
   html[data-theme="dark"] .nursego-ios-header,
   html[data-theme="dark"] .nursego-ios-bottom-nav { background: rgba(14,31,37,.97) !important; }
 }
+
+/* =========================================================
+   NURSEGO ENTRY — direct access-first welcome screen
+   ========================================================= */
+.nursego-entry-screen {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(185,231,228,.34), transparent 34%),
+    radial-gradient(ellipse at 88% 78%, rgba(214,235,245,.42), transparent 34%),
+    #f6f9fa;
+}
+.nursego-entry-screen::before,
+.nursego-entry-screen::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid rgba(8,127,131,.08);
+  border-radius: 50%;
+}
+.nursego-entry-screen::before { width: 440px; height: 440px; top: 8%; right: -300px; }
+.nursego-entry-screen::after { width: 340px; height: 340px; bottom: 4%; left: -260px; }
+.nursego-entry-header {
+  position: relative;
+  z-index: 2;
+  background: rgba(250,253,253,.78) !important;
+  border-bottom: 1px solid rgba(190,210,213,.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+.nursego-entry-main { position: relative; z-index: 1; }
+.nursego-entry-intro { max-width: 720px; }
+.nursego-entry-kicker {
+  color: #08777b;
+  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(8,127,131,.13);
+  box-shadow: 0 4px 18px rgba(23,76,82,.045);
+}
+.nursego-entry-title { color: #203746; }
+.nursego-entry-title span {
+  color: #087f83;
+  background: linear-gradient(100deg,#087f83,#36a69c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.nursego-entry-description { max-width: 560px; color: #667985; }
+.nursego-entry-portal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 270px;
+  padding: 25px;
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(195,216,219,.72);
+  border-radius: 7px 22px 7px 22px;
+  box-shadow: 0 14px 40px rgba(29,66,75,.075), inset 0 1px 0 rgba(255,255,255,.9);
+  transition: transform 190ms ease, box-shadow 190ms ease, border-color 190ms ease;
+}
+.nursego-entry-portal:hover {
+  transform: translateY(-3px);
+  border-color: rgba(8,127,131,.32);
+  box-shadow: 0 19px 46px rgba(29,66,75,.11);
+}
+.nursego-entry-icon {
+  flex: 0 0 auto;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #087f83;
+  background: #e7f5f3;
+  border-radius: 5px 15px 5px 15px;
+}
+.nursego-entry-patient .nursego-entry-icon { color: #32779a; background: #eaf3f8; }
+.nursego-entry-overline {
+  color: #80939b;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+.nursego-entry-portal h2 { color: #243b48; }
+.nursego-entry-copy { color: #687c85; }
+.nursego-entry-primary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 18px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  background: #087f83;
+  border: 1px solid #087f83;
+  border-radius: 5px 12px 5px 12px;
+  box-shadow: 0 5px 13px rgba(8,127,131,.16);
+}
+.nursego-entry-primary:hover { background: #076c70; transform: translateY(-1px); }
+.nursego-entry-demo {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #527078;
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid #e0eaeb;
+  border-radius: 5px 10px 5px 10px;
+}
+.nursego-entry-demo:hover { color: #087f83; background: #f2f9f8; border-color: #c5dfdc; }
+.nursego-entry-benefits { color: #6d8189; }
+.nursego-entry-benefits span { display: inline-flex; align-items: center; gap: 7px; }
+.nursego-entry-benefits svg { color: #168b87; }
+.nursego-entry-access { color: #8a9aa1; }
+.nursego-entry-footer { color: #91a0a6; border-top: 1px solid rgba(190,210,213,.45); }
+html[data-theme="dark"] .nursego-entry-screen {
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(29,105,105,.18), transparent 36%),
+    radial-gradient(ellipse at 88% 78%, rgba(37,78,100,.2), transparent 36%),
+    #0d1c22 !important;
+}
+html[data-theme="dark"] .nursego-entry-header {
+  background: rgba(13,29,35,.82) !important;
+  border-bottom-color: #2b4149 !important;
+}
+html[data-theme="dark"] .nursego-entry-kicker {
+  color: #9be0d8;
+  background: rgba(24,48,54,.86);
+  border-color: #31575a;
+}
+html[data-theme="dark"] .nursego-entry-title,
+html[data-theme="dark"] .nursego-entry-portal h2 { color: #edf5f6 !important; }
+html[data-theme="dark"] .nursego-entry-title span {
+  color: #83d8d0;
+  background: none;
+  -webkit-text-fill-color: #83d8d0;
+}
+html[data-theme="dark"] .nursego-entry-description,
+html[data-theme="dark"] .nursego-entry-copy { color: #b0c1c7 !important; }
+html[data-theme="dark"] .nursego-entry-portal {
+  background: rgba(21,40,47,.92) !important;
+  border-color: #35515a !important;
+  box-shadow: 0 16px 42px rgba(0,0,0,.22), inset 0 1px 0 rgba(220,245,246,.035);
+}
+html[data-theme="dark"] .nursego-entry-icon { color: #8fe0d7; background: #1b4143; }
+html[data-theme="dark"] .nursego-entry-patient .nursego-entry-icon { color: #a8d7f1; background: #203b4b; }
+html[data-theme="dark"] .nursego-entry-overline,
+html[data-theme="dark"] .nursego-entry-benefits,
+html[data-theme="dark"] .nursego-entry-access,
+html[data-theme="dark"] .nursego-entry-footer { color: #9aadb5 !important; }
+html[data-theme="dark"] .nursego-entry-demo {
+  color: #c4d5d9;
+  border-color: #38515a;
+}
+html[data-theme="dark"] .nursego-entry-demo:hover { background: #1b353d; color: #9be0d8; }
+html[data-theme="dark"] .nursego-entry-footer { border-top-color: #2b4149; }
+@media (max-width: 640px) {
+  .nursego-entry-main { padding-top: 34px !important; padding-bottom: 34px !important; }
+  .nursego-entry-intro { text-align: left; }
+  .nursego-entry-kicker { font-size: 10px; }
+  .nursego-entry-title { font-size: clamp(2.25rem, 10vw, 3rem) !important; }
+  .nursego-entry-description { margin-left: 0; max-width: 390px; font-size: 13px !important; line-height: 1.65 !important; }
+  .nursego-entry-portals { margin-top: 26px !important; gap: 12px !important; }
+  .nursego-entry-portal { min-height: 0; padding: 19px; border-radius: 5px 16px 5px 16px; }
+  .nursego-entry-icon { width: 44px; height: 44px; }
+  .nursego-entry-benefits { justify-content: flex-start; gap: 10px 16px; font-size: 10px; }
+  .nursego-entry-benefits span { flex: 0 0 calc(50% - 8px); }
+  .nursego-entry-access { text-align: left !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nursego-entry-portal, .nursego-entry-primary, .nursego-entry-demo { transition: none !important; }
+  .nursego-entry-portal:hover, .nursego-entry-primary:hover { transform: none !important; }
+}
