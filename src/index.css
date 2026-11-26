@@ -2257,3 +2257,55 @@ html[data-theme="dark"] .nursego-desktop-nav-shell {
 .nursego-page-enter .recharts-surface {
   max-width: 100%;
 }
+
+
+/* Follow-up layout repair: chart parents must retain measurable dimensions and allow popovers to escape. */
+.nursego-page-enter .recharts-responsive-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex: 1 1 auto;
+}
+.nursego-page-enter .recharts-wrapper,
+.nursego-page-enter .recharts-surface {
+  width: 100%;
+  max-width: 100%;
+}
+.nursego-page-enter .recharts-surface { overflow: visible; }
+.nursego-page-enter .recharts-legend-wrapper { font-size: 11px; }
+.nursego-page-enter .recharts-tooltip-wrapper { z-index: 30; }
+.nursego-page-enter .relative.z-\\[95\\] { z-index: 95; }
+.nursego-page-enter [role="listbox"] { transform: translateZ(0); }
+
+/* Desktop floating navigation: fit every control inside the glass shell. */
+@media (min-width: 768px) {
+  .nursego-ios-header { padding: 8px 14px 0 !important; }
+  .nursego-desktop-nav-shell {
+    width: min(100%, 1500px) !important;
+    padding-left: clamp(10px, 1.5vw, 24px) !important;
+    padding-right: clamp(10px, 1.5vw, 24px) !important;
+    overflow: visible;
+  }
+  .nursego-desktop-nav-shell > div {
+    width: 100%;
+    min-width: 0;
+    gap: clamp(6px, 1vw, 16px);
+  }
+  .nursego-desktop-nav-shell nav { flex: 1 1 auto; justify-content: center; }
+  .nursego-desktop-nav-shell nav button { padding-left: clamp(7px, .8vw, 12px); padding-right: clamp(7px, .8vw, 12px); }
+  .nursego-desktop-nav-shell > div > div:last-child { flex: 0 0 auto; }
+  .nursego-nav-scrolled .nursego-desktop-nav-shell {
+    width: fit-content !important;
+    max-width: calc(100vw - 28px);
+    padding: 0 12px !important;
+    border-radius: 18px;
+  }
+  .nursego-nav-scrolled .nursego-desktop-nav-shell > div { min-height: 48px; }
+}
+@media (min-width: 768px) and (max-width: 1100px) {
+  .nursego-desktop-nav-shell nav button { gap: 5px; font-size: 10px; }
+  .nursego-desktop-nav-shell nav button svg { width: 14px; height: 14px; }
+  .nursego-desktop-nav-shell .nursego-user-actions { gap: 3px; }
+}
+.nursego-nav-scrolled .nursego-desktop-nav-shell { transition: width .25s ease, padding .25s ease; }
