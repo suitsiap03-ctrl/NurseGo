@@ -216,7 +216,7 @@ function translateAuthError(message: string): string {
     return 'Terlalu banyak permintaan ke server autentikasi. Mohon tunggu beberapa saat lalu coba lagi.';
   }
   if (lower.includes('password should be at least')) {
-    return 'Kata sandi minimal harus 6 karakter.';
+    return 'Kata sandi minimal harus 8 karakter.';
   }
   if (lower.includes('unable to validate email')) {
     return 'Format alamat email tidak valid.';
