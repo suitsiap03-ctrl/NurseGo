@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {user && (
-              <nav className="hidden md:flex items-center gap-1 sm:gap-1.5 min-w-0">
+              <nav className="hidden lg:flex items-center gap-1 sm:gap-1.5 min-w-0">
                 {activeTabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = currentTab === tab.id;
@@ -149,7 +149,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       )}
 
       {user && (
-        <nav aria-label="Navigasi utama" className="md:hidden fixed bottom-[max(10px,env(safe-area-inset-bottom))] left-3 right-3 z-40 border border-slate-200/80 px-2 py-1.5 shadow-[0_10px_34px_rgba(15,23,42,0.14)] nursego-ios-bottom-nav">
+        <nav aria-label="Navigasi utama" className="lg:hidden fixed bottom-[max(10px,env(safe-area-inset-bottom))] left-3 right-3 z-40 border border-slate-200/80 px-2 py-1.5 shadow-[0_10px_34px_rgba(15,23,42,0.14)] nursego-ios-bottom-nav">
           <div className="flex items-center justify-around gap-1">
             {activeTabs.map((tab) => {
               const Icon = tab.icon;
