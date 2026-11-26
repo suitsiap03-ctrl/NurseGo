@@ -113,7 +113,7 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
   const needsEmailConfirm = Boolean(authError && authError.toLowerCase().includes('belum dikonfirmasi'));
 
   return (
-    <div className="min-h-screen relative isolate overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_#d9f3ef_0%,_#f4f8fa_42%,_#eef4f8_100%)] flex flex-col justify-center py-8 sm:py-12 px-3 sm:px-6">
+    <div className="nursego-auth-screen min-h-screen relative isolate overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_#d9f3ef_0%,_#f4f8fa_42%,_#eef4f8_100%)] flex flex-col justify-center py-8 sm:py-12 px-3 sm:px-6">
       <div className="relative z-10 mx-auto w-full max-w-[440px] px-1 sm:px-0">
         <button
           onClick={() => {
@@ -126,7 +126,7 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
           <span>Kembali ke Pilihan Peran</span>
         </button>
 
-        <div className="bg-white/95 backdrop-blur-sm py-7 px-5 sm:py-9 sm:px-9 shadow-[0_24px_70px_-28px_rgba(15,76,80,0.28)] rounded-[28px] border border-white/80 ring-1 ring-slate-200/70">
+        <div className="nursego-auth-card bg-white/95 backdrop-blur-sm py-7 px-5 sm:py-9 sm:px-9 shadow-[0_24px_70px_-28px_rgba(15,76,80,0.28)] rounded-[28px] border border-white/80 ring-1 ring-slate-200/70">
           <div className="text-center mb-6">
             <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center mx-auto mb-3">
               <Stethoscope className="w-6 h-6" />
