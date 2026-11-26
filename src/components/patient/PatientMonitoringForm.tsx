@@ -336,8 +336,8 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           </h2>
           <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
             {isDemoMode
-              ? 'Pratinjau Mode Demo selesai. Masuk menggunakan akun Pasien asli agar data tersimpan ke Supabase.'
-              : 'Hasil tanda vital, skala nyeri, gejala, kondisi umum, dan luka telah tersimpan di Supabase dan dikirimkan ke perawat pendamping Anda.'}
+              ? 'Pratinjau Mode Demo selesai. Masuk menggunakan akun Pasien agar data tersimpan.'
+              : 'Hasil tanda vital, skala nyeri, gejala, kondisi umum, dan luka telah tersimpan dan dikirimkan ke perawat pendamping Anda.'}
           </p>
         </div>
 
