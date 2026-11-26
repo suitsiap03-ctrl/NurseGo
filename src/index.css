@@ -1846,8 +1846,8 @@ html[data-theme="dark"] .nursego-notification-item.bg-white { background: #1a293
 html[data-theme="dark"] .nursego-notification-item.bg-teal-50\/45 { background: #1d383a !important; }
 html[data-theme="dark"] .nursego-notification-panel header,
 html[data-theme="dark"] .nursego-notification-panel footer { border-color: #344650 !important; }
-html[data-theme="dark"] .nursego-notification-panel .hover\\:bg-slate-100:hover { background: #2a3b44 !important; }
-html[data-theme="dark"] .nursego-notification-panel .hover\\:bg-slate-50:hover { background: #22343d !important; }
+html[data-theme="dark"] .nursego-notification-panel [class~="hover:bg-slate-100"]:hover { background: #2a3b44 !important; }
+html[data-theme="dark"] .nursego-notification-panel [class~="hover:bg-slate-50"]:hover { background: #22343d !important; }
 @media (max-width: 640px) {
   .nursego-notification-backdrop {
     justify-content: center;
@@ -2065,7 +2065,7 @@ h1, h2, h3, h4, h5, h6,
 }
 .nursego-page-enter > .space-y-6 { min-width: 0; }
 .nursego-page-enter .text-xs { line-height: 1.55; }
-.nursego-page-enter .text-\\[10px\\] { line-height: 1.4; }
+.nursego-page-enter [class~="text-[10px]"] { line-height: 1.4; }
 
 /* Main content cards: clean white surfaces with a consistent edge. */
 .nursego-page-enter .bg-white.rounded-xl.border,
