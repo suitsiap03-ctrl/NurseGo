@@ -223,7 +223,7 @@ export const NurseRegister: React.FC<NurseRegisterProps> = ({ onBackToLogin }) =
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-left text-xs text-blue-900 space-y-2">
               <p className="font-semibold">Konfirmasi Email Anda:</p>
               <p className="text-[11px] text-blue-800 leading-relaxed">
-                Tautan aktivasi telah dikirim oleh Supabase Auth ke <strong>{email}</strong>. Klik tautan pada email tersebut sebelum masuk ke Portal Perawat.
+                Tautan aktivasi telah dikirim ke <strong>{email}</strong>. Klik tautan pada email tersebut sebelum masuk ke Portal Perawat.
               </p>
               <button
                 type="button"
