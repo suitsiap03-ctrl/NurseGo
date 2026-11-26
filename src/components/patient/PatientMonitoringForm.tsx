@@ -81,7 +81,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
 
   // STEP 5: Kondisi Umum & Catatan Tambahan
   const [generalFeeling, setGeneralFeeling] = useState<
-    'sangat_baik' | 'baik' | 'biasa_saja' | 'kurang_baik' | 'buruk'
+    'sangat_baik' | 'baik' | 'biasa_saja' | 'kurang_baik' | 'buruk' | null
   >(null);
   const [additionalNotes, setAdditionalNotes] = useState<string>('');
 
@@ -146,8 +146,8 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       if (!validateStep1()) return;
       setCurrentStep(2);
     } else if (currentStep === 2) {
-      if (painScale === null || !painLocation.trim()) {
-        setErrorMsg('Pilih skala nyeri dan isi lokasi nyeri. Jika tidak nyeri, pilih angka 0.');
+      if (painScale === null || (painScale > 0 && !painLocation.trim())) {
+        setErrorMsg('Pilih skala nyeri. Jika masih terasa nyeri, isi juga lokasinya. Jika tidak nyeri, pilih angka 0.');
         return;
       }
       setErrorMsg(null);
@@ -160,8 +160,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       setErrorMsg(null);
       setCurrentStep(4);
     } else if (currentStep === 4) {
-      if (!woundAssessmentConfirmed) {
-        setErrorMsg('Konfirmasi kondisi luka: pilih luka tampak normal atau tandai keluhan yang terlihat.');
+      const hasAnyWoundFinding = hasRedness || hasSwelling || hasWarmth || hasDischarge || hasBleeding || hasOpenWound || hasIncreasedPain;
+      if (!woundAssessmentConfirmed || (!isWoundNormal && !hasAnyWoundFinding)) {
+        setErrorMsg('Konfirmasi kondisi luka: pilih luka tampak normal atau tandai minimal satu keluhan yang terlihat.');
         return;
       }
       setErrorMsg(null);
@@ -207,7 +208,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       recorded_by: user.id,
       recorded_at: timestamp,
       pain_scale: painScale ?? 0,
-      location: painLocation.trim() || 'Area operasi',
+      location: painLocation.trim() || (painScale === 0 ? 'Tidak ada nyeri' : 'Area operasi'),
       characteristics: painCharacteristic.trim(),
       aggravating_factors: aggravating.trim() || undefined,
       relieving_factors: relieving.trim() || undefined,
@@ -377,7 +378,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
             <p className="font-semibold">{alert.title}</p>
             <p className="leading-relaxed opacity-90">{alert.description}</p>
             <p className="text-[11px] font-medium pt-1 border-t border-black/10">
-              Perawat penanggung jawab Anda telah menerima notifikasi pemantauan ini.
+              Peringatan ini tercatat pada laporan. Jika mengalami sesak berat, perdarahan banyak, penurunan kesadaran, atau kondisi memburuk, segera hubungi layanan gawat darurat; jangan menunggu balasan aplikasi.
             </p>
           </div>
         ) : (
@@ -978,7 +979,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 </div>
                 <div>
                   <span className="text-slate-400">Kondisi Umum:</span>
-                  <div className="font-bold text-slate-900 capitalize">{generalFeeling.replace('_', ' ')}</div>
+                  <div className="font-bold text-slate-900 capitalize">{generalFeeling ? generalFeeling.replace('_', ' ') : 'Belum dipilih'}</div>
                 </div>
               </div>
             </div>
