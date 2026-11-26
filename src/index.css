@@ -1934,3 +1934,55 @@ html[data-theme="dark"] .nursego-notification-panel .hover\\:bg-slate-50:hover {
   .nursego-entry-primary,
   .nursego-entry-demo { transition: none !important; }
 }
+
+
+/* Authentication portal transition: screen and form enter with a soft, guided motion. */
+.nursego-auth-screen {
+  animation: ng-auth-screen-in 360ms cubic-bezier(.2,.75,.25,1) both;
+}
+.nursego-auth-card {
+  transform-origin: center;
+  animation: ng-auth-card-in 560ms 35ms cubic-bezier(.18,.78,.22,1) both;
+  will-change: opacity, transform;
+}
+.nursego-auth-card > div:first-child {
+  animation: ng-auth-content-in 460ms 130ms cubic-bezier(.2,.75,.25,1) both;
+}
+.nursego-auth-card form > div,
+.nursego-auth-card form > button {
+  animation: ng-auth-content-in 420ms cubic-bezier(.2,.75,.25,1) both;
+}
+.nursego-auth-card form > div:nth-child(1) { animation-delay: 180ms; }
+.nursego-auth-card form > div:nth-child(2) { animation-delay: 235ms; }
+.nursego-auth-card form > div:nth-child(3) { animation-delay: 290ms; }
+.nursego-auth-card form > div:nth-child(4) { animation-delay: 345ms; }
+.nursego-auth-card form > button { animation-delay: 390ms; }
+.nursego-auth-screen > div > button {
+  animation: ng-auth-content-in 420ms 80ms cubic-bezier(.2,.75,.25,1) both;
+}
+@keyframes ng-auth-screen-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ng-auth-card-in {
+  0% { opacity: 0; transform: translate3d(0,22px,0) scale(.975); }
+  72% { opacity: 1; transform: translate3d(0,-2px,0) scale(1.002); }
+  100% { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+@keyframes ng-auth-content-in {
+  from { opacity: 0; transform: translate3d(0,9px,0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nursego-auth-screen,
+  .nursego-auth-card,
+  .nursego-auth-card > div:first-child,
+  .nursego-auth-card form > div,
+  .nursego-auth-card form > button,
+  .nursego-auth-screen > div > button {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+}
