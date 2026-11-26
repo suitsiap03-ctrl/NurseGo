@@ -13,11 +13,11 @@ interface WelcomeScreenProps {
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onSelectDemo }) => {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="nursego-premium-welcome min-h-screen bg-slate-50 flex flex-col">
       <header className="w-full bg-white/90 border-b border-slate-200 nursego-ios-header">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-sm">
+            <div className="nursego-brand-mark w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-sm">
               <HeartPulse className="w-6 h-6" />
             </div>
             <div>
@@ -30,7 +30,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onSe
       </header>
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 flex flex-col justify-center nursego-page-enter">
-        <section className="text-center max-w-2xl mx-auto mb-9 sm:mb-11">
+        <section className="nursego-welcome-intro text-center max-w-2xl mx-auto mb-9 sm:mb-11">
           <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 border border-teal-100 px-3 py-1.5 text-xs font-semibold text-teal-800 mb-5">
             <HeartPulse className="w-4 h-4" />
             Pemantauan pemulihan pascaoperasi
@@ -46,7 +46,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onSe
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 w-full max-w-3xl mx-auto">
           <article className="nursego-portal-card group bg-white rounded-[26px] border border-slate-200 p-6 sm:p-7 shadow-sm hover:shadow-lg hover:border-teal-300 flex flex-col">
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+            <div className="nursego-portal-icon w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors">
               <Stethoscope className="w-6 h-6" />
             </div>
             <h2 className="text-xl font-bold text-slate-900">Portal Perawat</h2>
@@ -64,7 +64,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onSe
           </article>
 
           <article className="nursego-portal-card group bg-white rounded-[26px] border border-slate-200 p-6 sm:p-7 shadow-sm hover:shadow-lg hover:border-teal-300 flex flex-col">
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-700 flex items-center justify-center mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+            <div className="nursego-portal-icon nursego-portal-icon-patient w-12 h-12 rounded-2xl bg-sky-50 text-sky-700 flex items-center justify-center mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors">
               <UserRound className="w-6 h-6" />
             </div>
             <h2 className="text-xl font-bold text-slate-900">Portal Pasien</h2>
