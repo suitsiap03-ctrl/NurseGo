@@ -1869,3 +1869,68 @@ html[data-theme="dark"] .nursego-notification-panel .hover\\:bg-slate-50:hover {
     transform: none !important;
   }
 }
+
+
+/* Welcome portal entrance: calm motion, cards reveal one after another. */
+.nursego-entry-intro {
+  animation: ng-entry-intro-in 650ms cubic-bezier(.2,.75,.25,1) both;
+}
+.nursego-entry-kicker { animation: ng-entry-soft-in 520ms 70ms cubic-bezier(.2,.75,.25,1) both; }
+.nursego-entry-title { animation: ng-entry-soft-in 620ms 130ms cubic-bezier(.2,.75,.25,1) both; }
+.nursego-entry-description { animation: ng-entry-soft-in 620ms 210ms cubic-bezier(.2,.75,.25,1) both; }
+.nursego-entry-portals .nursego-entry-portal {
+  opacity: 0;
+  animation: ng-entry-card-in 720ms cubic-bezier(.18,.78,.22,1) both;
+  will-change: transform, opacity;
+}
+.nursego-entry-portals .nursego-entry-portal:nth-child(1) { animation-delay: 260ms; }
+.nursego-entry-portals .nursego-entry-portal:nth-child(2) { animation-delay: 390ms; }
+.nursego-entry-benefits { animation: ng-entry-soft-in 650ms 570ms cubic-bezier(.2,.75,.25,1) both; }
+.nursego-entry-access { animation: ng-entry-soft-in 600ms 650ms cubic-bezier(.2,.75,.25,1) both; }
+.nursego-entry-portal .nursego-entry-icon {
+  transition: transform 260ms cubic-bezier(.2,.8,.2,1), box-shadow 260ms ease;
+}
+.nursego-entry-portal:hover .nursego-entry-icon {
+  transform: translateY(-2px) rotate(-3deg);
+}
+.nursego-entry-primary,
+.nursego-entry-demo {
+  transition: transform 180ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.nursego-entry-primary:active,
+.nursego-entry-demo:active { transform: translateY(1px) scale(.985); }
+.nursego-entry-primary:focus-visible,
+.nursego-entry-demo:focus-visible {
+  outline: 3px solid rgba(13,148,136,.28);
+  outline-offset: 3px;
+}
+@keyframes ng-entry-intro-in {
+  from { opacity: 0; transform: translate3d(0,12px,0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
+}
+@keyframes ng-entry-soft-in {
+  from { opacity: 0; transform: translate3d(0,10px,0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
+}
+@keyframes ng-entry-card-in {
+  0% { opacity: 0; transform: translate3d(0,22px,0) scale(.975); }
+  68% { opacity: 1; transform: translate3d(0,-2px,0) scale(1.003); }
+  100% { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nursego-entry-intro,
+  .nursego-entry-kicker,
+  .nursego-entry-title,
+  .nursego-entry-description,
+  .nursego-entry-portals .nursego-entry-portal,
+  .nursego-entry-benefits,
+  .nursego-entry-access {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto !important;
+  }
+  .nursego-entry-portal .nursego-entry-icon,
+  .nursego-entry-primary,
+  .nursego-entry-demo { transition: none !important; }
+}
