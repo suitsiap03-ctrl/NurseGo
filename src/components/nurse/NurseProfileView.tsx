@@ -150,7 +150,7 @@ export const NurseProfileView: React.FC = () => {
   const handleUploadDocument = async (docType: 'str' | 'diploma', file: File | null) => {
     if (!file || !user) return;
     if (isDemoMode) {
-      setFeedback({ type: 'error', text: 'Mode Demo tidak mendukung unggah berkas ke Supabase Storage.' });
+      setFeedback({ type: 'error', text: 'Mode Demo tidak mendukung unggah berkas.' });
       return;
     }
 
@@ -167,7 +167,7 @@ export const NurseProfileView: React.FC = () => {
       if (uploadErr) {
         throw new Error(
           uploadErr.message.includes('Bucket not found')
-            ? 'Bucket Storage `nurse-documents` belum dibuat di Supabase. Jalankan migrasi 002.'
+            ? 'Penyimpanan dokumen belum tersedia. Silakan hubungi pengelola aplikasi.'
             : `Gagal mengunggah dokumen: ${uploadErr.message}`
         );
       }
@@ -654,7 +654,7 @@ export const NurseProfileView: React.FC = () => {
         {!isDemoMode && (
           <div className="pt-4 border-t border-slate-100 space-y-3">
             <div className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-              Berkas Verifikasi STR & Ijazah (Supabase Storage)
+              Berkas Verifikasi STR & Ijazah
             </div>
             <input
               ref={strFileRef}
