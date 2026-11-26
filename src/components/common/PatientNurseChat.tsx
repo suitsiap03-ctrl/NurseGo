@@ -69,7 +69,7 @@ export const PatientNurseChat: React.FC<PatientNurseChatProps> = ({
       if (error) {
         setErrorMsg(
           error.message.includes('does not exist')
-            ? 'Tabel `patient_messages` belum tersedia. Jalankan skrip migrasi SQL di folder `supabase/migrations`.'
+            ? 'Layanan pesan belum tersedia. Silakan coba kembali nanti.'
             : `Gagal memuat pesan: ${error.message}`
         );
       } else {
