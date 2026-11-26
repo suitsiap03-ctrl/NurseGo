@@ -64,11 +64,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <p className="mt-2 text-sm text-slate-600 leading-relaxed min-h-[72px]">
               Kelola pasien, pantau perkembangan pemulihan, susun asuhan keperawatan, dan tindak lanjuti kondisi pasien selama perawatan di rumah.
             </p>
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Pendaftaran perawat menggunakan nomor STR resmi.
-              </p>
-            </div>
             <div className="mt-auto pt-6 space-y-2">
               <button
                 type="button"
@@ -97,11 +92,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <p className="mt-2 text-sm text-slate-600 leading-relaxed min-h-[72px]">
               Pantau kondisi kesehatan dan perkembangan pemulihan Anda di rumah, termasuk tanda vital, nyeri, kondisi luka, dan jadwal obat.
             </p>
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Akun pasien dibuat dan diaktifkan melalui undangan perawat.
-              </p>
-            </div>
             <div className="mt-auto pt-6 space-y-2">
               <button
                 type="button"
