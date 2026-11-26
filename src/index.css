@@ -14,6 +14,41 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Subtle motion system: lively but calm, with reduced-motion support. */
+@keyframes nursego-fade-up {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes nursego-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nursego-modal-pop {
+  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes nursego-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -9px, 0); }
+}
+.nursego-page-enter > * > * { animation: nursego-fade-up .55s cubic-bezier(.2,.75,.25,1) both; }
+.nursego-page-enter > * > *:nth-child(2) { animation-delay: .06s; }
+.nursego-page-enter > * > *:nth-child(3) { animation-delay: .12s; }
+.nursego-page-enter > * > *:nth-child(4) { animation-delay: .18s; }
+.nursego-page-enter > * > *:nth-child(5) { animation-delay: .24s; }
+.nursego-page-enter > * > *:nth-child(6) { animation-delay: .30s; }
+.nursego-page-enter button:not(:disabled) { transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease; }
+.nursego-page-enter button:not(:disabled):hover { transform: translateY(-1px); }
+.nursego-page-enter button:not(:disabled):active { transform: translateY(0) scale(.98); }
+.nursego-page-enter [class*="rounded-xl"], .nursego-page-enter [class*="rounded-2xl"] { transition: box-shadow .22s ease, border-color .22s ease; }
+.nursego-page-enter [class*="rounded-xl"]:hover, .nursego-page-enter [class*="rounded-2xl"]:hover { box-shadow: 0 8px 24px rgba(15, 118, 110, .07); }
+.nursego-hero { position: relative; isolation: isolate; }
+.nursego-hero::before, .nursego-hero::after { content: ""; position: absolute; z-index: -1; border-radius: 9999px; pointer-events: none; }
+.nursego-hero::before { width: 190px; height: 190px; right: 7%; top: -95px; background: rgba(153, 246, 228, .14); filter: blur(2px); animation: nursego-float 7s ease-in-out infinite; }
+.nursego-hero::after { width: 120px; height: 120px; right: 24%; bottom: -72px; background: rgba(255,255,255,.09); filter: blur(1px); animation: nursego-float 9s ease-in-out infinite reverse; }
+.animate-fade-in { animation: nursego-fade-in .2s ease-out both; }
+.animate-modal-pop { animation: nursego-modal-pop .24s cubic-bezier(.2,.8,.2,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
 /* Custom scrollbar for dense data panels */
 ::-webkit-scrollbar {
   width: 6px;
