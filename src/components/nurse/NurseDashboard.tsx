@@ -376,7 +376,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
 
       setPatients(mergedPatients);
     } catch (err: any) {
-      setRelationsError(err?.message || 'Gagal memuat data dashboard dari Supabase.');
+      setRelationsError(err?.message || 'Gagal memuat data dashboard. ');
     } finally {
       setLoading(false);
       setHasLoadedOnce(true);
@@ -445,7 +445,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
       if (error) {
         throw new Error(
           isMissingRpcError(error)
-            ? 'Fungsi `respond_nurse_patient_assignment` belum tersedia di Supabase.'
+            ? 'Fitur pengelolaan penautan pasien belum tersedia.'
             : error.message
         );
       }
@@ -786,7 +786,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
             {loading ? (
               <div className="p-8 text-center text-xs text-slate-500">
                 <RefreshCw className="w-5 h-5 animate-spin mx-auto text-teal-600 mb-2" />
-                <span>Memuat data pasien dari Supabase...</span>
+                <span>Memuat data pasien...</span>
               </div>
             ) : relationsError ? (
               <div className="p-8 text-center text-xs text-rose-800 space-y-3 bg-rose-50/50">
