@@ -205,3 +205,138 @@ button:not(:disabled):active, a:active, [role="button"]:active {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+
+/* =========================================================
+   NURSEGO PREMIUM MODERN VISUAL SYSTEM
+   Visual-only layer: preserves component behavior and flows.
+   ========================================================= */
+:root {
+  --ng-ink: #102a35;
+  --ng-teal-deep: #075e63;
+  --ng-teal: #0f938b;
+  --ng-mint: #b8f2e6;
+  --ng-line: rgba(20, 91, 99, .12);
+  --ng-glass: rgba(255, 255, 255, .82);
+}
+body {
+  background:
+    radial-gradient(ellipse 42rem 32rem at -8% -4%, rgba(45, 212, 191, .20), transparent 68%),
+    radial-gradient(ellipse 38rem 32rem at 108% 18%, rgba(56, 189, 248, .16), transparent 70%),
+    radial-gradient(ellipse 34rem 28rem at 58% 108%, rgba(94, 234, 212, .15), transparent 72%),
+    linear-gradient(135deg, #f4fbfa 0%, #f4f8fc 48%, #f8fbff 100%);
+  color: var(--ng-ink);
+}
+body::before {
+  background:
+    radial-gradient(ellipse 38rem 32rem at 0% 12%, rgba(20, 184, 166, .16), transparent 72%),
+    radial-gradient(ellipse 34rem 36rem at 100% 30%, rgba(56, 189, 248, .15), transparent 72%),
+    radial-gradient(ellipse 30rem 26rem at 48% 100%, rgba(45, 212, 191, .13), transparent 74%);
+}
+body::after {
+  opacity: .30;
+  background-image:
+    radial-gradient(rgba(13, 148, 136, .24) .75px, transparent .75px),
+    linear-gradient(135deg, transparent 0 48%, rgba(255,255,255,.18) 48.2% 48.6%, transparent 48.8%);
+  background-size: 24px 24px, 100% 100%;
+}
+#root .bg-slate-50 { background-color: rgba(247, 251, 252, .80) !important; }
+.nursego-ios-header {
+  background: rgba(250, 255, 255, .82);
+  border-bottom-color: rgba(13, 148, 136, .14);
+  box-shadow: 0 8px 28px rgba(15, 65, 78, .045);
+}
+.nursego-ios-bottom-nav {
+  background: rgba(250, 255, 255, .90);
+  border-top-color: rgba(13, 148, 136, .16);
+  box-shadow: 0 -12px 34px rgba(15, 65, 78, .075);
+}
+.nursego-ios-tab-active {
+  background: linear-gradient(135deg, rgba(13, 148, 136, .15), rgba(45, 212, 191, .08));
+  box-shadow: inset 0 0 0 1px rgba(13, 148, 136, .10);
+}
+.nursego-hero {
+  border: 1px solid rgba(153, 246, 228, .20);
+  box-shadow: 0 22px 55px rgba(7, 94, 99, .18), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.nursego-hero::before {
+  width: 300px;
+  height: 300px;
+  right: -48px;
+  top: -168px;
+  background: radial-gradient(circle, rgba(153, 246, 228, .30), rgba(45, 212, 191, .08) 52%, transparent 72%);
+  filter: blur(0);
+}
+.nursego-hero::after {
+  width: 210px;
+  height: 210px;
+  right: 18%;
+  bottom: -142px;
+  background: radial-gradient(circle, rgba(125, 211, 252, .22), rgba(255,255,255,.04) 58%, transparent 74%);
+  filter: blur(0);
+}
+.nursego-page-enter .bg-white {
+  border-color: rgba(20, 91, 99, .12);
+  box-shadow: 0 10px 30px rgba(15, 65, 78, .045);
+}
+.nursego-page-enter .bg-white:hover {
+  border-color: rgba(13, 148, 136, .22);
+}
+.nursego-page-enter input,
+.nursego-page-enter select,
+.nursego-page-enter textarea {
+  border-color: rgba(71, 105, 117, .24);
+  background-color: rgba(255,255,255,.94);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+.nursego-page-enter input:focus,
+.nursego-page-enter select:focus,
+.nursego-page-enter textarea:focus {
+  border-color: #0f938b;
+  box-shadow: 0 0 0 3px rgba(15, 147, 139, .13);
+  outline: none;
+}
+.nursego-portal-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(13, 148, 136, .15);
+  background: linear-gradient(150deg, rgba(255,255,255,.98), rgba(246,253,252,.94));
+  box-shadow: 0 18px 42px rgba(16, 70, 82, .075), inset 0 1px 0 rgba(255,255,255,.95);
+}
+.nursego-portal-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 220px;
+  height: 220px;
+  right: -115px;
+  top: -125px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45, 212, 191, .20), rgba(125, 211, 252, .08) 55%, transparent 72%);
+  pointer-events: none;
+}
+.nursego-portal-card::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  top: 22px;
+  bottom: 22px;
+  width: 3px;
+  border-radius: 0 5px 5px 0;
+  background: linear-gradient(180deg, #2dd4bf, #38bdf8);
+  opacity: .78;
+}
+@media (hover: hover) and (pointer: fine) {
+  .nursego-portal-card:hover {
+    transform: translate3d(0, -6px, 0);
+    box-shadow: 0 25px 54px rgba(7, 94, 99, .13), inset 0 1px 0 rgba(255,255,255,.95);
+    border-color: rgba(13, 148, 136, .32);
+  }
+}
+@media (max-width: 640px) {
+  body::after { opacity: .18; }
+  .nursego-portal-card { box-shadow: 0 12px 30px rgba(16, 70, 82, .07); }
+  .nursego-hero { box-shadow: 0 16px 36px rgba(7, 94, 99, .16); }
+}
