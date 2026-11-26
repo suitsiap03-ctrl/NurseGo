@@ -377,9 +377,8 @@ const MainAppContent: React.FC = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
               <span>
-                <strong>Mode Pratinjau Demo Offline:</strong> Data tidak disimpan ke database
-                Supabase. Masuk dengan akun terdaftar untuk sinkronisasi nyata antara perawat dan
-                pasien.
+                <strong>Mode Pratinjau Demo Offline:</strong> Data tidak disimpan ke penyimpanan online. Masuk dengan akun terdaftar untuk menyinkronkan
+                data antara perawat dan pasien.
               </span>
             </div>
             <button
