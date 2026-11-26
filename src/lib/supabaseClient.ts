@@ -158,7 +158,7 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
     return {
       success: false,
       message: 'Alamat server tidak valid atau kosong.',
-      technicalDetails: 'VITE_SUPABASE_URL harus berupa URL https:// yang valid.',
+      technicalDetails: 'Alamat server harus berupa URL https:// yang valid.',
     };
   }
 
@@ -166,7 +166,7 @@ export async function testSupabaseConnection(overrideUrl?: string, overrideKey?:
     return {
       success: false,
       message: 'Kunci akses publik belum dimasukkan.',
-      technicalDetails: 'Missing or placeholder VITE_SUPABASE_ANON_KEY. Silakan masukkan kunci akses publik yang sesuai.',
+      technicalDetails: 'Kunci akses publik belum diisi atau masih menggunakan nilai contoh.',
     };
   }
 
