@@ -4,6 +4,7 @@
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, Cantarell, sans-serif;
   color-scheme: light;
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -15,50 +16,66 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Calm, fluid motion: short travel distances, eased starts/stops, and restrained stagger. */
-@keyframes nursego-fade-up {
-  0% { opacity: 0; transform: translate3d(0, 10px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+/* iOS-inspired motion: short travel, soft spring easing, no exaggerated bounce. */
+:root {
+  --ng-ease: cubic-bezier(.2, .8, .2, 1);
+  --ng-spring: cubic-bezier(.2, .9, .25, 1.15);
+}
+@keyframes nursego-page-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.992); filter: blur(2px); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
 }
 @keyframes nursego-fade-in {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-@keyframes nursego-modal-pop {
-  0% { opacity: 0; transform: translate3d(0, 8px, 0) scale(.985); }
-  65% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.002); }
+@keyframes nursego-modal-in {
+  0% { opacity: 0; transform: translate3d(0, 12px, 0) scale(.94); }
+  72% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.012); }
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes nursego-drawer-in {
+  from { opacity: .7; transform: translate3d(28px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 @keyframes nursego-float {
   0%, 100% { transform: translate3d(0, 0, 0); }
   50% { transform: translate3d(0, -7px, 0); }
 }
 .nursego-page-enter > * > * {
-  animation: nursego-fade-up 680ms cubic-bezier(.22, 1, .36, 1) both;
+  animation: nursego-page-in 460ms var(--ng-ease) both;
   backface-visibility: hidden;
 }
-.nursego-page-enter > * > *:nth-child(2) { animation-delay: 45ms; }
-.nursego-page-enter > * > *:nth-child(3) { animation-delay: 90ms; }
-.nursego-page-enter > * > *:nth-child(4) { animation-delay: 135ms; }
-.nursego-page-enter > * > *:nth-child(5) { animation-delay: 180ms; }
-.nursego-page-enter > * > *:nth-child(6) { animation-delay: 225ms; }
+.nursego-page-enter > * > *:nth-child(2) { animation-delay: 35ms; }
+.nursego-page-enter > * > *:nth-child(3) { animation-delay: 70ms; }
+.nursego-page-enter > * > *:nth-child(4) { animation-delay: 105ms; }
+.nursego-page-enter > * > *:nth-child(5) { animation-delay: 140ms; }
+.nursego-page-enter > * > *:nth-child(6) { animation-delay: 175ms; }
 
-.nursego-page-enter button:not(:disabled) {
-  transition: transform 260ms cubic-bezier(.22, 1, .36, 1),
-              box-shadow 260ms ease,
-              background-color 220ms ease,
-              border-color 220ms ease;
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
 }
-.nursego-page-enter button:not(:disabled):hover { transform: translate3d(0, -1px, 0); }
-.nursego-page-enter button:not(:disabled):active { transform: translate3d(0, 0, 0) scale(.985); }
-
+button:not(:disabled), a, [role="button"] {
+  transition:
+    transform 280ms var(--ng-spring),
+    box-shadow 280ms var(--ng-ease),
+    background-color 220ms var(--ng-ease),
+    border-color 220ms var(--ng-ease),
+    color 220ms var(--ng-ease);
+}
+button:not(:disabled):active, [role="button"]:active {
+  transform: scale(.975);
+}
+@media (hover: hover) and (pointer: fine) {
+  .nursego-page-enter button:not(:disabled):hover { transform: translate3d(0, -1px, 0); }
+  .nursego-page-enter [class*="rounded-xl"]:hover,
+  .nursego-page-enter [class*="rounded-2xl"]:hover {
+    box-shadow: 0 10px 28px rgba(15, 118, 110, .065);
+  }
+}
 .nursego-page-enter [class*="rounded-xl"],
 .nursego-page-enter [class*="rounded-2xl"] {
-  transition: box-shadow 280ms ease, border-color 240ms ease;
-}
-.nursego-page-enter [class*="rounded-xl"]:hover,
-.nursego-page-enter [class*="rounded-2xl"]:hover {
-  box-shadow: 0 8px 24px rgba(15, 118, 110, .055);
+  transition: box-shadow 300ms var(--ng-ease), border-color 240ms var(--ng-ease), transform 300ms var(--ng-spring);
 }
 
 .nursego-hero { position: relative; isolation: isolate; overflow: hidden; }
@@ -89,15 +106,50 @@ body {
   filter: blur(1px);
   animation: nursego-float 10s cubic-bezier(.45, 0, .55, 1) infinite reverse;
 }
-.animate-fade-in { animation: nursego-fade-in 260ms ease-out both; }
-.animate-modal-pop { animation: nursego-modal-pop 360ms cubic-bezier(.22, 1, .36, 1) both; }
+.nursego-portal-card {
+  transform: translateZ(0);
+  transition: transform 360ms var(--ng-spring), box-shadow 320ms var(--ng-ease), border-color 240ms var(--ng-ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .nursego-portal-card:hover { transform: translate3d(0, -4px, 0); }
+}
+.nursego-ios-header {
+  background: rgba(255,255,255,.88);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  backdrop-filter: saturate(180%) blur(18px);
+}
+.nursego-ios-bottom-nav {
+  background: rgba(255,255,255,.88);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  padding-bottom: max(.25rem, env(safe-area-inset-bottom));
+}
+.nursego-ios-tab {
+  position: relative;
+  isolation: isolate;
+  min-height: 48px;
+  border-radius: 15px;
+  transition: color 220ms var(--ng-ease), transform 260ms var(--ng-spring), background-color 220ms var(--ng-ease);
+}
+.nursego-ios-tab-active {
+  background: rgba(13, 148, 136, .09);
+}
+.nursego-ios-tab svg {
+  transition: transform 280ms var(--ng-spring), color 200ms var(--ng-ease);
+}
+.nursego-ios-tab-active svg { transform: translateY(-1px) scale(1.06); }
+.animate-fade-in { animation: nursego-fade-in 240ms var(--ng-ease) both; }
+.animate-modal-pop { animation: nursego-modal-in 420ms var(--ng-spring) both; }
+.nursego-drawer-panel { animation: nursego-drawer-in 360ms var(--ng-spring) both; }
 
+/* Respect the device's Reduce Motion accessibility setting. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
