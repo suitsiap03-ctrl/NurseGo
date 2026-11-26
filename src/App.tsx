@@ -257,7 +257,7 @@ const MainAppContent: React.FC = () => {
           <HeartPulse className="w-7 h-7" />
         </div>
         <p className="text-sm font-semibold text-slate-800">Menghubungkan ke NurseGo...</p>
-        <p className="text-xs text-slate-400 mt-1">Memeriksa sesi autentikasi Supabase</p>
+        <p className="text-xs text-slate-400 mt-1">Memeriksa sesi akun</p>
       </div>
     );
   }
