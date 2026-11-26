@@ -805,10 +805,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // The auth.users trigger creates the base profile securely before this session is returned.
         // Update the trigger-created nurse row; do not attempt a client-side INSERT blocked by RLS.
         const { error: nurseErr } = await supabase.from('nurse_profiles').update({
-          id: newUserId,
           str_number: data.strNumber.trim(),
           str_expiry_date: data.strExpiryDate || null,
-          verification_status: 'pending',
           education_level: data.educationLevel,
           has_ners_profession: data.hasNersProfession,
           academic_degree: data.academicDegree?.trim() || null,
