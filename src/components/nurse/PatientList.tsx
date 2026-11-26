@@ -432,7 +432,7 @@ export const PatientList: React.FC<PatientListProps> = ({
       )}
 
       {/* Search & Filter */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row gap-3">
+      <div className={`relative bg-white p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row gap-3 transition-[z-index] ${isSurgeryFilterOpen ? 'z-[80]' : 'z-0'}`}>
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -444,7 +444,7 @@ export const PatientList: React.FC<PatientListProps> = ({
           />
         </div>
 
-        <div className="relative shrink-0">
+        <div className={`relative shrink-0 ${isSurgeryFilterOpen ? 'z-[100]' : ''}`}>
           <button
             type="button"
             aria-expanded={isSurgeryFilterOpen}
@@ -457,8 +457,8 @@ export const PatientList: React.FC<PatientListProps> = ({
           </button>
           {isSurgeryFilterOpen && (
             <>
-              <button type="button" aria-label="Tutup pilihan operasi" className="fixed inset-0 z-20 cursor-default" onClick={() => setIsSurgeryFilterOpen(false)} />
-              <div className="absolute right-0 top-full z-30 mt-2 w-[min(84vw,280px)] p-1.5 bg-white border border-slate-200 rounded-xl shadow-xl">
+              <button type="button" aria-label="Tutup pilihan operasi" className="fixed inset-0 z-[90] cursor-default" onClick={() => setIsSurgeryFilterOpen(false)} />
+              <div className="absolute right-0 top-full z-[100] mt-2 w-[min(84vw,280px)] max-h-[min(60vh,420px)] overflow-y-auto overscroll-contain p-1.5 bg-white border border-slate-200 rounded-xl shadow-2xl">
                 <button type="button" onClick={() => { setSelectedSurgeryFilter('all'); setIsSurgeryFilterOpen(false); }} className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${selectedSurgeryFilter === 'all' ? 'bg-teal-50 text-teal-800' : 'text-slate-700 hover:bg-slate-50'}`}>
                   Semua Jenis Operasi <span className="text-slate-400 font-normal">(7 jenis)</span>
                 </button>
