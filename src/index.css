@@ -1459,175 +1459,298 @@ html[data-theme="dark"] .nursego-entry-footer { border-top-color: #2b4149; }
   .nursego-entry-portal:hover, .nursego-entry-primary:hover { transform: none !important; }
 }
 
+
+
 /* =========================================================
-   NURSEGO 2D OUTLINE SYSTEM — bold, friendly, still clinical
+   NURSEGO VISUAL REFINEMENT
+   2D outline is an accent, not a global component treatment.
+   Dark theme uses dedicated readable surface/text tokens.
    ========================================================= */
-:root {
-  --ng-ink: #23434a;
-  --ng-outline: #31545a;
-  --ng-outline-soft: #b7d2d0;
-  --ng-shadow-flat: #c9e2df;
-}
-.nursego-entry-screen {
-  background-color: #f4faf8 !important;
-  background-image:
-    radial-gradient(rgba(8,127,131,.10) 1px, transparent 1px) !important;
-  background-size: 18px 18px !important;
-}
-.nursego-entry-screen::before,
-.nursego-entry-screen::after { border: 2px solid rgba(49,84,90,.14) !important; }
-.nursego-entry-header {
-  background: #f9fdfb !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  border-bottom: 2px solid var(--ng-outline) !important;
-  box-shadow: 0 3px 0 rgba(49,84,90,.08);
-}
-.nursego-brand-mark {
-  border: 2px solid var(--ng-ink);
-  box-shadow: 3px 3px 0 #a8cfca;
-}
-.nursego-entry-kicker {
-  border: 1.5px solid var(--ng-outline) !important;
-  border-radius: 5px 12px 5px 12px !important;
-  box-shadow: 3px 3px 0 #c5dfda !important;
-}
-.nursego-entry-title { letter-spacing: -.045em !important; }
+
+/* Restrained 2D accents: entry portal cards and primary actions only. */
 .nursego-entry-portal {
-  background: #fff !important;
-  border: 2px solid var(--ng-outline) !important;
-  border-radius: 5px 20px 5px 20px !important;
-  box-shadow: 5px 5px 0 #b9d8d3, 0 10px 24px rgba(30,70,75,.06) !important;
+  border: 1.5px solid #6f9997 !important;
+  border-radius: 14px !important;
+  box-shadow: 3px 3px 0 #c8dfda, 0 8px 22px rgba(29,66,75,.045) !important;
 }
 .nursego-entry-portal:hover {
-  transform: translate(-2px,-2px) !important;
-  box-shadow: 7px 7px 0 #a9d0ca, 0 13px 25px rgba(30,70,75,.08) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 4px 4px 0 #b8d7d1, 0 11px 25px rgba(29,66,75,.07) !important;
 }
 .nursego-entry-icon {
-  border: 2px solid var(--ng-outline) !important;
-  border-radius: 4px 13px 4px 13px !important;
-  box-shadow: 2px 2px 0 #b9d8d3;
+  border: 1px solid #8db5b1 !important;
+  border-radius: 11px !important;
+  box-shadow: 2px 2px 0 #d2e5e1 !important;
 }
 .nursego-entry-primary {
-  border: 2px solid #164f53 !important;
-  border-radius: 4px 11px 4px 11px !important;
-  box-shadow: 3px 3px 0 #164f53 !important;
-  transition: transform 130ms ease, box-shadow 130ms ease, background 130ms ease !important;
-}
-.nursego-entry-primary:hover {
-  transform: translate(1px,1px) !important;
-  box-shadow: 2px 2px 0 #164f53 !important;
-}
-.nursego-entry-primary:active {
-  transform: translate(3px,3px) !important;
-  box-shadow: 0 0 0 #164f53 !important;
+  border: 1.5px solid #075e62 !important;
+  border-radius: 10px !important;
+  box-shadow: 2px 2px 0 #075e62 !important;
 }
 .nursego-entry-demo {
-  border: 1.5px solid var(--ng-outline) !important;
-  border-radius: 4px 10px 4px 10px !important;
-  box-shadow: 2px 2px 0 #c5dfda;
+  border: 1px solid #b8cecd !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
 }
-.nursego-entry-footer { border-top: 2px solid var(--ng-outline) !important; }
-.nursego-entry-benefits svg { stroke-width: 2.4; }
+.nursego-entry-header { border-bottom-width: 1px !important; box-shadow: none !important; }
+.nursego-entry-footer { border-top-width: 1px !important; }
+.nursego-entry-kicker { border-width: 1px !important; border-radius: 999px !important; box-shadow: none !important; }
 
-/* Same outlined language inside the actual nurse/patient workspace. */
+/* Remove the accidental global cartoon treatment from workspace components. */
 .nursego-page-enter [class*="rounded-3xl"],
 .nursego-page-enter [class*="rounded-2xl"],
-.nursego-page-enter [class*="rounded-xl"] {
-  border-radius: 5px 13px 5px 13px !important;
-}
-.nursego-page-enter .grid > * {
-  border-color: #c1d6d5;
-  box-shadow: 3px 3px 0 rgba(172,205,200,.62) !important;
-}
+.nursego-page-enter [class*="rounded-xl"] { border-radius: revert-layer !important; }
+.nursego-page-enter .grid > * { box-shadow: revert-layer !important; }
 .nursego-page-enter button,
-.nursego-page-enter [role="button"] {
-  border-radius: 4px 10px 4px 10px;
-}
+.nursego-page-enter [role="button"] { border-radius: revert-layer !important; }
 .nursego-page-enter input,
 .nursego-page-enter select,
 .nursego-page-enter textarea {
-  border: 1.5px solid #9fbab9 !important;
-  border-radius: 4px !important;
-  box-shadow: 2px 2px 0 rgba(190,215,211,.55);
+  border-width: 1px !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
 }
 .nursego-ios-bottom-nav {
-  border: 2px solid var(--ng-outline) !important;
-  border-radius: 8px 17px 8px 17px !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  background: #fbfffd !important;
-  box-shadow: 4px 4px 0 #a9cbc6, 0 8px 20px rgba(20,55,62,.08) !important;
+  border: 1px solid rgba(190,210,213,.78) !important;
+  border-radius: 18px !important;
+  background: rgba(250,253,253,.94) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.2) !important;
+  backdrop-filter: blur(16px) saturate(1.2) !important;
+  box-shadow: 0 8px 26px rgba(20,55,62,.12) !important;
 }
 .nursego-ios-bottom-nav .nursego-ios-tab-active {
-  border: 1px solid #438b86;
-  border-radius: 4px 9px 4px 9px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
 }
 .nursego-modal-panel,
 .nursego-drawer-panel {
-  border: 2px solid var(--ng-outline) !important;
-  border-radius: 5px 16px 5px 16px !important;
-  box-shadow: 5px 5px 0 #a9cbc6, 0 16px 36px rgba(7,35,43,.14) !important;
+  border-width: 1px !important;
+  border-color: #d7e2e5 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 55px rgba(7,35,43,.18) !important;
 }
-html[data-theme="dark"] .nursego-entry-screen {
-  background-color: #14272c !important;
-  background-image: radial-gradient(rgba(130,216,207,.11) 1px, transparent 1px) !important;
+
+/* Dark theme foundation: consistent canvas, layered surfaces and accessible copy. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --ng-canvas: #101a20;
+  --ng-surface: #19262e;
+  --ng-surface-raised: #202f38;
+  --ng-surface-inset: #131f26;
+  --ng-copy: #edf3f5;
+  --ng-copy-secondary: #bdcbd1;
+  --ng-copy-muted: #9aabb3;
+  --ng-divider: #344650;
+  --ng-accent: #80d7ce;
 }
-html[data-theme="dark"] .nursego-entry-header {
-  background: #192f35 !important;
-  border-bottom-color: #8bbdb7 !important;
+html[data-theme="dark"] body {
+  background: var(--ng-canvas) !important;
+  color: var(--ng-copy) !important;
 }
-html[data-theme="dark"] .nursego-brand-mark {
-  border-color: #a2d8d1;
-  box-shadow: 3px 3px 0 #315b5c;
+html[data-theme="dark"] body::before {
+  opacity: .2 !important;
+  background:
+    radial-gradient(ellipse 34rem 28rem at 0% 10%, rgba(8,127,131,.14), transparent 72%),
+    radial-gradient(ellipse 28rem 30rem at 100% 35%, rgba(40,105,130,.10), transparent 74%) !important;
 }
-html[data-theme="dark"] .nursego-entry-portal {
-  background: #1c343a !important;
-  border-color: #8bbdb7 !important;
-  box-shadow: 5px 5px 0 #315b5c, 0 10px 24px rgba(0,0,0,.16) !important;
+html[data-theme="dark"] body::after { opacity: .025 !important; }
+html[data-theme="dark"] #root,
+html[data-theme="dark"] #root .bg-slate-50,
+html[data-theme="dark"] .min-h-screen.bg-slate-50 {
+  background: transparent !important;
+  color: var(--ng-copy) !important;
 }
-html[data-theme="dark"] .nursego-entry-icon {
-  border-color: #8bbdb7 !important;
-  box-shadow: 2px 2px 0 #315b5c;
+
+/* Neutral surfaces across dashboards, auth screens, cards, forms and dialogs. */
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] [class~="bg-white"],
+html[data-theme="dark"] [class*="bg-white/"] {
+  background-color: var(--ng-surface) !important;
+  color: var(--ng-copy) !important;
+  border-color: var(--ng-divider) !important;
 }
-html[data-theme="dark"] .nursego-entry-primary {
-  border-color: #a5e2d9 !important;
-  box-shadow: 3px 3px 0 #315b5c !important;
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] [class*="bg-slate-50/"] { background-color: var(--ng-surface-inset) !important; }
+html[data-theme="dark"] .bg-slate-100,
+html[data-theme="dark"] [class*="bg-slate-100/"],
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-gray-100 { background-color: var(--ng-surface-raised) !important; }
+html[data-theme="dark"] .border-slate-100,
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200 { border-color: var(--ng-divider) !important; }
+
+/* Neutral text: no more gray-on-charcoal or inherited near-black labels. */
+html[data-theme="dark"] .text-slate-950,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-gray-950,
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-gray-700 { color: var(--ng-copy) !important; }
+html[data-theme="dark"] .text-slate-600,
+html[data-theme="dark"] .text-gray-600 { color: var(--ng-copy-secondary) !important; }
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400,
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400 { color: var(--ng-copy-muted) !important; }
+html[data-theme="dark"] p,
+html[data-theme="dark"] label,
+html[data-theme="dark"] small { text-shadow: none; }
+
+/* Readable semantic colors and their low-emphasis surfaces. */
+html[data-theme="dark"] .text-teal-900,
+html[data-theme="dark"] .text-teal-800,
+html[data-theme="dark"] .text-teal-700,
+html[data-theme="dark"] .text-teal-600 { color: #8edfd6 !important; }
+html[data-theme="dark"] .text-emerald-900,
+html[data-theme="dark"] .text-emerald-800,
+html[data-theme="dark"] .text-emerald-700,
+html[data-theme="dark"] .text-green-900,
+html[data-theme="dark"] .text-green-800,
+html[data-theme="dark"] .text-green-700 { color: #8fe0b5 !important; }
+html[data-theme="dark"] .text-amber-950,
+html[data-theme="dark"] .text-amber-900,
+html[data-theme="dark"] .text-amber-800,
+html[data-theme="dark"] .text-amber-700,
+html[data-theme="dark"] .text-yellow-900 { color: #f2cc83 !important; }
+html[data-theme="dark"] .text-rose-950,
+html[data-theme="dark"] .text-rose-900,
+html[data-theme="dark"] .text-rose-800,
+html[data-theme="dark"] .text-rose-700,
+html[data-theme="dark"] .text-red-900,
+html[data-theme="dark"] .text-red-800 { color: #f3a2a8 !important; }
+html[data-theme="dark"] .text-blue-900,
+html[data-theme="dark"] .text-blue-800,
+html[data-theme="dark"] .text-sky-900,
+html[data-theme="dark"] .text-indigo-900 { color: #a8d4f1 !important; }
+html[data-theme="dark"] .bg-teal-50,
+html[data-theme="dark"] .bg-teal-100 { background-color: #193a3b !important; }
+html[data-theme="dark"] .bg-emerald-50,
+html[data-theme="dark"] .bg-green-50 { background-color: #1b3a30 !important; }
+html[data-theme="dark"] .bg-amber-50,
+html[data-theme="dark"] .bg-yellow-50 { background-color: #3b3324 !important; }
+html[data-theme="dark"] .bg-rose-50,
+html[data-theme="dark"] .bg-red-50 { background-color: #3b272e !important; }
+html[data-theme="dark"] .bg-blue-50,
+html[data-theme="dark"] .bg-sky-50 { background-color: #1d3443 !important; }
+html[data-theme="dark"] .bg-indigo-50,
+html[data-theme="dark"] .bg-purple-50 { background-color: #2b2c43 !important; }
+
+/* Form controls, placeholders, tables and focus indicators. */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background-color: #121f26 !important;
+  color: var(--ng-copy) !important;
+  border-color: #435762 !important;
+  caret-color: #8edfd6;
 }
-html[data-theme="dark"] .nursego-entry-demo {
-  border-color: #719b9b !important;
-  box-shadow: 2px 2px 0 #29494c;
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: #91a3ac !important; opacity: 1 !important; }
+html[data-theme="dark"] select option { background: #19262e; color: #edf3f5; }
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
+  border-color: #70cfc5 !important;
+  box-shadow: 0 0 0 3px rgba(112,207,197,.18) !important;
+  outline: none !important;
 }
-html[data-theme="dark"] .nursego-entry-kicker {
-  border-color: #719b9b !important;
-  box-shadow: 3px 3px 0 #29494c !important;
-}
-html[data-theme="dark"] .nursego-entry-footer { border-top-color: #719b9b !important; }
-html[data-theme="dark"] .nursego-page-enter .grid > * {
-  border-color: #45656a !important;
-  box-shadow: 3px 3px 0 rgba(8,17,21,.42) !important;
-}
-html[data-theme="dark"] .nursego-page-enter input,
-html[data-theme="dark"] .nursego-page-enter select,
-html[data-theme="dark"] .nursego-page-enter textarea {
-  border-color: #58777b !important;
-  box-shadow: 2px 2px 0 rgba(5,15,18,.4);
+html[data-theme="dark"] table { color: var(--ng-copy) !important; }
+html[data-theme="dark"] th { color: #dce8ec !important; }
+html[data-theme="dark"] td { color: #c6d3d8 !important; }
+html[data-theme="dark"] hr { border-color: var(--ng-divider) !important; }
+
+/* Navigation, theme control, overlays and shared chrome. */
+html[data-theme="dark"] .nursego-ios-header,
+html[data-theme="dark"] .nursego-entry-header,
+html[data-theme="dark"] .nursego-public-header,
+html[data-theme="dark"] .nursego-public-footer,
+html[data-theme="dark"] footer {
+  background: #17252d !important;
+  color: var(--ng-copy) !important;
+  border-color: var(--ng-divider) !important;
+  box-shadow: none !important;
 }
 html[data-theme="dark"] .nursego-ios-bottom-nav {
-  background: #1a3339 !important;
-  border-color: #8bbdb7 !important;
-  box-shadow: 4px 4px 0 #315b5c, 0 8px 20px rgba(0,0,0,.24) !important;
+  background: rgba(25,39,47,.97) !important;
+  border: 1px solid #40545e !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.34) !important;
+}
+html[data-theme="dark"] .nursego-ios-tab:not(.nursego-ios-tab-active) { color: #bdcbd1 !important; }
+html[data-theme="dark"] .nursego-ios-tab svg { color: #9eb0b8 !important; }
+html[data-theme="dark"] .nursego-ios-tab-active {
+  color: #a0e5dc !important;
+  background: #254247 !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .nursego-ios-tab-active svg { color: #a0e5dc !important; }
+html[data-theme="dark"] .nursego-theme-toggle {
+  background: #263942 !important;
+  color: #e5f0f2 !important;
+  border: 1px solid #49616b !important;
 }
 html[data-theme="dark"] .nursego-modal-panel,
-html[data-theme="dark"] .nursego-drawer-panel {
-  border-color: #8bbdb7 !important;
-  box-shadow: 5px 5px 0 #315b5c, 0 16px 36px rgba(0,0,0,.3) !important;
+html[data-theme="dark"] .nursego-drawer-panel,
+html[data-theme="dark"] [role="dialog"] {
+  background: #1a2931 !important;
+  color: var(--ng-copy) !important;
+  border-color: #40545e !important;
+  box-shadow: 0 18px 55px rgba(0,0,0,.42) !important;
 }
-@media (max-width: 640px) {
-  .nursego-entry-portal { box-shadow: 4px 4px 0 #b9d8d3 !important; }
-  .nursego-entry-portal:hover { transform: none !important; }
-  .nursego-entry-main { padding-top: 28px !important; }
+html[data-theme="dark"] .nursego-entry-screen {
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(29,105,105,.14), transparent 36%),
+    radial-gradient(ellipse at 88% 78%, rgba(37,78,100,.14), transparent 36%),
+    #101a20 !important;
 }
+html[data-theme="dark"] .nursego-entry-title,
+html[data-theme="dark"] .nursego-entry-portal h2 { color: #edf3f5 !important; }
+html[data-theme="dark"] .nursego-entry-title span {
+  color: #8edfd6 !important;
+  background: none !important;
+  -webkit-text-fill-color: #8edfd6 !important;
+}
+html[data-theme="dark"] .nursego-entry-description,
+html[data-theme="dark"] .nursego-entry-copy { color: #bdcbd1 !important; }
+html[data-theme="dark"] .nursego-entry-portal {
+  background: #1b2b33 !important;
+  border: 1.5px solid #58747c !important;
+  box-shadow: 3px 3px 0 #304b52, 0 8px 22px rgba(0,0,0,.18) !important;
+}
+html[data-theme="dark"] .nursego-entry-icon {
+  background: #254247 !important;
+  color: #a0e5dc !important;
+  border-color: #58747c !important;
+  box-shadow: 2px 2px 0 #304b52 !important;
+}
+html[data-theme="dark"] .nursego-entry-patient .nursego-entry-icon {
+  background: #263e4c !important;
+  color: #b7dcf1 !important;
+}
+html[data-theme="dark"] .nursego-entry-overline,
+html[data-theme="dark"] .nursego-entry-benefits,
+html[data-theme="dark"] .nursego-entry-access,
+html[data-theme="dark"] .nursego-entry-footer { color: #9aabb3 !important; }
+html[data-theme="dark"] .nursego-entry-demo {
+  background: #202f38 !important;
+  color: #d3e0e4 !important;
+  border-color: #49616b !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .nursego-entry-primary {
+  background: #087f83 !important;
+  color: #fff !important;
+  border-color: #83d8d0 !important;
+  box-shadow: 2px 2px 0 #315b5c !important;
+}
+
+/* Avoid accidental inherited light text colors in status chips and icons. */
+html[data-theme="dark"] .nursego-page-enter [class*="text-white"] { color: #fff !important; }
+html[data-theme="dark"] .nursego-page-enter [class*="shadow-"] { --tw-shadow-color: rgba(0,0,0,.22); }
+html[data-theme="dark"] ::selection { background: #276b69; color: #fff; }
+
 @media (prefers-reduced-motion: reduce) {
-  .nursego-entry-portal, .nursego-entry-primary { transition: none !important; }
+  .nursego-entry-portal, .nursego-entry-primary, .nursego-entry-demo { transition: none !important; }
 }
