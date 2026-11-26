@@ -211,7 +211,7 @@ export const NurseLogin: React.FC<NurseLoginProps> = ({
                 </button>
               </div>
               <p className="text-[11px] text-blue-800">
-                Masukkan alamat email akun perawat Anda untuk menerima tautan pemulihan kata sandi dari Supabase Auth.
+                Masukkan alamat email akun perawat Anda untuk menerima tautan pemulihan kata sandi melalui email.
               </p>
               <div className="flex gap-2">
                 <input
