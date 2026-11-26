@@ -64,7 +64,11 @@ function shouldPersistInLocalStorage(): boolean {
 const dynamicAuthStorage = {
   getItem: (key: string): string | null => {
     try {
-      return localStorage.getItem(key) ?? sessionStorage.getItem(key);
+      const persistentValue = localStorage.getItem(key);
+      if (persistentValue !== null) return persistentValue;
+    } catch { /* local storage may be unavailable in restricted browser contexts */ }
+    try {
+      return sessionStorage.getItem(key);
     } catch {
       return null;
     }
@@ -79,7 +83,8 @@ const dynamicAuthStorage = {
         localStorage.removeItem(key);
       }
     } catch {
-      // ignore storage restriction
+      // Fall back to tab storage if persistent storage is blocked.
+      try { sessionStorage.setItem(key, value); } catch { /* ignore storage restriction */ }
     }
   },
   removeItem: (key: string): void => {
