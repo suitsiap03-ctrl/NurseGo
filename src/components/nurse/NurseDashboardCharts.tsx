@@ -273,8 +273,8 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       }
 
       return (
-        <div className="relative block h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={260}>
+        <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={dailyActivitySeries}
               margin={{ top: 14, right: 16, left: 0, bottom: 4 }}
@@ -344,8 +344,8 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       const maxBp = Math.min(220, Math.ceil((Math.max(...bpVals, 145) + 10) / 10) * 10);
 
       return (
-        <div className="h-[280px] sm:h-[320px] w-full min-w-0 bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={250}>
+        <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart data={vitalSignChartSeries} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
@@ -463,8 +463,8 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
         : Math.min(cfg.maxCeil, Number((Math.max(...nums, cfg.refHigh ?? -Infinity) + cfg.pad).toFixed(1)));
 
     return (
-      <div className="h-[280px] sm:h-[320px] w-full min-w-0 bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={250}>
+      <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart data={singleSeriesData} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
@@ -520,7 +520,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
 
         <div className="flex flex-wrap items-center gap-2">
           {patients.length > 0 && (
-            <div className="relative z-30">
+            <div className="relative z-[95] min-w-0">
               <button
                 type="button"
                 aria-label="Pilih pasien untuk grafik"
@@ -534,7 +534,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
               {patientPickerOpen && (
                 <>
                   <button type="button" aria-label="Tutup pilihan pasien" className="fixed inset-0 z-[80] cursor-default" onClick={() => setPatientPickerOpen(false)} />
-                  <div role="listbox" aria-label="Daftar pasien grafik" className="absolute right-0 top-full z-[90] mt-2 w-[min(82vw,280px)] max-h-[min(55vh,360px)] overflow-y-auto overscroll-contain rounded-xl border border-emerald-100 bg-white p-1.5 shadow-2xl">
+                  <div role="listbox" aria-label="Daftar pasien grafik" className="absolute right-0 top-full z-[100] mt-2 w-[min(280px,calc(100vw-32px))] max-h-[min(55vh,360px)] overflow-y-auto overscroll-contain rounded-xl border border-emerald-100 bg-white p-1.5 shadow-2xl">
                     <button type="button" role="option" aria-selected={effectivePatientId === 'all'} onClick={() => { setSelectedPatientId('all'); setPatientPickerOpen(false); }} className={`w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-semibold ${effectivePatientId === 'all' ? 'bg-emerald-50 text-emerald-800' : 'text-slate-700 hover:bg-slate-50'}`}>
                       <span>Semua Pasien ({patients.length})</span>{effectivePatientId === 'all' && <Check className="w-3.5 h-3.5" />}
                     </button>
