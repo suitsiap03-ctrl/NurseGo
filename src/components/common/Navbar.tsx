@@ -7,7 +7,7 @@
  * - User Profile & Quick Logout
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { PWAInstallButton } from './PWAInstallButton';
 import { ThemeToggle } from './ThemeToggle';
@@ -23,8 +23,6 @@ import {
   LogOut,
   AlertCircle,
   Bell,
-  Menu,
-  X
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -42,18 +40,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const { user, profile, nurseProfile, role, isDemoMode, signOut } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [menuExpanded, setMenuExpanded] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
-      if (window.scrollY <= 100) setMenuExpanded(false);
-    };
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const nurseTabs = [
     { id: 'beranda', label: 'Beranda', icon: Activity },
@@ -73,9 +59,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header className={`sticky top-0 z-40 nursego-ios-header ${isScrolled ? "nursego-nav-scrolled" : ""}`}>
+      <header className="sticky top-0 z-40 nursego-ios-header">
         <div className="nursego-desktop-nav-shell w-full max-w-[1600px] mx-auto px-3 sm:px-6 xl:px-8 2xl:px-10">
-          <div className={`flex items-center justify-between gap-2 sm:gap-3 min-h-16 transition-all duration-300 ${isScrolled && !menuExpanded ? "h-12" : "h-16"}`}>
+          <div className="flex items-center justify-between gap-2 sm:gap-3 min-h-16 h-16">
             <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
               <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-xs">
                 <HeartPulse className="w-5 h-5" />
@@ -89,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {user && (
-              <nav className={`${isScrolled && !menuExpanded ? "hidden" : "hidden md:flex"} items-center gap-1 sm:gap-1.5 min-w-0`}>
+              <nav className={`$hidden md:flex items-center gap-1 sm:gap-1.5 min-w-0`}>
                 {activeTabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = currentTab === tab.id;
@@ -124,14 +110,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {unreadCount > 0 && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />}
                 </button>
               )}
-              {user && isScrolled && (
-                <button type="button" aria-label={menuExpanded ? "Tutup menu" : "Buka menu"} onClick={() => setMenuExpanded((v) => !v)} className="hidden md:inline-flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 shadow-sm">
-                  {menuExpanded ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                </button>
-              )}
               {user ? (
                 <div className="flex items-center gap-1.5 pl-1.5 sm:pl-2 border-l border-slate-200 shrink-0">
-                  <div className={`${isScrolled && !menuExpanded ? "hidden" : "hidden xl:flex"} flex-col text-right min-w-0 max-w-[130px]`}>
+                  <div className={`$hidden xl:flex flex-col text-right min-w-0 max-w-[130px]`}>
                     <span className="text-xs font-semibold text-slate-800 truncate max-w-[150px]">
                       {nurseProfile?.professional_title || profile?.full_name || user.email?.split('@')[0]}
                     </span>
