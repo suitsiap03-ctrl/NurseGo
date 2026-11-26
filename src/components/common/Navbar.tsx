@@ -149,7 +149,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       )}
 
       {user && (
-        <nav aria-label="Navigasi utama" className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200/80 px-2 pt-1 shadow-[0_-8px_28px_rgba(15,23,42,0.06)] nursego-ios-bottom-nav">
+        <nav aria-label="Navigasi utama" className="md:hidden fixed bottom-[max(10px,env(safe-area-inset-bottom))] left-3 right-3 z-40 border border-slate-200/80 px-2 py-1.5 shadow-[0_10px_34px_rgba(15,23,42,0.14)] nursego-ios-bottom-nav">
           <div className="flex items-center justify-around gap-1">
             {activeTabs.map((tab) => {
               const Icon = tab.icon;
