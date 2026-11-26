@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { PWAInstallButton } from './PWAInstallButton';
+import { ThemeToggle } from './ThemeToggle';
 import {
   Activity,
   Users,
@@ -95,6 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             <div className="flex items-center gap-2 shrink-0">
+              <ThemeToggle />
               <PWAInstallButton compact />
               {user && (
                 <button
