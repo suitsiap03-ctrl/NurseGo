@@ -212,8 +212,8 @@ export const NurseProfileView: React.FC = () => {
     }
 
     const normalizedName = normalizePersonName(fullName);
-    if (!normalizedName || !strNumber.trim()) {
-      setFeedback({ type: 'error', text: 'Nama lengkap dan Nomor STR wajib diisi.' });
+    if (!normalizedName) {
+      setFeedback({ type: 'error', text: 'Nama lengkap wajib diisi.' });
       return;
     }
     setFullName(normalizedName);
@@ -221,16 +221,23 @@ export const NurseProfileView: React.FC = () => {
     setSaving(true);
     const supabase = getSupabase();
     try {
-      const { error: profErr } = await supabase
+      const { data: updatedProfile, error: profErr } = await supabase
         .from('profiles')
         .update({
           full_name: normalizedName,
           phone: phone.trim() || null,
         })
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select('id')
+        .maybeSingle();
 
-      if (profErr) {
-        setFeedback({ type: 'error', text: `Gagal memperbarui profil: ${profErr.message}` });
+      if (profErr || !updatedProfile) {
+        setFeedback({
+          type: 'error',
+          text: profErr
+            ? `Gagal memperbarui profil: ${profErr.message}`
+            : 'Profil akun tidak ditemukan atau tidak memiliki izin untuk diperbarui. Silakan masuk ulang.',
+        });
         return;
       }
 
@@ -249,19 +256,34 @@ export const NurseProfileView: React.FC = () => {
         department: department.trim() || null,
       };
 
-      const { error: nurseErr } = nurseProfile?.id
-        ? await supabase
-            .from('nurse_profiles')
-            .update(nurseFields)
-            .eq('id', user.id)
-        : await supabase.from('nurse_profiles').upsert({
+      let nurseErr: any = null;
+      if (nurseProfile?.id) {
+        const { data: updatedNurse, error } = await supabase
+          .from('nurse_profiles')
+          .update(nurseFields)
+          .eq('id', user.id)
+          .select('id')
+          .maybeSingle();
+        nurseErr = error;
+        if (!error && !updatedNurse) {
+          const { error: insertErr } = await supabase.from('nurse_profiles').upsert({
             id: user.id,
             ...nurseFields,
-            verification_status: 'pending',
+            verification_status: nurseProfile.verification_status || 'pending',
           });
+          nurseErr = insertErr;
+        }
+      } else {
+        const { error } = await supabase.from('nurse_profiles').upsert({
+          id: user.id,
+          ...nurseFields,
+          verification_status: 'pending',
+        });
+        nurseErr = error;
+      }
 
       if (nurseErr) {
-        setFeedback({ type: 'error', text: `Gagal memperbarui data STR: ${nurseErr.message}` });
+        setFeedback({ type: 'error', text: `Gagal memperbarui data perawat: ${nurseErr.message}` });
         return;
       }
 
@@ -502,11 +524,10 @@ export const NurseProfileView: React.FC = () => {
 
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Nomor STR Perawat *
+                  Nomor STR Perawat
                 </label>
                 <input
                   type="text"
-                  required
                   value={strNumber}
                   onChange={(e) => setStrNumber(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-mono text-slate-900 focus:bg-white"
