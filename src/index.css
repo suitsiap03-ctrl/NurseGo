@@ -30,8 +30,9 @@ body {
   to { opacity: 1; }
 }
 @keyframes nursego-modal-in {
-  0% { opacity: 0; transform: translate3d(0, 12px, 0) scale(.94); }
-  72% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.012); }
+  0% { opacity: 0; transform: translate3d(0, 16px, 0) scale(.92); }
+  68% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.018); }
+  84% { transform: translate3d(0, 0, 0) scale(.994); }
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 @keyframes nursego-drawer-in {
@@ -42,15 +43,19 @@ body {
   0%, 100% { transform: translate3d(0, 0, 0); }
   50% { transform: translate3d(0, -7px, 0); }
 }
-.nursego-page-enter > * > * {
-  animation: nursego-page-in 460ms var(--ng-ease) both;
+.nursego-page-enter {
+  animation: nursego-page-in 420ms var(--ng-ease) both;
   backface-visibility: hidden;
+  transform-origin: center top;
+  will-change: opacity, transform, filter;
 }
-.nursego-page-enter > * > *:nth-child(2) { animation-delay: 35ms; }
-.nursego-page-enter > * > *:nth-child(3) { animation-delay: 70ms; }
-.nursego-page-enter > * > *:nth-child(4) { animation-delay: 105ms; }
-.nursego-page-enter > * > *:nth-child(5) { animation-delay: 140ms; }
-.nursego-page-enter > * > *:nth-child(6) { animation-delay: 175ms; }
+/* A gentle stagger for the first-level content blocks, without delaying the page itself. */
+.nursego-page-enter > * > * { animation: nursego-page-in 440ms var(--ng-ease) both; }
+.nursego-page-enter > * > *:nth-child(2) { animation-delay: 25ms; }
+.nursego-page-enter > * > *:nth-child(3) { animation-delay: 50ms; }
+.nursego-page-enter > * > *:nth-child(4) { animation-delay: 75ms; }
+.nursego-page-enter > * > *:nth-child(5) { animation-delay: 100ms; }
+.nursego-page-enter > * > *:nth-child(6) { animation-delay: 125ms; }
 
 button, a, [role="button"] {
   -webkit-tap-highlight-color: transparent;
@@ -63,8 +68,17 @@ button:not(:disabled), a, [role="button"] {
     border-color 220ms var(--ng-ease),
     color 220ms var(--ng-ease);
 }
-button:not(:disabled):active, [role="button"]:active {
-  transform: scale(.975);
+button:not(:disabled):active, a:active, [role="button"]:active {
+  transform: scale(.955);
+  transition-duration: 90ms;
+}
+/* Consistent tactile feedback for touchscreens; restore softly on release. */
+@media (hover: none) and (pointer: coarse) {
+  button:not(:disabled), a, [role="button"] { touch-action: manipulation; }
+  button:not(:disabled):active, a:active, [role="button"]:active {
+    transform: scale(.94);
+    filter: brightness(.97);
+  }
 }
 @media (hover: hover) and (pointer: fine) {
   .nursego-page-enter button:not(:disabled):hover { transform: translate3d(0, -1px, 0); }
