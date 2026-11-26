@@ -30,6 +30,8 @@ import {
   Activity,
   Droplets,
   Flame,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
 import { PainRecord, PatientAlert, VitalSignRecord } from '../../types/database';
 import { getLocalDateInputValue } from '../../lib/dateUtils';
@@ -135,6 +137,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
   const [vitalMetric, setVitalMetric] = useState<VitalMetric>('bp');
   const [rangeDays, setRangeDays] = useState<RangeDays>(14);
   const [selectedPatientId, setSelectedPatientId] = useState<string>('all');
+  const [patientPickerOpen, setPatientPickerOpen] = useState(false);
 
   const patientNameMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -270,8 +273,8 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       }
 
       return (
-        <div className="h-[280px] sm:h-[320px] w-full min-w-0 bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={250}>
+        <div className="relative block h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={260}>
             <BarChart
               data={dailyActivitySeries}
               margin={{ top: 14, right: 16, left: 0, bottom: 4 }}
@@ -517,19 +520,33 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
 
         <div className="flex flex-wrap items-center gap-2">
           {patients.length > 0 && (
-            <select
-              aria-label="Filter pasien untuk grafik"
-              value={effectivePatientId}
-              onChange={(e) => setSelectedPatientId(e.target.value)}
-              className="px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium focus:outline-hidden focus:ring-1 focus:ring-teal-500 max-w-[200px]"
-            >
-              <option value="all">Semua Pasien ({patients.length})</option>
-              {patients.map((p) => (
-                <option key={p.patientId} value={p.patientId}>
-                  {p.fullName}
-                </option>
-              ))}
-            </select>
+            <div className="relative z-30">
+              <button
+                type="button"
+                aria-label="Pilih pasien untuk grafik"
+                aria-expanded={patientPickerOpen}
+                onClick={() => setPatientPickerOpen((open) => !open)}
+                className="min-w-[190px] max-w-[260px] inline-flex items-center justify-between gap-3 px-3 py-2 text-xs bg-white border border-emerald-200 rounded-xl text-emerald-900 font-bold shadow-sm hover:bg-emerald-50 transition-colors"
+              >
+                <span className="min-w-0 truncate">{effectivePatientId === 'all' ? `Semua Pasien (${patients.length})` : patientNameMap.get(effectivePatientId) || 'Pilih Pasien'}</span>
+                <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${patientPickerOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {patientPickerOpen && (
+                <>
+                  <button type="button" aria-label="Tutup pilihan pasien" className="fixed inset-0 z-[80] cursor-default" onClick={() => setPatientPickerOpen(false)} />
+                  <div role="listbox" aria-label="Daftar pasien grafik" className="absolute right-0 top-full z-[90] mt-2 w-[min(82vw,280px)] max-h-[min(55vh,360px)] overflow-y-auto overscroll-contain rounded-xl border border-emerald-100 bg-white p-1.5 shadow-2xl">
+                    <button type="button" role="option" aria-selected={effectivePatientId === 'all'} onClick={() => { setSelectedPatientId('all'); setPatientPickerOpen(false); }} className={`w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-semibold ${effectivePatientId === 'all' ? 'bg-emerald-50 text-emerald-800' : 'text-slate-700 hover:bg-slate-50'}`}>
+                      <span>Semua Pasien ({patients.length})</span>{effectivePatientId === 'all' && <Check className="w-3.5 h-3.5" />}
+                    </button>
+                    {patients.map((p) => (
+                      <button key={p.patientId} type="button" role="option" aria-selected={effectivePatientId === p.patientId} onClick={() => { setSelectedPatientId(p.patientId); setPatientPickerOpen(false); }} className={`w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-xs ${effectivePatientId === p.patientId ? 'bg-emerald-50 text-emerald-800 font-bold' : 'text-slate-700 hover:bg-slate-50'}`}>
+                        <span className="truncate">{p.fullName}</span>{effectivePatientId === p.patientId && <Check className="w-3.5 h-3.5 shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg">
