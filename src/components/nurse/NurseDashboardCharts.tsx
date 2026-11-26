@@ -251,7 +251,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
     if (chartMode === 'activity') {
       return (
         <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={260} debounce={80}>
+          <ResponsiveContainer width="100%" height={280} minWidth={1} debounce={80}>
             <BarChart
               data={dailyActivitySeries}
               margin={{ top: 14, right: 16, left: 0, bottom: 4 }}
@@ -305,7 +305,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
 
       return (
         <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={260}>
+          <ResponsiveContainer width="100%" height={280} minWidth={1}>
             <LineChart data={vitalSignChartSeries} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
@@ -424,7 +424,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
 
     return (
       <div className="relative h-[300px] sm:h-[340px] w-full min-w-[280px] overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={260}>
+        <ResponsiveContainer width="100%" height={280} minWidth={1}>
           <LineChart data={singleSeriesData} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
