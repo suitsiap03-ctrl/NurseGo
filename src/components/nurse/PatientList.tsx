@@ -31,6 +31,7 @@ import {
   UserCheck,
   Clock,
   X,
+  ChevronDown,
 } from 'lucide-react';
 
 interface PatientListProps {
@@ -52,6 +53,7 @@ export const PatientList: React.FC<PatientListProps> = ({
   const [pendingInvitations, setPendingInvitations] = useState<PatientInvitation[]>([]);
   const [search, setSearch] = useState<string>('');
   const [selectedSurgeryFilter, setSelectedSurgeryFilter] = useState<string>('all');
+  const [isSurgeryFilterOpen, setIsSurgeryFilterOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [confirmDeleteInviteId, setConfirmDeleteInviteId] = useState<string | null>(null);
   const [confirmCancelReqId, setConfirmCancelReqId] = useState<string | null>(null);
@@ -442,20 +444,32 @@ export const PatientList: React.FC<PatientListProps> = ({
           />
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <select
-            value={selectedSurgeryFilter}
-            onChange={(e) => setSelectedSurgeryFilter(e.target.value)}
-            className="w-full sm:w-auto px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-teal-500"
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            aria-expanded={isSurgeryFilterOpen}
+            onClick={() => setIsSurgeryFilterOpen((open) => !open)}
+            className={`inline-flex w-full sm:w-auto items-center justify-between gap-2 px-3 py-2 text-xs font-semibold rounded-lg border transition-colors ${selectedSurgeryFilter !== 'all' ? 'bg-teal-50 border-teal-200 text-teal-800' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`}
           >
-            <option value="all">Semua Jenis Operasi (7 MVP)</option>
-            {MVP_SURGERY_DEFINITIONS.map((def) => (
-              <option key={def.code} value={def.canonicalName}>
-                {def.canonicalName}
-              </option>
-            ))}
-          </select>
+            <Filter className="w-4 h-4" />
+            <span className="max-w-[190px] truncate">{selectedSurgeryFilter === 'all' ? 'Semua Operasi' : selectedSurgeryFilter}</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isSurgeryFilterOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {isSurgeryFilterOpen && (
+            <>
+              <button type="button" aria-label="Tutup pilihan operasi" className="fixed inset-0 z-20 cursor-default" onClick={() => setIsSurgeryFilterOpen(false)} />
+              <div className="absolute right-0 top-full z-30 mt-2 w-[min(84vw,280px)] p-1.5 bg-white border border-slate-200 rounded-xl shadow-xl">
+                <button type="button" onClick={() => { setSelectedSurgeryFilter('all'); setIsSurgeryFilterOpen(false); }} className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${selectedSurgeryFilter === 'all' ? 'bg-teal-50 text-teal-800' : 'text-slate-700 hover:bg-slate-50'}`}>
+                  Semua Jenis Operasi <span className="text-slate-400 font-normal">(7 jenis)</span>
+                </button>
+                {MVP_SURGERY_DEFINITIONS.map((def) => (
+                  <button key={def.code} type="button" onClick={() => { setSelectedSurgeryFilter(def.canonicalName); setIsSurgeryFilterOpen(false); }} className={`w-full text-left px-3 py-2.5 rounded-lg text-xs transition-colors ${selectedSurgeryFilter === def.canonicalName ? 'bg-teal-50 text-teal-800 font-bold' : 'text-slate-700 hover:bg-slate-50'}`}>
+                    {def.canonicalName}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
