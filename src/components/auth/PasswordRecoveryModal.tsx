@@ -75,8 +75,8 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({
       setError('Tautan pengaturan ulang kata sandi tidak berlaku atau sudah kedaluwarsa. Silakan minta tautan baru.');
       return;
     }
-    if (newPassword.length < 8) {
-      setError('Kata sandi baru minimal 8 karakter.');
+    if (newPassword.length < 8 || !/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      setError('Kata sandi harus minimal 8 karakter dan mengandung huruf kecil, huruf besar, serta angka.');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -187,10 +187,11 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimal 8 karakter"
+                    placeholder="Min. 8 karakter, huruf besar, kecil & angka"
                     leftIcon={<Lock className="w-4 h-4" />}
                     className="w-full pl-10 py-3 bg-slate-50/80 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/15 focus:border-teal-500 transition"
                   />
+                  <p className="mt-1 text-xs text-slate-500">Gunakan minimal 8 karakter, terdiri dari huruf besar, huruf kecil, dan angka.</p>
                 </div>
 
                 <div>
