@@ -156,7 +156,7 @@ const InteractiveTrendChart: React.FC<{
       </svg>
     </div>
     <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">{series.map((line)=><span key={line.name} className="inline-flex items-center gap-2" style={{color:line.color}}><span className="h-2.5 w-2.5 rounded-full" style={{backgroundColor:line.color}}/>{line.name}</span>)}</div>
-    {activePoint?<div className="mt-3 rounded-xl border border-teal-200 bg-teal-50/70 p-3 text-sm animate-[nursego-chart-in_220ms_ease-out]"><div className="flex items-center justify-between gap-2"><strong className="text-slate-800">{activePoint.fullDate}</strong><button type="button" onClick={()=>setActive(null)} className="rounded-md px-2 py-1 text-xs text-teal-800 hover:bg-teal-100">Tutup</button></div><p className="mt-1 font-semibold" style={{color:series[active.seriesIndex].color}}>{series[active.seriesIndex].name}: {activePoint.value} {unit}</p></div>:<p className="mt-2 text-center text-xs text-slate-500">Ketuk titik pada grafik untuk melihat detail pengukuran.</p>}
+    {activePoint?<div className="mt-3 rounded-xl border border-teal-200 bg-teal-50/70 p-3 text-sm animate-[nursego-chart-in_220ms_ease-out]"><div className="flex items-center justify-between gap-2"><strong className="text-slate-800">{activePoint.fullDate}</strong><button type="button" onClick={()=>setActive(null)} className="rounded-md px-2 py-1 text-xs text-teal-800 hover:bg-teal-100">Tutup</button></div><p className="mt-1 font-semibold" style={{color:series[active?.seriesIndex ?? 0].color}}>{series[active?.seriesIndex ?? 0].name}: {activePoint.value} {unit}</p></div>:<p className="mt-2 text-center text-xs text-slate-500">Ketuk titik pada grafik untuk melihat detail pengukuran.</p>}
   </div>;
 };
 
