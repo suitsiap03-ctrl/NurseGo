@@ -92,8 +92,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectRole, onSe
             </div>
 
             <div className="nursego-hero-visual">
-              <img className="nursego-hero-photo" src="https://images.unsplash.com/photo-1765896387387-0538bc9f997e?auto=format&fit=crop&w=1400&q=82" alt="Perawat mendampingi pasien dalam suasana perawatan yang hangat" loading="eager" fetchPriority="high" />
-              <span className="nursego-photo-credit">Foto: Age Cymru / Unsplash</span>
+              <img className="nursego-hero-photo" src="https://trustedpathhomehealth.com/assets/images/hero-care-focused-960.webp" alt="Perawat mendampingi pasien dalam suasana perawatan yang hangat" loading="eager" fetchPriority="high" />
+              <span className="nursego-photo-credit">Ilustrasi perawatan di rumah</span>
               <div className="nursego-hero-orbit nursego-orbit-one" />
               <div className="nursego-hero-orbit nursego-orbit-two" />
               <div className="nursego-hero-main-card">
