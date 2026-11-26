@@ -51,6 +51,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
   const [respiratoryRate, setRespiratoryRate] = useState<string>('');
   const [oxygenSaturation, setOxygenSaturation] = useState<string>('');
   const [vitalsNotMeasuredReason, setVitalsNotMeasuredReason] = useState<string>('');
+  const hasAnyVitalMeasurement = [systolic, diastolic, temperature, heartRate, respiratoryRate, oxygenSaturation].some((value) => value.trim() !== '');
 
   // STEP 2: Tingkat Nyeri
   const [painScale, setPainScale] = useState<number | null>(null);
@@ -202,7 +203,6 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       .filter(Boolean)
       .join(' | ');
 
-    const hasAnyVital = [systolic, diastolic, temperature, heartRate, respiratoryRate, oxygenSaturation].some((value) => value.trim() !== '');
     const vitalsData = {
       patient_id: user.id,
       surgery_id: patientSurgery?.id || null,
@@ -372,7 +372,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       } else {
         await notifyAssignedNurses(user.id, {
           title: 'Laporan Pemantauan Harian Baru',
-          message: `${profile?.full_name || 'Pasien'} telah mengirimkan pemantauan harian. ${hasAnyVital ? 'Tanda vital yang tersedia ikut dicatat. ' : 'Belum ada angka tanda vital yang diukur. ' }Skala nyeri ${painScale}/10.`,
+          message: `${profile?.full_name || 'Pasien'} telah mengirimkan pemantauan harian. ${hasAnyVitalMeasurement ? 'Hasil tanda vital yang tersedia ikut dicatat. ' : 'Belum ada angka tanda vital yang diukur; laporan lainnya tetap tersimpan. ' }Skala nyeri ${painScale}/10.`,
           type: 'monitoring',
           linkTarget: `patient:${user.id}:monitoring`,
         });
@@ -404,7 +404,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
             {isDemoMode
               ? 'Pratinjau Mode Demo selesai. Masuk menggunakan akun Pasien agar data tersimpan.'
-              : 'Hasil tanda vital, skala nyeri, gejala, kondisi umum, dan luka telah tersimpan dan dikirimkan ke perawat pendamping Anda.'}
+              : `${hasAnyVitalMeasurement ? 'Hasil tanda vital yang diisi, ' : ''}skala nyeri, gejala, kondisi umum, dan kondisi luka telah tersimpan dan dikirimkan ke perawat pendamping Anda.`}
           </p>
         </div>
 
