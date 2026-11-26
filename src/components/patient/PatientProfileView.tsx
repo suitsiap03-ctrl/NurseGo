@@ -330,7 +330,7 @@ export const PatientProfileView: React.FC = () => {
         if (updErr) {
           setTeamFeedback({
             type: 'error',
-            text: `Fungsi \`end_nurse_patient_assignment\` belum terpasang di Supabase dan pembaruan langsung ditolak (${updErr.message}). Jalankan migrasi SQL \`004_live_sync_consent_rpcs_and_mvp.sql\`.`,
+            text: `Pembaruan status pendampingan belum dapat dilakukan (${updErr.message}). Silakan coba kembali nanti.`,
           });
           return;
         }
