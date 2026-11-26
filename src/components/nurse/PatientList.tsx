@@ -220,7 +220,7 @@ export const PatientList: React.FC<PatientListProps> = ({
       if (error) {
         throw new Error(
           isMissingRpcError(error)
-            ? 'Fungsi `respond_nurse_patient_assignment` belum tersedia di Supabase. Jalankan migrasi `004_live_sync_consent_rpcs_and_mvp.sql`.'
+            ? 'Fitur persetujuan penautan pasien belum tersedia. Silakan coba kembali nanti.'
             : error.message
         );
       }
@@ -244,7 +244,7 @@ export const PatientList: React.FC<PatientListProps> = ({
       if (error) {
         throw new Error(
           isMissingRpcError(error)
-            ? 'Fungsi `end_nurse_patient_assignment` belum tersedia di Supabase. Jalankan migrasi `004_live_sync_consent_rpcs_and_mvp.sql`.'
+            ? 'Fitur pengakhiran pendampingan belum tersedia. Silakan coba kembali nanti.'
             : error.message
         );
       }
@@ -458,7 +458,7 @@ export const PatientList: React.FC<PatientListProps> = ({
         {loading ? (
           <div className="p-12 text-center text-xs text-slate-500">
             <RefreshCw className="w-5 h-5 animate-spin mx-auto text-teal-600 mb-2" />
-            <span>Mengambil data pasien dari Supabase...</span>
+            <span>Mengambil data pasien...</span>
           </div>
         ) : filteredPatients.length === 0 ? (
           <div className="p-10 text-center text-xs text-slate-500 space-y-3">
