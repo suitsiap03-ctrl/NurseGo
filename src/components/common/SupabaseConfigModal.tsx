@@ -118,7 +118,7 @@ export const SupabaseConfigModal: React.FC<SupabaseConfigModalProps> = ({
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://pwokxvmvyezhacjpzhuz.supabase.co"
+              placeholder="https://alamat-server-anda"
               className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg font-mono text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:bg-white"
             />
           </div>
