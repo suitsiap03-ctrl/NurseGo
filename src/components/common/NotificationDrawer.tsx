@@ -46,10 +46,10 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
-    <div className="nursego-drawer-backdrop fixed inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-xs">
-      <div className="nursego-drawer-panel bg-white w-full max-w-md h-full shadow-2xl flex flex-col border-l border-slate-200">
+    <div className="nursego-drawer-backdrop fixed inset-0 z-50 flex justify-end bg-slate-900/45 backdrop-blur-sm">
+      <div className="nursego-drawer-panel bg-white w-full max-w-none h-full min-h-0 shadow-2xl flex flex-col border-0">
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 sm:px-6 border-b border-slate-100 flex items-center justify-between shrink-0 pt-[max(1rem,env(safe-area-inset-top))]">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center relative">
               <Bell className="w-4 h-4" />
@@ -86,7 +86,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
         </div>
 
         {/* Notification List */}
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 text-xs">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain divide-y divide-slate-100 text-xs">
           {notifications.length === 0 ? (
             <div className="p-12 text-center text-slate-400 space-y-2">
               <Bell className="w-8 h-8 mx-auto text-slate-300" />
@@ -165,7 +165,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-slate-100 text-center text-[11px] text-slate-400">
+        <div className="p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] border-t border-slate-100 text-center text-[11px] text-slate-400 shrink-0">
           NurseGo Notification System · Terintegrasi Real-time
         </div>
       </div>
