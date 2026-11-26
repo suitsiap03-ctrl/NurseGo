@@ -130,7 +130,7 @@ export const PatientActivation: React.FC<PatientActivationProps> = ({
         );
       }
     } catch {
-      setTokenCheckMsg('Tidak dapat memeriksa token saat ini. Periksa koneksi internet dan konfigurasi Supabase.');
+      setTokenCheckMsg('Tidak dapat memeriksa token saat ini. Periksa koneksi internet dan pengaturan koneksi.');
     } finally {
       setCheckingToken(false);
     }
