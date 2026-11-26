@@ -34,24 +34,28 @@ export function isValidIsoDateOnly(value: string): boolean {
   );
 }
 
-export function generateInvitationToken(length = 8): string {
+export function generateInvitationToken(length = 16): string {
+  if (typeof crypto === 'undefined' || typeof crypto.getRandomValues !== 'function') {
+    throw new Error('Peramban tidak mendukung pembuatan kode undangan yang aman. Gunakan peramban modern melalui koneksi HTTPS.');
+  }
+
   const chars: string[] = [];
-  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
-    const buf = new Uint8Array(length);
-    crypto.getRandomValues(buf);
-    for (let i = 0; i < length; i++) {
-      chars.push(TOKEN_CHARSET[buf[i] % TOKEN_CHARSET.length]);
-    }
-  } else {
-    for (let i = 0; i < length; i++) {
-      chars.push(TOKEN_CHARSET[Math.floor(Math.random() * TOKEN_CHARSET.length)]);
+  const limit = Math.floor(256 / TOKEN_CHARSET.length) * TOKEN_CHARSET.length;
+  while (chars.length < length) {
+    const remaining = length - chars.length;
+    const randomBytes = new Uint8Array(Math.max(remaining * 2, 16));
+    crypto.getRandomValues(randomBytes);
+    for (const value of randomBytes) {
+      if (value >= limit) continue;
+      chars.push(TOKEN_CHARSET[value % TOKEN_CHARSET.length]);
+      if (chars.length === length) break;
     }
   }
   return `INV-${chars.join('')}`;
 }
 
 export function isValidInvitationToken(token: string): boolean {
-  return /^INV-[A-Z0-9]{6,12}$/.test(token.trim().toUpperCase());
+  return /^INV-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8,24}$/.test(token.trim().toUpperCase());
 }
 
 export function validatePatientModalInput(input: InviteValidationInput): string | null {
