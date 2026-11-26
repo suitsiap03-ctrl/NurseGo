@@ -51,6 +51,7 @@ export interface NurseProfile {
 
 export interface PatientProfile {
   id: string; // matches auth.uid()
+  birth_date?: string;
   date_of_birth?: string;
   gender?: 'L' | 'P' | 'Laki-laki' | 'Perempuan';
   emergency_contact_name?: string;
