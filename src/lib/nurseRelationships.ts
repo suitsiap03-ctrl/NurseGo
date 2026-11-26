@@ -107,7 +107,7 @@ export async function fetchNurseRelationships(
     if (relErr) {
       rpcErrMsg = relErr.message;
       rpcNotice = isMissingRpcError(relErr)
-        ? 'Fungsi relasi multi-perawat belum tersedia di Supabase. Menggunakan kueri penugasan aktif langsung.'
+        ? 'Fitur relasi multi-perawat belum tersedia. Menggunakan data penugasan aktif.'
         : `Fungsi relasi tidak dapat dimuat (${relErr.message}). Menggunakan kueri penugasan aktif langsung.`;
     } else {
       rpcList = parseRpcRelationshipPayload(relRpc);
