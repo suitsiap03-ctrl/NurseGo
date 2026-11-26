@@ -1,6 +1,6 @@
 /**
- * Dedicated Password Reset Page triggered when user opens a Supabase PASSWORD_RECOVERY link.
- * Isolated from dashboards: verifies recovery session, updates password via Supabase Auth,
+ * Dedicated Password Reset Page triggered when user opens a tautan pemulihan kata sandi.
+ * Isolated from dashboards: verifies recovery session, updates password melalui layanan autentikasi,
  * signs out of the temporary recovery session, and directs back to the matching portal login page.
  */
 
