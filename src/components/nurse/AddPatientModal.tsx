@@ -155,7 +155,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
       setSuggestSwitchToInvite(true);
       throw new Error(
         isMissingRpcError(linkErr)
-          ? 'Fitur penautan langsung akun terdaftar (`nurse_request_patient_link`) belum tersedia. Anda tetap dapat mengundang pasien baru melalui tab "Undang Pasien Baru".'
+          ? 'Fitur penautan akun pasien belum tersedia saat ini. Anda masih dapat mengirim undangan pasien baru melalui tab "Undang Pasien Baru".'
           : `Gagal mengajukan penautan pasien: ${linkErr.message}`
       );
     }
@@ -242,7 +242,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
         invError = fallbackErr;
         if (!fallbackErr) {
           warningMsg =
-            'Undangan tersimpan, namun sebagian kolom tambahan belum tersedia di tabel `patient_invitations`.';
+            'Undangan berhasil disimpan, tetapi beberapa informasi tambahan belum dapat disimpan. Periksa kembali data pasien sebelum melanjutkan.';
         }
       }
 
