@@ -259,13 +259,19 @@ export const PatientList: React.FC<PatientListProps> = ({
   };
 
   const handleCopyLink = async (inv: PatientInvitation) => {
+    if (!inv.token) {
+      setErrorMsg(
+        'Kode undangan hanya tersedia saat pertama kali dibuat dan tidak disimpan dalam bentuk teks. Hapus undangan lama lalu buat undangan baru jika tautannya hilang.'
+      );
+      return;
+    }
     const link = getPatientActivationUrl(inv.token, inv.patient_email);
     try {
       await navigator.clipboard.writeText(link);
       setCopiedId(inv.id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      // ignore
+      setErrorMsg('Tautan tidak dapat disalin otomatis. Silakan salin tautan saat undangan pertama kali dibuat.');
     }
   };
 
@@ -657,7 +663,11 @@ export const PatientList: React.FC<PatientListProps> = ({
                   <div className="font-bold text-slate-900">{inv.patient_name}</div>
                   <div className="text-slate-600 flex flex-wrap items-center gap-2">
                     <span>{inv.patient_email}</span>
-                    <span>· Kode: <strong className="font-mono text-teal-700">{inv.token}</strong></span>
+                    {inv.token ? (
+                      <span>· Kode: <strong className="font-mono text-teal-700">{inv.token}</strong></span>
+                    ) : (
+                      <span className="text-slate-500">· Kode tidak ditampilkan kembali demi keamanan</span>
+                    )}
                     {inv.surgery_date && (
                       <span>· Tgl Op: {formatLocalDate(inv.surgery_date)}</span>
                     )}
@@ -665,18 +675,28 @@ export const PatientList: React.FC<PatientListProps> = ({
                 </div>
                 <div className="flex items-center gap-2 self-end sm:self-center">
                   <button
+                    type="button"
                     onClick={() => handleCopyLink(inv)}
-                    className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold rounded-lg inline-flex items-center gap-1.5"
+                    disabled={!inv.token}
+                    title={!inv.token ? 'Kode tidak disimpan dalam bentuk teks demi keamanan. Buat undangan baru jika tautan hilang.' : 'Salin tautan aktivasi'}
+                    className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold rounded-lg inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-teal-50"
                   >
-                    {copiedId === inv.id ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Link Tersalin</span>
-                      </>
+                    {inv.token ? (
+                      copiedId === inv.id ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Link Tersalin</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Salin Link Aktivasi</span>
+                        </>
+                      )
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5" />
-                        <span>Salin Link Aktivasi</span>
+                        <span>Tautan Tidak Tersedia</span>
                       </>
                     )}
                   </button>
