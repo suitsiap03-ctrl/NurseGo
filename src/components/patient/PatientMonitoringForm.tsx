@@ -114,11 +114,11 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
     const spo2 = parseVitalNumber(oxygenSaturation);
 
     if (isNaN(sys) || sys < 50 || sys > 260) {
-      setErrorMsg('Tekanan darah sistolik harus di antara 50 – 260 mmHg.');
+      setErrorMsg('Angka atas tekanan darah harus di antara 50–260 mmHg. Periksa kembali angka pada alat pengukur.');
       return false;
     }
     if (isNaN(dia) || dia < 30 || dia > 160) {
-      setErrorMsg('Tekanan darah diastolik harus di antara 30 – 160 mmHg.');
+      setErrorMsg('Angka bawah tekanan darah harus di antara 30–160 mmHg. Periksa kembali angka pada alat pengukur.');
       return false;
     }
     if (isNaN(temp) || temp < 32 || temp > 43) {
@@ -454,34 +454,20 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="block font-semibold text-slate-700 mb-1">
-                Tekanan Darah (Sistolik / Diastolik) *
-              </label>
-              <div className="flex items-center gap-2 max-w-xs">
-                <input
-                  type="number"
-                  min="50"
-                  max="260"
-                  inputMode="numeric"
-                  placeholder="Sistolik"
-                  value={systolic}
-                  onChange={(e) => setSystolic(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-sm"
-                />
-                <span className="font-bold text-slate-400">/</span>
-                <input
-                  type="number"
-                  min="30"
-                  max="160"
-                  inputMode="numeric"
-                  placeholder="Diastolik"
-                  value={diastolic}
-                  onChange={(e) => setDiastolic(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-sm"
-                />
-                <span className="text-slate-500 font-medium whitespace-nowrap">mmHg</span>
+              <label className="block font-semibold text-slate-700 mb-1">Tekanan Darah *</label>
+              <p className="mb-2 max-w-lg text-[11px] leading-relaxed text-slate-500">Lihat dua angka pada alat pengukur tekanan darah. Masukkan angka yang di atas terlebih dahulu, lalu angka yang di bawah.</p>
+              <div className="grid max-w-md grid-cols-[1fr_auto_1fr] items-end gap-2">
+                <div>
+                  <label htmlFor="patient-bp-systolic" className="mb-1 block text-[11px] font-semibold text-slate-700">Angka atas</label>
+                  <input id="patient-bp-systolic" type="number" min="50" max="260" inputMode="numeric" placeholder="Contoh 120" value={systolic} onChange={(e) => setSystolic(e.target.value)} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-base focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none transition" />
+                </div>
+                <span className="pb-2 font-bold text-slate-400">/</span>
+                <div>
+                  <label htmlFor="patient-bp-diastolic" className="mb-1 block text-[11px] font-semibold text-slate-700">Angka bawah</label>
+                  <input id="patient-bp-diastolic" type="number" min="30" max="160" inputMode="numeric" placeholder="Contoh 80" value={diastolic} onChange={(e) => setDiastolic(e.target.value)} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-base focus:border-teal-500 focus:ring-2 focus:ring-teal-100 outline-none transition" />
+                </div>
+                <span className="col-span-3 text-[10px] text-slate-500">Satuan: mmHg · Contoh hasil 120/80 berarti angka atas 120 dan angka bawah 80.</span>
               </div>
-              <span className="text-[10px] text-slate-400 mt-1 block">Acuan normal: 100/60 – 129/84 mmHg</span>
             </div>
 
             <div>
