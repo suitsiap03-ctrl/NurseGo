@@ -190,33 +190,51 @@ export const NurseAlerts: React.FC<NurseAlertsProps> = ({ onSelectPatient }) => 
         </div>
       )}
 
-      <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex items-center gap-2 text-xs">
-          <span className="font-semibold text-slate-600">Tingkat Keparahan:</span>
-          <select
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800"
-          >
-            <option value="all">Semua Tingkat</option>
-            <option value="darurat">Darurat</option>
-            <option value="urgent">Urgent</option>
-            <option value="waspada">Waspada</option>
-          </select>
+      <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 space-y-3">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Tingkat Keparahan</span>
+            <span className="text-[10px] text-slate-400">Filter</span>
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+            {[
+              { value: 'all', label: 'Semua' },
+              { value: 'darurat', label: 'Darurat' },
+              { value: 'urgent', label: 'Urgent' },
+              { value: 'waspada', label: 'Waspada' },
+            ].map((item) => (
+              <button key={item.value} type="button" onClick={() => setLevelFilter(item.value)}
+                aria-pressed={levelFilter === item.value}
+                className={`shrink-0 px-3 py-2 rounded-lg text-xs font-semibold border transition-all duration-200 ${levelFilter === item.value
+                  ? item.value === 'darurat' ? 'bg-rose-600 border-rose-600 text-white shadow-sm'
+                    : item.value === 'urgent' ? 'bg-orange-500 border-orange-500 text-white shadow-sm'
+                    : item.value === 'waspada' ? 'bg-amber-400 border-amber-400 text-slate-900 shadow-sm'
+                    : 'bg-slate-800 border-slate-800 text-white shadow-sm'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
-
-        <div className="flex items-center gap-2 text-xs">
-          <span className="font-semibold text-slate-600">Status Penanganan:</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800"
-          >
-            <option value="all">Semua Status</option>
-            <option value="aktif">Aktif</option>
-            <option value="ditinjau">Ditinjau</option>
-            <option value="selesai">Selesai</option>
-          </select>
+        <div className="h-px bg-slate-100" />
+        <div className="space-y-2">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status Penanganan</span>
+          <div className="grid grid-cols-4 gap-1.5">
+            {[
+              { value: 'all', label: 'Semua' },
+              { value: 'aktif', label: 'Aktif' },
+              { value: 'ditinjau', label: 'Ditinjau' },
+              { value: 'selesai', label: 'Selesai' },
+            ].map((item) => (
+              <button key={item.value} type="button" onClick={() => setStatusFilter(item.value)}
+                aria-pressed={statusFilter === item.value}
+                className={`min-w-0 px-1.5 sm:px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all duration-200 ${statusFilter === item.value
+                  ? 'bg-teal-700 border-teal-700 text-white shadow-sm'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
