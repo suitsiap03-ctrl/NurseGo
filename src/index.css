@@ -2019,3 +2019,178 @@ html, body {
     padding-right: clamp(2rem, 3vw, 3.25rem);
   }
 }
+
+
+/* =========================================================
+   NURSEGO PREMIUM HEALTHCARE — GLOBAL FINISHING PASS
+   Green + white identity, clear clinical status colors,
+   consistent surfaces, typography and responsive behavior.
+   ========================================================= */
+:root {
+  --ng-brand: #087f68;
+  --ng-brand-strong: #066653;
+  --ng-brand-soft: #e9f7f1;
+  --ng-ink: #18352f;
+  --ng-muted: #71847f;
+  --ng-line: #e1ebe6;
+  --ng-surface: #ffffff;
+  --ng-canvas: #f5faf7;
+  --ng-radius-card: 16px;
+  --ng-shadow-card: 0 5px 20px rgba(23, 66, 51, .055);
+  font-family: 'Nunito Sans', 'Segoe UI', sans-serif;
+}
+html, body, button, input, select, textarea {
+  font-family: 'Nunito Sans', 'Segoe UI', Roboto, Arial, sans-serif !important;
+}
+body {
+  color: var(--ng-ink);
+  background: linear-gradient(145deg, #f8fcf9 0%, #f1f8f4 52%, #f8fbfa 100%);
+}
+h1, h2, h3, h4, h5, h6,
+.nursego-page-enter h1, .nursego-page-enter h2,
+.nursego-page-enter h3, .nursego-ios-header .font-bold {
+  font-family: 'Outfit', 'Nunito Sans', sans-serif !important;
+  letter-spacing: -.025em;
+}
+::selection { background: rgba(16, 145, 111, .18); color: #123c30; }
+:focus-visible { outline: 3px solid rgba(16, 145, 111, .34); outline-offset: 2px; }
+
+/* App shell and page rhythm */
+#root, #root > div { min-width: 0; }
+.nursego-page-enter {
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  padding-top: clamp(1rem, 2vw, 1.75rem);
+}
+.nursego-page-enter > .space-y-6 { min-width: 0; }
+.nursego-page-enter .text-xs { line-height: 1.55; }
+.nursego-page-enter .text-\\[10px\\] { line-height: 1.4; }
+
+/* Main content cards: clean white surfaces with a consistent edge. */
+.nursego-page-enter .bg-white.rounded-xl.border,
+.nursego-page-enter .bg-white.rounded-2xl.border,
+.nursego-page-enter form.bg-white,
+.nursego-page-enter .bg-white.rounded-xl:not([class*="shadow-none"]) {
+  border-color: var(--ng-line);
+  box-shadow: var(--ng-shadow-card);
+}
+.nursego-page-enter .bg-white.rounded-xl.border,
+.nursego-page-enter .bg-white.rounded-2xl.border {
+  border-radius: var(--ng-radius-card);
+}
+@media (hover: hover) and (pointer: fine) {
+  .nursego-page-enter .bg-white.rounded-xl.border,
+  .nursego-page-enter .bg-white.rounded-2xl.border {
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .nursego-page-enter .bg-white.rounded-xl.border:hover,
+  .nursego-page-enter .bg-white.rounded-2xl.border:hover {
+    border-color: #c8e2d5;
+    box-shadow: 0 9px 26px rgba(23, 66, 51, .085);
+  }
+}
+
+/* Brand actions: use green consistently without recoloring risk states. */
+.nursego-page-enter button.bg-teal-600,
+.nursego-page-enter a.bg-teal-600,
+.nursego-page-enter button.bg-emerald-600 {
+  background: linear-gradient(135deg, #0b9274, #08745f);
+  box-shadow: 0 3px 9px rgba(8, 127, 104, .16);
+}
+.nursego-page-enter button.bg-teal-600:hover,
+.nursego-page-enter a.bg-teal-600:hover,
+.nursego-page-enter button.bg-emerald-600:hover {
+  background: linear-gradient(135deg, #087b64, #065e4e);
+}
+
+/* Forms and selection controls */
+.nursego-page-enter input:not([type="checkbox"]):not([type="radio"]),
+.nursego-page-enter select,
+.nursego-page-enter textarea {
+  min-height: 40px;
+  border-color: #d9e6df;
+  border-radius: 10px;
+  background-color: #fbfdfc;
+  color: #18352f;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.nursego-page-enter textarea { min-height: 84px; }
+.nursego-page-enter input:focus,
+.nursego-page-enter select:focus,
+.nursego-page-enter textarea:focus {
+  border-color: #39a889;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(28, 160, 124, .12);
+  outline: none;
+}
+.nursego-page-enter input::placeholder,
+.nursego-page-enter textarea::placeholder { color: #9aaba4; }
+
+/* Navigation: subtle glass, stronger active state, consistent sizing. */
+.nursego-ios-header {
+  background: rgba(255,255,255,.92);
+  border-color: #e2ece6;
+  box-shadow: 0 3px 16px rgba(21, 61, 47, .045);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.nursego-ios-header .nursego-ios-tab-active {
+  background: #eaf7f1;
+  color: #076b55 !important;
+  border-radius: 10px;
+}
+.nursego-ios-header .nursego-ios-tab-active svg { color: #087f68 !important; }
+.nursego-ios-header .nursego-ios-tab:not(.nursego-ios-tab-active) {
+  border-radius: 10px;
+}
+
+/* Tables and chart panels */
+.nursego-page-enter table { border-collapse: separate; border-spacing: 0; }
+.nursego-page-enter thead th {
+  background: #f1f8f4;
+  color: #526d62;
+  font-weight: 800;
+  letter-spacing: .025em;
+}
+.nursego-page-enter tbody tr:hover { background: #f5fbf7; }
+.nursego-page-enter td, .nursego-page-enter th { border-color: #e8f0eb; }
+.nursego-page-enter [class*="recharts-wrapper"] { max-width: 100%; }
+
+/* More legible section headers and compact metadata labels */
+.nursego-page-enter h1 { color: #173d31; }
+.nursego-page-enter h2, .nursego-page-enter h3 { color: #24483c; }
+.nursego-page-enter label { color: #49645a; }
+.nursego-page-enter .uppercase.tracking-wider { letter-spacing: .075em; }
+
+/* Preserve clinical status semantics: danger, urgent, caution and normal. */
+.nursego-page-enter .bg-rose-50 { border-color: #f3cbd0; }
+.nursego-page-enter .bg-orange-50 { border-color: #f4d4bd; }
+.nursego-page-enter .bg-amber-50 { border-color: #f0dfad; }
+.nursego-page-enter .bg-emerald-50 { border-color: #cce9d8; }
+
+/* Mobile: retain touch-friendly controls and prevent desktop overflow. */
+@media (max-width: 767px) {
+  .nursego-page-enter {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-top: 14px !important;
+  }
+  .nursego-page-enter > .space-y-6 { gap: 14px; }
+  .nursego-page-enter button { min-height: 36px; }
+  .nursego-page-enter .overflow-x-auto { scrollbar-width: thin; }
+  .nursego-page-enter table { min-width: 620px; }
+  .nursego-page-enter .grid { min-width: 0; }
+  .nursego-page-enter [class*="rounded-xl"].border,
+  .nursego-page-enter [class*="rounded-2xl"].border { border-radius: 12px; }
+}
+@media (min-width: 768px) {
+  .nursego-page-enter { padding-bottom: 36px !important; }
+}
+@media (min-width: 1440px) {
+  .nursego-page-enter { max-width: 1680px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nursego-page-enter *,
+  .nursego-ios-header * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
