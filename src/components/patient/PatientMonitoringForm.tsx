@@ -35,19 +35,19 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   // STEP 1: Tanda Vital
-  const [systolic, setSystolic] = useState<string>('120');
-  const [diastolic, setDiastolic] = useState<string>('80');
-  const [temperature, setTemperature] = useState<string>('36.6');
-  const [heartRate, setHeartRate] = useState<string>('76');
-  const [respiratoryRate, setRespiratoryRate] = useState<string>('18');
-  const [oxygenSaturation, setOxygenSaturation] = useState<string>('98');
+  const [systolic, setSystolic] = useState<string>('');
+  const [diastolic, setDiastolic] = useState<string>('');
+  const [temperature, setTemperature] = useState<string>('');
+  const [heartRate, setHeartRate] = useState<string>('');
+  const [respiratoryRate, setRespiratoryRate] = useState<string>('');
+  const [oxygenSaturation, setOxygenSaturation] = useState<string>('');
 
   // STEP 2: Tingkat Nyeri
-  const [painScale, setPainScale] = useState<number>(2);
-  const [painLocation, setPainLocation] = useState<string>('Area luka operasi');
-  const [painCharacteristic, setPainCharacteristic] = useState<string>('Nyeri tumpul hilang timbul');
-  const [aggravating, setAggravating] = useState<string>('Saat bangun dari tempat tidur');
-  const [relieving, setRelieving] = useState<string>('Istirahat berbaring');
+  const [painScale, setPainScale] = useState<number | null>(null);
+  const [painLocation, setPainLocation] = useState<string>('');
+  const [painCharacteristic, setPainCharacteristic] = useState<string>('');
+  const [aggravating, setAggravating] = useState<string>('');
+  const [relieving, setRelieving] = useState<string>('');
 
   // STEP 3: Gejala yang Dirasakan
   const symptomList = [
@@ -63,11 +63,13 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
     'Perut kembung',
   ];
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
-  const [symptomTrend, setSymptomTrend] = useState<'membaik' | 'sama' | 'memburuk'>('membaik');
+  const [noSymptoms, setNoSymptoms] = useState(false);
+  const [symptomTrend, setSymptomTrend] = useState<'membaik' | 'sama' | 'memburuk' | null>(null);
   const [symptomNotes, setSymptomNotes] = useState<string>('');
 
   // STEP 4: Kondisi Luka Operasi
-  const [isWoundNormal, setIsWoundNormal] = useState<boolean>(true);
+  const [isWoundNormal, setIsWoundNormal] = useState<boolean>(false);
+  const [woundAssessmentConfirmed, setWoundAssessmentConfirmed] = useState(false);
   const [hasRedness, setHasRedness] = useState<boolean>(false);
   const [hasSwelling, setHasSwelling] = useState<boolean>(false);
   const [hasWarmth, setHasWarmth] = useState<boolean>(false);
@@ -80,7 +82,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
   // STEP 5: Kondisi Umum & Catatan Tambahan
   const [generalFeeling, setGeneralFeeling] = useState<
     'sangat_baik' | 'baik' | 'biasa_saja' | 'kurang_baik' | 'buruk'
-  >('baik');
+  >(null);
   const [additionalNotes, setAdditionalNotes] = useState<string>('');
 
   const [submitting, setSubmitting] = useState(false);
@@ -94,6 +96,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
     setSelectedSymptoms((prev) =>
       prev.includes(sym) ? prev.filter((s) => s !== sym) : [...prev, sym]
     );
+    setNoSymptoms(false);
   };
 
   const parseVitalNumber = (raw: string): number => {
@@ -143,16 +146,24 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       if (!validateStep1()) return;
       setCurrentStep(2);
     } else if (currentStep === 2) {
-      if (!painLocation.trim()) {
-        setErrorMsg('Mohon isi lokasi nyeri yang dirasakan.');
+      if (painScale === null || !painLocation.trim()) {
+        setErrorMsg('Pilih skala nyeri dan isi lokasi nyeri. Jika tidak nyeri, pilih angka 0.');
         return;
       }
       setErrorMsg(null);
       setCurrentStep(3);
     } else if (currentStep === 3) {
+      if (!symptomTrend || (!noSymptoms && selectedSymptoms.length === 0)) {
+        setErrorMsg('Pilih perkembangan keluhan dan tandai gejala yang dirasakan, atau pilih “Tidak ada keluhan”.');
+        return;
+      }
       setErrorMsg(null);
       setCurrentStep(4);
     } else if (currentStep === 4) {
+      if (!woundAssessmentConfirmed) {
+        setErrorMsg('Konfirmasi kondisi luka: pilih luka tampak normal atau tandai keluhan yang terlihat.');
+        return;
+      }
       setErrorMsg(null);
       setCurrentStep(5);
     }
@@ -160,6 +171,14 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
 
   const handleFinalSubmit = async () => {
     if (!user || submitting) return;
+    if (!generalFeeling) {
+      setErrorMsg('Pilih kondisi tubuh Anda hari ini sebelum mengirim laporan.');
+      return;
+    }
+    if (!woundAssessmentConfirmed || !symptomTrend || painScale === null) {
+      setErrorMsg('Masih ada bagian pemantauan yang belum dikonfirmasi. Periksa kembali langkah sebelumnya.');
+      return;
+    }
     setErrorMsg(null);
 
     const timestamp = new Date().toISOString();
@@ -187,7 +206,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       patient_id: user.id,
       recorded_by: user.id,
       recorded_at: timestamp,
-      pain_scale: painScale,
+      pain_scale: painScale ?? 0,
       location: painLocation.trim() || 'Area operasi',
       characteristics: painCharacteristic.trim(),
       aggravating_factors: aggravating.trim() || undefined,
@@ -199,8 +218,8 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
       recorded_by: user.id,
       recorded_at: timestamp,
       symptoms: selectedSymptoms,
-      general_condition: generalFeeling,
-      symptom_trend: symptomTrend,
+      general_condition: generalFeeling ?? 'baik',
+      symptom_trend: symptomTrend ?? 'sama',
       notes: combinedGeneralNotes || `Tren gejala: ${symptomTrend}`,
     };
 
@@ -363,7 +382,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           </div>
         ) : (
           <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 font-medium">
-            Kondisi Anda saat ini tercatat dalam batas stabil. Lanjutkan istirahat dan konsumsi obat sesuai jadwal!
+            Tidak ada peringatan otomatis yang terpicu dari data yang dikirim. Hal ini bukan berarti kondisi Anda dipastikan stabil. Hubungi perawat atau fasilitas kesehatan jika ada keluhan atau kondisi memburuk.
           </div>
         )}
 
@@ -384,7 +403,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           Form Pemantauan Mandiri Harian
         </h1>
         <p className="text-xs text-slate-500 mt-1">
-          Laporkan tanda vital, rasa nyeri, keluhan tubuh, dan kondisi luka jahitan Anda secara berkala.
+          Isi berdasarkan hasil pengukuran dan pengamatan yang benar-benar Anda lakukan. Jangan menebak atau mengisi perkiraan. Jika tidak dapat mengukur, hubungi perawat pendamping.
         </p>
 
         <div className="grid grid-cols-5 gap-1.5 mt-5">
@@ -437,6 +456,10 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               <div className="flex items-center gap-2 max-w-xs">
                 <input
                   type="number"
+                  min="50"
+                  max="260"
+                  inputMode="numeric"
+                  placeholder="Sistolik"
                   value={systolic}
                   onChange={(e) => setSystolic(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-sm"
@@ -444,6 +467,10 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 <span className="font-bold text-slate-400">/</span>
                 <input
                   type="number"
+                  min="30"
+                  max="160"
+                  inputMode="numeric"
+                  placeholder="Diastolik"
                   value={diastolic}
                   onChange={(e) => setDiastolic(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-center text-sm"
@@ -458,7 +485,10 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min="32"
+                  max="43"
                   step="0.1"
+                  placeholder="Contoh: 36,5"
                   value={temperature}
                   onChange={(e) => setTemperature(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-sm"
@@ -472,6 +502,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min="30"
+                  max="220"
+                  placeholder="Masukkan hasil ukur"
                   value={heartRate}
                   onChange={(e) => setHeartRate(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-sm"
@@ -485,6 +518,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min="6"
+                  max="60"
+                  placeholder="Masukkan hasil hitung"
                   value={respiratoryRate}
                   onChange={(e) => setRespiratoryRate(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-sm"
@@ -498,6 +534,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min="50"
+                  max="100"
+                  placeholder="Masukkan hasil ukur"
                   value={oxygenSaturation}
                   onChange={(e) => setOxygenSaturation(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-bold font-mono text-sm"
@@ -545,7 +584,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                       : 'bg-rose-100 text-rose-800'
                   }`}
                 >
-                  {painScale} / 10
+                  {painScale === null ? 'Pilih skala' : String(painScale) + ' / 10'}
                 </span>
               </div>
               <input
@@ -553,7 +592,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 min="0"
                 max="10"
                 step="1"
-                value={painScale}
+                value={painScale ?? 0}
                 onChange={(e) => setPainScale(Number(e.target.value))}
                 className="w-full accent-teal-600 h-2.5 bg-slate-200 rounded-lg cursor-pointer"
               />
@@ -570,6 +609,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 <label className="block font-semibold text-slate-700 mb-1">Lokasi Nyeri *</label>
                 <input
                   type="text"
+                  placeholder="Contoh: sekitar luka operasi"
                   value={painLocation}
                   onChange={(e) => setPainLocation(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
@@ -583,6 +623,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                   onChange={(e) => setPainCharacteristic(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900"
                 >
+                  <option value="">Pilih karakter nyeri (opsional)</option>
                   <option value="Nyeri tumpul hilang timbul">Nyeri tumpul hilang timbul</option>
                   <option value="Nyeri perih tertusuk-tusuk">Nyeri perih tertusuk-tusuk</option>
                   <option value="Nyeri berdenyut konstan">Nyeri berdenyut konstan</option>
@@ -645,6 +686,9 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <button type="button" onClick={() => { setNoSymptoms(true); setSelectedSymptoms([]); }} className="col-span-2 sm:col-span-3 p-3 rounded-lg border bg-slate-50 border-slate-200 text-left font-semibold">
+                {noSymptoms ? '✓ ' : ''}Tidak ada keluhan yang dirasakan
+              </button>
               {symptomList.map((sym) => {
                 const isChecked = selectedSymptoms.includes(sym);
                 return (
@@ -673,7 +717,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
 
             <div>
               <label className="block font-semibold text-slate-700 mb-2">
-                Perkembangan keluhan dibanding kemarin:
+                Perkembangan keluhan dibanding kemarin: *
               </label>
               <div className="grid grid-cols-3 gap-3">
                 <button
@@ -763,6 +807,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 type="checkbox"
                 checked={isWoundNormal}
                 onChange={(e) => {
+                  setWoundAssessmentConfirmed(e.target.checked);
                   setIsWoundNormal(e.target.checked);
                   if (e.target.checked) {
                     setHasRedness(false);
@@ -801,6 +846,7 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                     type="checkbox"
                     checked={item.checked}
                     onChange={(e) => {
+                      setWoundAssessmentConfirmed(true);
                       item.set(e.target.checked);
                       if (e.target.checked) setIsWoundNormal(false);
                     }}
@@ -916,16 +962,18 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
                 </div>
                 <div>
                   <span className="text-slate-400">Skala Nyeri:</span>
-                  <div className="font-bold text-slate-900">{painScale}/10 ({painLocation})</div>
+                  <div className="font-bold text-slate-900">{painScale === null ? 'Belum dipilih' : String(painScale) + '/10'} ({painLocation || 'Belum diisi'})</div>
                 </div>
                 <div>
                   <span className="text-slate-400">Kondisi Luka:</span>
                   <div className="font-bold text-slate-900">
-                    {hasDischarge || hasBleeding || hasOpenWound
-                      ? 'Ada Tanda Bahaya Luka'
+                    {!woundAssessmentConfirmed
+                      ? 'Belum dikonfirmasi'
+                      : hasDischarge || hasBleeding || hasOpenWound
+                      ? 'Ada tanda bahaya luka'
                       : isWoundNormal
-                      ? 'Normal & Kering'
-                      : 'Kemerahan/Bengkak'}
+                      ? 'Dinyatakan normal'
+                      : 'Ada keluhan / perlu ditinjau'}
                   </div>
                 </div>
                 <div>
