@@ -195,7 +195,7 @@ function translateAuthError(message: string): string {
     lower.includes('load failed') ||
     lower.includes('timeout')
   ) {
-    return 'Gagal terhubung ke server Supabase. Periksa koneksi internet Anda lalu coba lagi.';
+    return 'Gagal terhubung ke layanan NurseGo. Periksa koneksi internet Anda lalu coba lagi.';
   }
   if (lower.includes('invalid login credentials')) {
     return 'Email atau kata sandi salah. Silakan periksa kembali.';
@@ -386,8 +386,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.warn('complete_patient_activation RPC notice:', rpcErr.message);
           setAuthError(
             isMissingRpcError(rpcErr)
-              ? 'Fungsi `complete_patient_activation` belum tersedia di Supabase. Jalankan migrasi SQL 004 agar penautan perawat dapat diproses.'
-              : `Aktivasi penautan perawat belum selesai: ${rpcErr.message}`
+              ? 'Fitur aktivasi akun pasien belum tersedia saat ini. Silakan hubungi tim pengelola NurseGo.'
+              : `Aktivasi akun pasien belum selesai. Silakan coba kembali atau hubungi tim pengelola NurseGo.`
           );
         } else if (rpcRes && rpcRes.success === false && rpcRes.reason) {
           console.warn('complete_patient_activation notice:', rpcRes.reason);
@@ -488,7 +488,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       } catch (err: any) {
         console.error('Error during profile loading:', err);
-        const msg = err?.message || 'Gagal memuat data profil pengguna dari Supabase.';
+        const msg = err?.message || 'Gagal memuat data akun Anda. Silakan muat ulang halaman atau coba lagi.';
         lastProfileErrorRef.current = msg;
         setAuthError(msg);
         return null;
@@ -655,7 +655,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): Promise<{ success: boolean; error?: string }> => {
     setAuthError(null);
     if (!isSupabaseConfigured()) {
-      const msg = 'Konfigurasi Supabase (Anon Key) belum diatur.';
+      const msg = 'Layanan akun belum siap. Silakan coba beberapa saat lagi atau hubungi tim pengelola NurseGo.';
       setAuthError(msg);
       return { success: false, error: msg };
     }
@@ -682,7 +682,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await supabase.auth.signOut();
           const msg =
             lastProfileErrorRef.current ||
-            'Data profil peran Anda belum tersimpan di tabel `profiles` Supabase. Pastikan skrip migrasi SQL telah dijalankan.';
+            'Data akun Anda belum lengkap. Silakan hubungi tim pengelola NurseGo agar dapat diperiksa.';
           setAuthError(msg);
           return { success: false, error: msg };
         }
@@ -718,7 +718,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUpNurse = async (data: SignUpNursePayload): Promise<SignUpNurseResult> => {
     setAuthError(null);
     if (!isSupabaseConfigured()) {
-      const msg = 'Konfigurasi Supabase (Anon Key) belum diatur.';
+      const msg = 'Layanan akun belum siap. Silakan coba beberapa saat lagi atau hubungi tim pengelola NurseGo.';
       setAuthError(msg);
       return { success: false, error: msg };
     }
@@ -788,7 +788,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .from('nurse-documents')
                 .upload(path, data.strFile, { upsert: true });
               if (!upErr) strUrl = path;
-              else documentNotice = 'Berkas dicatat secara lokal, namun bucket Storage `nurse-documents` belum tersedia di Supabase.';
+              else documentNotice = 'Berkas belum dapat disimpan ke akun. Silakan coba lagi atau hubungi tim pengelola NurseGo.';
             }
             if (data.diplomaFile) {
               const path = `${newUserId}/diploma_${Date.now()}_${data.diplomaFile.name}`;
@@ -850,7 +850,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }): Promise<ActivatePatientResult> => {
     setAuthError(null);
     if (!isSupabaseConfigured()) {
-      const msg = 'Konfigurasi Supabase (Anon Key) belum diatur.';
+      const msg = 'Layanan akun belum siap. Silakan coba beberapa saat lagi atau hubungi tim pengelola NurseGo.';
       setAuthError(msg);
       return { success: false, error: msg };
     }
@@ -873,8 +873,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (rpcVerifyErr) {
         const msg = isMissingRpcError(rpcVerifyErr)
-          ? 'Fungsi verifikasi undangan (`verify_patient_invitation`) belum terpasang di Supabase. Pastikan migrasi SQL backend sudah dijalankan.'
-          : `Gagal memvalidasi token undangan: ${rpcVerifyErr.message}`;
+          ? 'Fitur pemeriksaan undangan belum tersedia saat ini. Silakan hubungi perawat yang mengirimkan undangan.'
+          : `Kode undangan belum dapat diperiksa. Pastikan kode dan alamat email sudah benar, lalu coba lagi.`;
         setAuthError(msg);
         return { success: false, error: msg };
       }
@@ -947,8 +947,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (actRpcErr) {
           const msg = isMissingRpcError(actRpcErr)
-            ? 'Akun autentikasi terbuat, tetapi fungsi `complete_patient_activation` belum terpasang di Supabase. Jalankan migrasi SQL 004 lalu masuk kembali.'
-            : `Akun terbuat, namun aktivasi undangan gagal diselesaikan: ${actRpcErr.message}`;
+            ? 'Akun berhasil dibuat, tetapi proses aktivasi belum selesai. Silakan hubungi perawat yang mengirimkan undangan.'
+            : `Akun berhasil dibuat, tetapi aktivasi belum selesai. Silakan hubungi perawat yang mengirimkan undangan.`;
           setAuthError(msg);
           return { success: false, error: msg };
         }
@@ -1014,7 +1014,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     portal?: UserRole
   ): Promise<{ success: boolean; error?: string }> => {
     if (!isSupabaseConfigured()) {
-      return { success: false, error: 'Konfigurasi Supabase belum diatur.' };
+      return { success: false, error: 'Layanan akun belum siap. Silakan coba beberapa saat lagi atau hubungi tim pengelola NurseGo.' };
     }
     if (portal) {
       saveRecoveryPortalHint(portal);
@@ -1094,7 +1094,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     email: string
   ): Promise<{ success: boolean; error?: string }> => {
     if (!isSupabaseConfigured()) {
-      return { success: false, error: 'Konfigurasi Supabase belum diatur.' };
+      return { success: false, error: 'Layanan akun belum siap. Silakan coba beberapa saat lagi atau hubungi tim pengelola NurseGo.' };
     }
     const supabase = getSupabase();
     try {
