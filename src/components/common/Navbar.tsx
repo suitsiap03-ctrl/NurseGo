@@ -60,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 border-b border-slate-200 nursego-ios-header">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 xl:px-8 2xl:px-10">
           <div className="flex items-center justify-between gap-2 sm:gap-4 h-16">
             <div className="flex items-center gap-3 shrink-0">
               <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-xs">
