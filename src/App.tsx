@@ -462,7 +462,7 @@ const MainAppContent: React.FC = () => {
         </div>
       )}
 
-      <main key={String(role) + '-' + currentTab + '-' + (selectedPatientId || 'none')} className="nursego-page-enter flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8">
+      <main key={String(role) + '-' + currentTab + '-' + (selectedPatientId || 'none')} className="nursego-page-enter flex-1 w-full max-w-[1600px] min-w-0 mx-auto px-4 sm:px-6 xl:px-8 2xl:px-10 py-6 pb-24 md:pb-8">
         {/* NURSE VIEWS */}
         {role === 'nurse' && (
           <>
