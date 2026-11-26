@@ -80,7 +80,7 @@ export const PatientProfileView: React.FC = () => {
   useEffect(() => {
     setFullName(profile?.full_name || '');
     setPhone(profile?.phone || '');
-    setDateOfBirth(patientProfile?.date_of_birth || '');
+    setDateOfBirth(patientProfile?.birth_date || patientProfile?.date_of_birth || '');
     setGender((patientProfile?.gender as 'L' | 'P') || '');
     setEmergencyName(patientProfile?.emergency_contact_name || '');
     setEmergencyPhone(patientProfile?.emergency_contact_phone || '');
@@ -377,32 +377,48 @@ export const PatientProfileView: React.FC = () => {
     setSaving(true);
     const supabase = getSupabase();
     try {
-      const { error: profErr } = await supabase
+      const { data: updatedProfile, error: profErr } = await supabase
         .from('profiles')
         .update({
           full_name: normalizedFullName || profile?.full_name,
           phone: phone.trim() || null,
         })
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select('id')
+        .maybeSingle();
 
-      if (profErr) {
-        setFeedback({ type: 'error', text: `Gagal memperbarui profil: ${profErr.message}` });
+      if (profErr || !updatedProfile) {
+        setFeedback({
+          type: 'error',
+          text: profErr
+            ? `Gagal memperbarui profil: ${profErr.message}`
+            : 'Profil akun tidak ditemukan atau tidak memiliki izin untuk diperbarui. Silakan masuk ulang.',
+        });
         return;
       }
 
-      const { error: patErr } = await supabase.from('patient_profiles').upsert({
-        id: user.id,
-        date_of_birth: dateOfBirth || null,
-        gender: gender || null,
-        emergency_contact_name: normalizedEmergencyName || null,
-        emergency_contact_phone: emergencyPhone.trim() || null,
-        address: address.trim() || null,
-        medical_history: medicalHistory.trim() || null,
-        allergies: allergies.trim() || null,
-      });
+      const { data: updatedPatient, error: patErr } = await supabase
+        .from('patient_profiles')
+        .upsert({
+          id: user.id,
+          birth_date: dateOfBirth || null,
+          gender: gender || null,
+          emergency_contact_name: normalizedEmergencyName || null,
+          emergency_contact_phone: emergencyPhone.trim() || null,
+          address: address.trim() || null,
+          medical_history: medicalHistory.trim() || null,
+          allergies: allergies.trim() || null,
+        })
+        .select('id')
+        .maybeSingle();
 
-      if (patErr) {
-        setFeedback({ type: 'error', text: `Gagal menyimpan detail pasien: ${patErr.message}` });
+      if (patErr || !updatedPatient) {
+        setFeedback({
+          type: 'error',
+          text: patErr
+            ? `Gagal menyimpan detail pasien: ${patErr.message}`
+            : 'Data pasien belum berhasil tersimpan. Silakan coba kembali.',
+        });
         return;
       }
 
