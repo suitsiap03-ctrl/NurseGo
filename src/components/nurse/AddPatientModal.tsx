@@ -155,7 +155,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
       setSuggestSwitchToInvite(true);
       throw new Error(
         isMissingRpcError(linkErr)
-          ? 'Fitur penautan langsung akun terdaftar (`nurse_request_patient_link`) belum tersedia di Supabase. Anda tetap dapat mengundang pasien baru melalui tab "Undang Pasien Baru".'
+          ? 'Fitur penautan langsung akun terdaftar (`nurse_request_patient_link`) belum tersedia. Anda tetap dapat mengundang pasien baru melalui tab "Undang Pasien Baru".'
           : `Gagal mengajukan penautan pasien: ${linkErr.message}`
       );
     }
