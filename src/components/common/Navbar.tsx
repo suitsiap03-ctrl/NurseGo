@@ -8,7 +8,7 @@
  * - User Profile & Quick Logout
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { PWAInstallButton } from './PWAInstallButton';
 import {
@@ -39,6 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   unreadCount = 0,
 }) => {
   const { user, profile, nurseProfile, role, isDemoMode, signOut } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Navigation tabs for Nurse: 1. Beranda, 2. Pasien, 3. Peringatan, 4. Dokumentasi, 5. Profil
   const nurseTabs = [
@@ -135,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </span>
                   </div>
                   <button
-                    onClick={() => signOut()}
+                    onClick={() => setShowLogoutConfirm(true)}
                     title="Keluar dari akun"
                     className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                   >
@@ -147,6 +148,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       </header>
+
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setShowLogoutConfirm(false)}>
+          <section role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title" className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 animate-modal-pop" onClick={(event) => event.stopPropagation()}>
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600"><LogOut className="h-5 w-5" /></div>
+            <h2 id="logout-dialog-title" className="text-center text-base font-bold text-slate-900">Keluar dari akun?</h2>
+            <p className="mt-2 text-center text-sm leading-relaxed text-slate-500">Anda akan kembali ke halaman masuk. Pastikan perubahan atau laporan yang sedang dikerjakan sudah tersimpan.</p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button type="button" autoFocus onClick={() => setShowLogoutConfirm(false)} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Batal</button>
+              <button type="button" onClick={() => { setShowLogoutConfirm(false); void signOut(); }} className="rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">Ya, keluar</button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* Mobile Bottom Navigation Bar */}
       {user && (
