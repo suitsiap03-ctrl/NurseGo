@@ -408,7 +408,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
     };
 
     const cfg = metricMeta[vitalMetric];
-    const singleSeriesData: Array<Record<string, string | number>> =
+    const singleSeriesData: Array<Record<string, string | number | undefined>> =
       vitalMetric === 'pain' ? painChartSeries : vitalSignChartSeries;
     const nums = singleSeriesData
       .map((d) => chartNumber(d[cfg.dataKey]))
