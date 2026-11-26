@@ -130,7 +130,7 @@ export const PatientProfileView: React.FC = () => {
         if (relErr) {
           setTeamNotice(
             isMissingRpcError(relErr)
-              ? 'Fungsi backend persetujuan multi-perawat (`004_live_sync_consent_rpcs_and_mvp.sql`) belum diterapkan di Supabase. Fitur undangan perawat tambahan dan persetujuan penautan belum tersedia hingga migrasi dijalankan.'
+              ? 'Fitur persetujuan dan undangan perawat tambahan belum tersedia. Silakan coba kembali nanti.'
               : `Fungsi relasi tim perawat gagal dimuat (${relErr.message}).`
           );
         }
@@ -240,7 +240,7 @@ export const PatientProfileView: React.FC = () => {
         setTeamFeedback({
           type: 'error',
           text: isMissingRpcError(error)
-            ? 'Fungsi undangan perawat tambahan (`patient_invite_additional_nurse`) belum tersedia di Supabase. Jalankan migrasi SQL `004_live_sync_consent_rpcs_and_mvp.sql` terlebih dahulu.'
+            ? 'Fitur undangan perawat tambahan belum tersedia. Silakan coba kembali nanti.'
             : error.message,
         });
         return;
@@ -283,7 +283,7 @@ export const PatientProfileView: React.FC = () => {
         setTeamFeedback({
           type: 'error',
           text: isMissingRpcError(error)
-            ? 'Fungsi `respond_nurse_patient_assignment` belum tersedia di Supabase. Jalankan migrasi SQL `004_live_sync_consent_rpcs_and_mvp.sql` terlebih dahulu.'
+            ? 'Fitur persetujuan penautan perawat belum tersedia. Silakan coba kembali nanti.'
             : error.message,
         });
         return;
