@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ResponsiveContainer,
   BarChart,
@@ -273,8 +274,8 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       }
 
       return (
-        <div className="relative min-h-[300px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height={260} minWidth={0}>
+        <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart
               data={dailyActivitySeries}
               margin={{ top: 14, right: 16, left: 0, bottom: 4 }}
@@ -344,8 +345,8 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       const maxBp = Math.min(220, Math.ceil((Math.max(...bpVals, 145) + 10) / 10) * 10);
 
       return (
-        <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-          <ResponsiveContainer width="100%" height={260} minWidth={0}>
+        <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <LineChart data={vitalSignChartSeries} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
@@ -464,7 +465,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
 
     return (
       <div className="relative h-[300px] sm:h-[340px] w-full min-w-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
-        <ResponsiveContainer width="100%" height={260} minWidth={0}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <LineChart data={singleSeriesData} margin={{ top: 14, right: 16, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis
@@ -531,10 +532,10 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
                 <span className="min-w-0 truncate">{effectivePatientId === 'all' ? `Semua Pasien (${patients.length})` : patientNameMap.get(effectivePatientId) || 'Pilih Pasien'}</span>
                 <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${patientPickerOpen ? 'rotate-180' : ''}`} />
               </button>
-              {patientPickerOpen && (
+              {patientPickerOpen && createPortal(
                 <>
-                  <button type="button" aria-label="Tutup pilihan pasien" className="fixed inset-0 z-[80] cursor-default" onClick={() => setPatientPickerOpen(false)} />
-                  <div role="listbox" aria-label="Daftar pasien grafik" className="fixed left-4 right-4 top-1/2 z-[100] mx-auto w-[min(360px,calc(100vw-32px))] max-h-[min(60vh,420px)] -translate-y-1/2 overflow-y-auto overscroll-contain rounded-2xl border border-emerald-100 bg-white p-2 shadow-2xl">
+                  <button type="button" aria-label="Tutup pilihan pasien" className="fixed inset-0 z-[9998] cursor-default bg-slate-950/15" onClick={() => setPatientPickerOpen(false)} />
+                  <div role="listbox" aria-label="Daftar pasien grafik" className="fixed left-1/2 top-1/2 z-[9999] w-[min(360px,calc(100vw-32px))] max-h-[min(60vh,420px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto overscroll-contain rounded-2xl border border-emerald-100 bg-white p-2 shadow-2xl">
                     <button type="button" role="option" aria-selected={effectivePatientId === 'all'} onClick={() => { setSelectedPatientId('all'); setPatientPickerOpen(false); }} className={`w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-xs font-semibold ${effectivePatientId === 'all' ? 'bg-emerald-50 text-emerald-800' : 'text-slate-700 hover:bg-slate-50'}`}>
                       <span>Semua Pasien ({patients.length})</span>{effectivePatientId === 'all' && <Check className="w-3.5 h-3.5" />}
                     </button>
@@ -544,7 +545,8 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
                       </button>
                     ))}
                   </div>
-                </>
+                </>,
+                document.body
               )}
             </div>
           )}
