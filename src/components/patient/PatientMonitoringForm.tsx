@@ -455,7 +455,11 @@ export const PatientMonitoringForm: React.FC<PatientMonitoringFormProps> = ({ on
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className="block font-semibold text-slate-700 mb-1">Tekanan Darah *</label>
-              <p className="mb-2 max-w-lg text-[11px] leading-relaxed text-slate-500">Lihat dua angka pada alat pengukur tekanan darah. Masukkan angka yang di atas terlebih dahulu, lalu angka yang di bawah.</p>
+              <div className="mb-3 max-w-lg rounded-xl border border-teal-100 bg-teal-50/70 p-3 text-[11px] leading-relaxed text-teal-950">
+                <p><strong>Angka atas (SYS)</strong> adalah tekanan saat jantung memompa darah.</p>
+                <p className="mt-1"><strong>Angka bawah (DIA)</strong> adalah tekanan saat jantung beristirahat di antara denyutan.</p>
+                <p className="mt-1.5 font-semibold">Contoh pada alat: SYS 120 dan DIA 80 → isi 120 pada angka atas dan 80 pada angka bawah.</p>
+              </div>
               <div className="grid max-w-md grid-cols-[1fr_auto_1fr] items-end gap-2">
                 <div>
                   <label htmlFor="patient-bp-systolic" className="mb-1 block text-[11px] font-semibold text-slate-700">Angka atas</label>
