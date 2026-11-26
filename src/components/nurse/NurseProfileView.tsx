@@ -158,6 +158,9 @@ export const NurseProfileView: React.FC = () => {
     setFeedback(null);
     const supabase = getSupabase();
     try {
+      if (!nurseProfile?.id) {
+        throw new Error('Data akun perawat belum lengkap. Muat ulang profil atau hubungi pengelola aplikasi.');
+      }
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const path = `${user.id}/${docType}_${Date.now()}_${safeName}`;
       const { error: uploadErr } = await supabase.storage
@@ -173,16 +176,10 @@ export const NurseProfileView: React.FC = () => {
       }
 
       const column = docType === 'str' ? 'str_document_url' : 'diploma_document_url';
-      const { error: dbErr } = nurseProfile?.id
-        ? await supabase
-            .from('nurse_profiles')
-            .update({ [column]: path })
-            .eq('id', user.id)
-        : await supabase.from('nurse_profiles').upsert({
-            id: user.id,
-            str_number: nurseProfile?.str_number || strNumber.trim() || '',
-            [column]: path,
-          });
+      const { error: dbErr } = await supabase
+        .from('nurse_profiles')
+        .update({ [column]: path })
+        .eq('id', user.id);
 
       if (dbErr) throw dbErr;
 
@@ -256,34 +253,23 @@ export const NurseProfileView: React.FC = () => {
         department: department.trim() || null,
       };
 
-      let nurseErr: any = null;
-      if (nurseProfile?.id) {
-        const { data: updatedNurse, error } = await supabase
-          .from('nurse_profiles')
-          .update(nurseFields)
-          .eq('id', user.id)
-          .select('id')
-          .maybeSingle();
-        nurseErr = error;
-        if (!error && !updatedNurse) {
-          const { error: insertErr } = await supabase.from('nurse_profiles').upsert({
-            id: user.id,
-            ...nurseFields,
-            verification_status: nurseProfile.verification_status || 'pending',
-          });
-          nurseErr = insertErr;
-        }
-      } else {
-        const { error } = await supabase.from('nurse_profiles').upsert({
-          id: user.id,
-          ...nurseFields,
-          verification_status: 'pending',
+      if (!nurseProfile?.id) {
+        setFeedback({
+          type: 'error',
+          text: 'Data kredensial perawat belum tersedia. Silakan muat ulang profil atau hubungi pengelola aplikasi.',
         });
-        nurseErr = error;
+        return;
       }
 
-      if (nurseErr) {
-        setFeedback({ type: 'error', text: `Gagal memperbarui data perawat: ${nurseErr.message}` });
+      const { data: updatedNurse, error: nurseErr } = await supabase
+        .from('nurse_profiles')
+        .update(nurseFields)
+        .eq('id', user.id)
+        .select('id')
+        .maybeSingle();
+
+      if (nurseErr || !updatedNurse) {
+        setFeedback({ type: 'error', text: `Gagal memperbarui data perawat: ${nurseErr?.message || 'Data tidak ditemukan atau tidak dapat diperbarui.'}` });
         return;
       }
 
