@@ -374,7 +374,7 @@ const MainAppContent: React.FC = () => {
 
       {isDemoMode && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-900">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 xl:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
               <span>
@@ -396,7 +396,7 @@ const MainAppContent: React.FC = () => {
 
       {activationBannerToken && getActivationParamsFromUrl().hasActivation && (
         <div className="bg-teal-50 border-b border-teal-200 px-4 py-2.5 text-xs text-teal-950">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 xl:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="flex items-start sm:items-center gap-2">
               <KeyRound className="w-4 h-4 text-teal-700 shrink-0 mt-0.5 sm:mt-0" />
               <span>
@@ -445,7 +445,7 @@ const MainAppContent: React.FC = () => {
 
       {authError && (
         <div className="bg-rose-50 border-b border-rose-200 px-4 py-2.5 text-xs text-rose-900">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 xl:px-8 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{authError}</span>
