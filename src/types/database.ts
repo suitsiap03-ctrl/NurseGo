@@ -193,6 +193,11 @@ export interface SymptomRecord {
   symptoms: string[]; // e.g. ["Demam", "Mual", "Muntah", "Pusing", "Sesak napas", "Batuk", "Lemas", "Nafsu makan menurun", "Gangguan buang air"]
   general_condition: GeneralCondition;
   symptom_trend?: string;
+  surgery_specific_data?: {
+    surgery_name?: string;
+    surgery_id?: string | null;
+    answers?: Array<{ key: string; label: string; value: string }>;
+  } | null;
   notes?: string;
   created_at?: string;
 }
