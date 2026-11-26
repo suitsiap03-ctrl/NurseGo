@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {user && (
-              <nav className={`$hidden md:flex items-center gap-1 sm:gap-1.5 min-w-0`}>
+              <nav className="hidden md:flex items-center gap-1 sm:gap-1.5 min-w-0">
                 {activeTabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = currentTab === tab.id;
