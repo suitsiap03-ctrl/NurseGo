@@ -1783,3 +1783,89 @@ h1, h2, h3, h4, h5, h6,
 .nursego-public-title span {
   font-family: var(--ng-font-display) !important;
 }
+
+
+/* Notification popover: compact, top-anchored and staggered from top to bottom. */
+.nursego-notification-backdrop {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: calc(env(safe-area-inset-top, 0px) + 72px) clamp(12px, 3vw, 28px) 16px;
+  background: rgba(15, 31, 39, .18);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: ng-notification-backdrop-in 180ms ease-out both;
+}
+.nursego-notification-panel {
+  width: min(440px, calc(100vw - 24px));
+  max-height: min(72dvh, 680px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, .24);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .97);
+  color: #1e293b;
+  box-shadow: 0 22px 65px rgba(15, 35, 45, .2), 0 3px 12px rgba(15, 35, 45, .08);
+  transform-origin: top right;
+  animation: ng-notification-panel-in 330ms cubic-bezier(.2,.8,.2,1) both;
+}
+.nursego-notification-list { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,.45) transparent; }
+.nursego-notification-item {
+  border: 0;
+  border-bottom: 1px solid rgba(226,232,240,.68);
+  opacity: 0;
+  transform: translateY(-9px);
+  animation: ng-notification-item-in 280ms cubic-bezier(.2,.75,.25,1) both;
+}
+.nursego-notification-item:last-child { border-bottom: 0; }
+.nursego-notification-item:focus-visible {
+  outline: 2px solid #0d9488;
+  outline-offset: -3px;
+}
+@keyframes ng-notification-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ng-notification-panel-in {
+  from { opacity: 0; transform: translate3d(0,-16px,0) scale(.985); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+@keyframes ng-notification-item-in {
+  from { opacity: 0; transform: translate3d(0,-9px,0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
+}
+html[data-theme="dark"] .nursego-notification-panel {
+  background: rgba(26, 41, 49, .98) !important;
+  color: #edf3f5 !important;
+  border-color: #40545e !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.48) !important;
+}
+html[data-theme="dark"] .nursego-notification-item { border-bottom-color: #344650 !important; }
+html[data-theme="dark"] .nursego-notification-item.bg-white { background: #1a2931 !important; }
+html[data-theme="dark"] .nursego-notification-item.bg-teal-50\/45 { background: #1d383a !important; }
+html[data-theme="dark"] .nursego-notification-panel header,
+html[data-theme="dark"] .nursego-notification-panel footer { border-color: #344650 !important; }
+html[data-theme="dark"] .nursego-notification-panel .hover\\:bg-slate-100:hover { background: #2a3b44 !important; }
+html[data-theme="dark"] .nursego-notification-panel .hover\\:bg-slate-50:hover { background: #22343d !important; }
+@media (max-width: 640px) {
+  .nursego-notification-backdrop {
+    justify-content: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 66px) 10px 12px;
+  }
+  .nursego-notification-panel {
+    width: 100%;
+    max-height: min(74dvh, 640px);
+    border-radius: 20px;
+    transform-origin: top center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nursego-notification-backdrop,
+  .nursego-notification-panel,
+  .nursego-notification-item {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
