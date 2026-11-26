@@ -165,16 +165,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onOpenConfig }) => {
             <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold">Supabase Anon Key belum aktif</p>
+                <p className="font-semibold">Koneksi layanan belum aktif</p>
                 <p className="text-[11px] text-amber-800 mt-0.5">
-                  Klik tombol di bawah untuk memasukkan Supabase Publishable Key proyek pwokxvmvyezhacjpzhuz.
+                  Masukkan kunci akses layanan agar NurseGo dapat terhubung dan menyimpan data.
                 </p>
                 <button
                   type="button"
                   onClick={onOpenConfig}
                   className="mt-1.5 px-2 py-1 bg-amber-600 text-white font-medium rounded text-[11px] hover:bg-amber-700"
                 >
-                  Buka Pengaturan Supabase
+                  Buka Pengaturan Koneksi
                 </button>
               </div>
             </div>
