@@ -86,7 +86,7 @@ export const SupabaseConfigModal: React.FC<SupabaseConfigModalProps> = ({
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-slate-900">Status & Konfigurasi Supabase</h2>
+              <h2 className="text-base font-semibold text-slate-900">Status & Konfigurasi Koneksi</h2>
               <p className="text-xs text-slate-500">Proyek ID: <span className="font-mono text-slate-700 font-medium">{PROJECT_ID}</span></p>
             </div>
           </div>
@@ -106,13 +106,13 @@ export const SupabaseConfigModal: React.FC<SupabaseConfigModalProps> = ({
               <span>Ketentuan Integrasi Nyata:</span>
             </div>
             <p>
-              Supabase adalah <span className="font-medium text-slate-800">single source of truth</span> NurseGo. Gunakan <span className="font-semibold text-slate-800">Publishable / Anon Key</span> resmi dari dashboard Supabase Anda. Jangan pernah memasukkan service_role key.
+              Layanan penyimpanan data menjadi <span className="font-medium text-slate-800">single source of truth</span> NurseGo. Gunakan <span className="font-semibold text-slate-800">Publishable / Anon Key</span> resmi dari penyedia layanan.  Jangan pernah memasukkan service_role key.
             </p>
           </div>
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
-              Supabase Project URL
+              Alamat Server
             </label>
             <input
               type="text"
@@ -126,7 +126,7 @@ export const SupabaseConfigModal: React.FC<SupabaseConfigModalProps> = ({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">
-                Supabase Anon / Publishable Key
+                Kunci Akses Publik
               </label>
               <a
                 href={`https://supabase.com/dashboard/project/${PROJECT_ID}/settings/api`}
@@ -184,7 +184,7 @@ export const SupabaseConfigModal: React.FC<SupabaseConfigModalProps> = ({
           {saveSuccess && (
             <div className="p-2.5 bg-teal-50 border border-teal-200 text-teal-800 text-xs rounded-lg flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-teal-600" />
-              <span>Konfigurasi berhasil disimpan dan Supabase client diinisialisasi ulang!</span>
+              <span>Konfigurasi berhasil disimpan dan koneksi diperbarui!</span>
             </div>
           )}
         </div>
