@@ -181,8 +181,8 @@ export const PatientActivation: React.FC<PatientActivationProps> = ({
       setAuthError('Konfirmasi kata sandi tidak cocok.');
       return;
     }
-    if (password.length < 6) {
-      setAuthError('Kata sandi minimal 6 karakter.');
+    if (password.length < 8) {
+      setAuthError('Kata sandi minimal 8 karakter.');
       return;
     }
 
@@ -530,7 +530,7 @@ export const PatientActivation: React.FC<PatientActivationProps> = ({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min. 6 karakter"
+                  placeholder="Min. 8 karakter"
                   leftIcon={<Lock className="w-4 h-4" />}
                   className="w-full pl-9 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:bg-white"
                 />
