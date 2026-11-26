@@ -392,7 +392,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigateTa
             <p className="text-xs text-slate-500 mt-0.5">
               {hasReportedToday
                 ? 'Terima kasih telah melaporkan kondisi Anda. Anda tetap dapat memperbarui jika ada keluhan baru.'
-                : 'Periksa tanda vital (tekanan darah, suhu), skala nyeri, dan kondisi luka jahitan Anda.'}
+                : 'Laporkan nyeri, gejala, kondisi luka, dan keadaan tubuh. Tanda vital dicatat jika alat tersedia.'}
             </p>
           </div>
         </div>
