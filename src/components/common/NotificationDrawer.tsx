@@ -46,8 +46,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white w-full max-w-md h-full shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-200">
+    <div className="nursego-drawer-backdrop fixed inset-0 z-50 flex justify-end bg-slate-900/50 backdrop-blur-xs">
+      <div className="nursego-drawer-panel bg-white w-full max-w-md h-full shadow-2xl flex flex-col border-l border-slate-200">
         {/* Header */}
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
