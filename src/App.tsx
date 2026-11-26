@@ -89,6 +89,7 @@ const MainAppContent: React.FC = () => {
     signOut,
   } = useAuth();
   const [loginSuccessNotice, setLoginSuccessNotice] = useState<string | null>(null);
+  const [showDemoLogoutConfirm, setShowDemoLogoutConfirm] = useState(false);
 
   const [isAuthCallback, setIsAuthCallback] = useState<boolean>(() => detectAuthCallbackRoute());
 
@@ -383,7 +384,7 @@ const MainAppContent: React.FC = () => {
             </div>
             <button
               type="button"
-              onClick={() => signOut()}
+              onClick={() => setShowDemoLogoutConfirm(true)}
               className="self-start sm:self-center px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold inline-flex items-center gap-1.5 shrink-0"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -461,7 +462,7 @@ const MainAppContent: React.FC = () => {
         </div>
       )}
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8">
+      <main key={String(role) + '-' + currentTab + '-' + (selectedPatientId || 'none')} className="nursego-page-enter flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8">
         {/* NURSE VIEWS */}
         {role === 'nurse' && (
           <>
@@ -539,6 +540,20 @@ const MainAppContent: React.FC = () => {
           pemantauan klinis berbasis web, bukan pengganti pemeriksaan langsung tenaga medis.
         </p>
       </footer>
+
+      {showDemoLogoutConfirm && isDemoMode && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 backdrop-blur-sm p-4 animate-fade-in" onClick={() => setShowDemoLogoutConfirm(false)}>
+          <section role="dialog" aria-modal="true" aria-labelledby="demo-logout-title" className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 animate-modal-pop" onClick={(event) => event.stopPropagation()}>
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600"><LogOut className="h-5 w-5" /></div>
+            <h2 id="demo-logout-title" className="text-center text-base font-bold text-slate-900">Keluar dari mode demo?</h2>
+            <p className="mt-2 text-center text-sm leading-relaxed text-slate-500">Anda akan kembali ke halaman awal NurseGo. Data demo tidak akan disimpan.</p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setShowDemoLogoutConfirm(false)} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Tetap di sini</button>
+              <button type="button" onClick={() => { setShowDemoLogoutConfirm(false); void signOut(); }} className="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700">Ya, keluar</button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* Notification Drawer */}
       <NotificationDrawer
