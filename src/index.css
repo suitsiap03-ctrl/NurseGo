@@ -1986,3 +1986,36 @@ html[data-theme="dark"] .nursego-notification-panel .hover\\:bg-slate-50:hover {
     will-change: auto !important;
   }
 }
+
+
+/* Desktop viewport sizing: keep the app shell fluid after refresh and avoid a narrow left-aligned canvas. */
+html, body {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: border-box; }
+#root {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+#root > .min-h-screen {
+  width: 100%;
+  min-width: 0;
+}
+.nursego-page-enter {
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 1280px) {
+  .nursego-page-enter {
+    padding-left: clamp(2rem, 3vw, 3.25rem);
+    padding-right: clamp(2rem, 3vw, 3.25rem);
+  }
+}
