@@ -190,10 +190,6 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
     [scopedVitals, scopedPain, scopedAlerts, rangeDays]
   );
 
-  const hasAnyActivityInRange = dailyActivitySeries.some(
-    (d) => d.monitoringCount > 0 || d.alertCount > 0
-  );
-
   const painChartSeries = useMemo(() => {
     return scopedPain.map((p) => {
       const d = new Date(p.recorded_at);
@@ -254,7 +250,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
 
     if (chartMode === 'activity') {
       return (
-        <div className="relative h-[320px] sm:h-[360px] w-full min-w-[280px] min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
+        <div className="relative h-[320px] sm:h-[360px] w-full min-w-0 min-h-0 overflow-hidden bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-200">
           <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={80}>
             <BarChart
               data={dailyActivitySeries}
@@ -302,9 +298,6 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
     }
 
     // Vital & Pain Trend Mode
-    const activeSeriesLength =
-      vitalMetric === 'pain' ? painChartSeries.length : vitalSignChartSeries.length;
-
     if (vitalMetric === 'bp') {
       const bpVals = vitalSignChartSeries.flatMap((d) => [d.systolic, d.diastolic]).filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
       const minBp = bpVals.length ? Math.max(40, Math.floor((Math.min(...bpVals) - 10) / 10) * 10) : 60;
