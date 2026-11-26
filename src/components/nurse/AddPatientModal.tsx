@@ -479,7 +479,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-[11px] text-blue-900 flex items-start gap-2">
                   <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                   <span>
-                    Bagikan <strong>Tautan Aktivasi</strong> atau <strong>Kode Aktivasi</strong> di atas kepada pasien agar pasien dapat mengaktifkan akun dengan email yang sama.
+                    Kode dan tautan ini hanya ditampilkan saat undangan dibuat dan tidak disimpan dalam bentuk teks. Salin atau kirim kepada pasien sekarang; jika tautan hilang, batalkan undangan lama lalu buat undangan baru. Pasien harus mengaktifkan akun menggunakan email yang sama.
                   </span>
                 </div>
               </>
