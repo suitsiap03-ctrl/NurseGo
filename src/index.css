@@ -953,3 +953,277 @@ html[data-theme="dark"] .border-amber-300 { border-color: #75603a !important; }
 html[data-theme="dark"] .border-emerald-200 { border-color: #32634e !important; }
 html[data-theme="dark"] .border-teal-100,
 html[data-theme="dark"] .border-teal-200 { border-color: #31575a !important; }
+
+
+/* =========================================================
+   REFINEMENT 02 — humane photography, mobile composition,
+   floating navigation, readable dark mode and smoother motion.
+   ========================================================= */
+
+/* The hero photograph is a warm home-care visit, never a clinical close-up. */
+.nursego-hero-photo {
+  object-position: 50% 42%;
+  background: #e8eeee;
+}
+.nursego-photo-credit {
+  padding: 4px 7px;
+  border-radius: 3px;
+  background: rgba(12,28,33,.48);
+  backdrop-filter: blur(4px);
+}
+
+/* The mobile bottom bar floats above the screen edge like a compact dock. */
+.nursego-ios-bottom-nav {
+  width: auto;
+  max-width: 520px;
+  margin-inline: auto;
+  border-radius: 16px !important;
+  padding: 6px 7px !important;
+  background: rgba(255,255,255,.94) !important;
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  transform: translateZ(0);
+}
+.nursego-ios-bottom-nav > div { gap: 3px !important; }
+.nursego-ios-bottom-nav .nursego-ios-tab {
+  min-height: 48px;
+  border-radius: 9px !important;
+  padding-block: 5px !important;
+}
+.nursego-ios-bottom-nav .nursego-ios-tab-active {
+  background: #e8f5f3 !important;
+  box-shadow: none !important;
+}
+.nursego-ios-bottom-nav .nursego-ios-tab span {
+  font-size: 9px;
+  letter-spacing: -.01em;
+}
+@media (min-width: 768px) {
+  .nursego-ios-bottom-nav { display: none; }
+}
+
+/* Better mobile hero composition: image first, compact overlapping data panel below. */
+@media (max-width: 640px) {
+  .nursego-public-header > div { height: 62px !important; }
+  .nursego-public-header .nursego-brand-mark { width: 36px !important; height: 36px !important; border-radius: 9px !important; }
+  .nursego-public-header .nursego-theme-toggle { min-height: 34px; padding-inline: 8px; }
+  .nursego-public-hero > div {
+    padding-top: 38px !important;
+    padding-bottom: 46px !important;
+    gap: 28px !important;
+  }
+  .nursego-public-title { font-size: clamp(2.35rem, 10vw, 3.15rem) !important; }
+  .nursego-hero-visual {
+    position: relative;
+    min-height: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 0 4px;
+    margin: 0;
+  }
+  .nursego-hero-photo {
+    position: relative !important;
+    inset: auto !important;
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1.24 / 1;
+    object-fit: cover;
+    object-position: center 38%;
+    border-radius: 3px 24px 3px 3px !important;
+    box-shadow: none !important;
+  }
+  .nursego-hero-main-card {
+    position: relative !important;
+    z-index: 2;
+    width: calc(100% - 22px) !important;
+    max-width: none !important;
+    margin: -46px 0 0 22px !important;
+    padding: 15px !important;
+    border-radius: 3px 3px 14px 3px !important;
+    box-shadow: 0 12px 28px rgba(15,42,52,.13) !important;
+    animation: none !important;
+  }
+  .nursego-floating-note { display: none !important; }
+  .nursego-photo-credit { left: 10px !important; bottom: auto !important; top: 10px; }
+  .nursego-hero-main-card .mt-7 { margin-top: 14px !important; }
+  .nursego-hero-main-card .mt-5 { margin-top: 12px !important; }
+  .nursego-hero-main-card .rounded-2xl { border-radius: 8px !important; }
+  .nursego-hero-main-card .grid-cols-3 > div { padding: 8px !important; }
+  .nursego-page-enter { padding-bottom: 108px !important; }
+  .nursego-page-enter .grid { column-gap: 10px !important; row-gap: 10px !important; }
+  .nursego-page-enter [class*="rounded-3xl"] { border-radius: 12px !important; }
+  .nursego-page-enter [class*="rounded-2xl"] { border-radius: 9px !important; }
+  .nursego-page-enter [class*="rounded-xl"] { border-radius: 7px !important; }
+  .nursego-page-enter .shadow-lg,
+  .nursego-page-enter .shadow-xl,
+  .nursego-page-enter .shadow-2xl { box-shadow: 0 5px 16px rgba(22,48,58,.07) !important; }
+  .nursego-ios-bottom-nav { bottom: max(10px, env(safe-area-inset-bottom)) !important; }
+}
+
+/* Use mixed geometry: crisp data strips, offset accent edges and restrained radii. */
+.nursego-page-enter [class*="rounded-3xl"],
+.nursego-page-enter [class*="rounded-2xl"] { border-radius: 10px !important; }
+.nursego-page-enter [class*="rounded-xl"] { border-radius: 7px !important; }
+.nursego-page-enter button[class*="rounded-full"],
+.nursego-page-enter a[class*="rounded-full"] { border-radius: 6px !important; }
+.nursego-page-enter .grid > * {
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.nursego-page-enter .grid > *:hover {
+  border-color: #b8d2d4;
+}
+.nursego-page-enter [class*="shadow-"] { --tw-shadow: 0 5px 16px rgba(22,48,58,.055) !important; }
+.nursego-page-enter input, .nursego-page-enter select, .nursego-page-enter textarea {
+  border-radius: 5px !important;
+}
+
+/* Dark palette: explicitly lift every semantic text color, not only slate. */
+html[data-theme="dark"] {
+  --ng-copy: #edf5f6;
+  --ng-copy-muted: #b0c1c7;
+  --ng-divider: #334a53;
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] #root { color: #edf5f6 !important; }
+html[data-theme="dark"] .text-slate-950,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-gray-700 { color: #edf5f6 !important; }
+html[data-theme="dark"] .text-slate-600,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400,
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400 { color: #b0c1c7 !important; }
+html[data-theme="dark"] .text-teal-900,
+html[data-theme="dark"] .text-teal-800,
+html[data-theme="dark"] .text-teal-700,
+html[data-theme="dark"] .text-teal-600 { color: #82d8cf !important; }
+html[data-theme="dark"] .text-emerald-900,
+html[data-theme="dark"] .text-emerald-800,
+html[data-theme="dark"] .text-emerald-700,
+html[data-theme="dark"] .text-emerald-600 { color: #83dfb4 !important; }
+html[data-theme="dark"] .text-rose-900,
+html[data-theme="dark"] .text-rose-800,
+html[data-theme="dark"] .text-rose-700,
+html[data-theme="dark"] .text-rose-600 { color: #ff9da8 !important; }
+html[data-theme="dark"] .text-amber-900,
+html[data-theme="dark"] .text-amber-800,
+html[data-theme="dark"] .text-amber-700,
+html[data-theme="dark"] .text-amber-600 { color: #f2c77b !important; }
+html[data-theme="dark"] .text-blue-900,
+html[data-theme="dark"] .text-blue-800,
+html[data-theme="dark"] .text-blue-700,
+html[data-theme="dark"] .text-blue-600,
+html[data-theme="dark"] .text-sky-900,
+html[data-theme="dark"] .text-sky-800,
+html[data-theme="dark"] .text-sky-700 { color: #9bcdf5 !important; }
+html[data-theme="dark"] .text-indigo-900,
+html[data-theme="dark"] .text-indigo-800,
+html[data-theme="dark"] .text-indigo-700,
+html[data-theme="dark"] .text-purple-900,
+html[data-theme="dark"] .text-purple-800,
+html[data-theme="dark"] .text-purple-700 { color: #c3b7fa !important; }
+html[data-theme="dark"] .text-white { color: #ffffff !important; }
+html[data-theme="dark"] .bg-teal-50,
+html[data-theme="dark"] .bg-teal-100 { background-color: #18383b !important; }
+html[data-theme="dark"] .bg-emerald-50,
+html[data-theme="dark"] .bg-emerald-100 { background-color: #17392f !important; }
+html[data-theme="dark"] .bg-rose-50,
+html[data-theme="dark"] .bg-rose-100 { background-color: #3b242b !important; }
+html[data-theme="dark"] .bg-amber-50,
+html[data-theme="dark"] .bg-amber-100 { background-color: #3b301e !important; }
+html[data-theme="dark"] .bg-blue-50,
+html[data-theme="dark"] .bg-blue-100,
+html[data-theme="dark"] .bg-sky-50,
+html[data-theme="dark"] .bg-sky-100 { background-color: #1b3342 !important; }
+html[data-theme="dark"] .bg-indigo-50,
+html[data-theme="dark"] .bg-purple-50 { background-color: #2a2942 !important; }
+html[data-theme="dark"] .border-teal-100,
+html[data-theme="dark"] .border-teal-200 { border-color: #31575a !important; }
+html[data-theme="dark"] .border-emerald-100,
+html[data-theme="dark"] .border-emerald-200 { border-color: #32634e !important; }
+html[data-theme="dark"] .border-rose-100,
+html[data-theme="dark"] .border-rose-200 { border-color: #70404b !important; }
+html[data-theme="dark"] .border-amber-100,
+html[data-theme="dark"] .border-amber-200 { border-color: #75603a !important; }
+html[data-theme="dark"] .border-blue-100,
+html[data-theme="dark"] .border-blue-200 { border-color: #36566c !important; }
+html[data-theme="dark"] .ring-white { --tw-ring-color: #14242b !important; }
+html[data-theme="dark"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html[data-theme="dark"] .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: #2b4149 !important; }
+html[data-theme="dark"] .nursego-ios-bottom-nav {
+  background: rgba(17,34,41,.94) !important;
+  border-color: #38515a !important;
+  box-shadow: 0 10px 34px rgba(0,0,0,.38) !important;
+}
+html[data-theme="dark"] .nursego-ios-bottom-nav .nursego-ios-tab-active {
+  background: #1b4143 !important;
+}
+html[data-theme="dark"] .nursego-ios-bottom-nav .nursego-ios-tab-active span,
+html[data-theme="dark"] .nursego-ios-bottom-nav .nursego-ios-tab-active svg { color: #91e0d6 !important; }
+html[data-theme="dark"] .nursego-public-hero,
+html[data-theme="dark"] .nursego-public-section,
+html[data-theme="dark"] .nursego-portal-section { color: #edf5f6 !important; }
+html[data-theme="dark"] .nursego-public-header,
+html[data-theme="dark"] .nursego-public-footer { color: #edf5f6 !important; }
+html[data-theme="dark"] .nursego-hero-main-card {
+  background: rgba(20,36,43,.96) !important;
+  border-color: #3b555e !important;
+}
+html[data-theme="dark"] .nursego-hero-main-card .bg-gradient-to-br {
+  background: #1b353d !important;
+}
+html[data-theme="dark"] .nursego-hero-main-card [class*="bg-white"] {
+  background: #203841 !important;
+}
+
+/* Smooth, coherent overlays: fade backdrop, spring-settle panel, no abrupt pop. */
+@keyframes ng-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ng-dialog-enter {
+  0% { opacity: 0; transform: translate3d(0,18px,0) scale(.965); }
+  65% { opacity: 1; transform: translate3d(0,-2px,0) scale(1.006); }
+  100% { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+@keyframes ng-drawer-enter {
+  from { opacity: .6; transform: translate3d(34px,0,0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
+}
+.nursego-modal-backdrop,
+.nursego-drawer-backdrop { animation: ng-backdrop-enter 190ms ease-out both; }
+.nursego-modal-panel {
+  transform-origin: center center;
+  animation: ng-dialog-enter 360ms cubic-bezier(.2,.82,.22,1) both;
+  will-change: transform, opacity;
+  border-radius: 5px 16px 5px 16px !important;
+}
+.nursego-drawer-panel {
+  animation: ng-drawer-enter 310ms cubic-bezier(.2,.8,.2,1) both;
+  will-change: transform, opacity;
+}
+.nursego-drawer-panel > div:first-child { min-height: 76px; }
+.nursego-drawer-panel [class*="cursor-pointer"] {
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+.nursego-drawer-panel [class*="cursor-pointer"]:active { transform: scale(.992); }
+@media (max-width: 640px) {
+  .nursego-modal-backdrop { padding: 10px !important; align-items: flex-end !important; }
+  .nursego-modal-panel {
+    max-height: min(88dvh, 760px) !important;
+    padding: 17px !important;
+    border-radius: 5px 15px 5px 15px !important;
+    animation: ng-dialog-enter 330ms cubic-bezier(.2,.82,.22,1) both;
+  }
+  .nursego-drawer-panel { width: min(100%, 440px) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nursego-modal-backdrop, .nursego-drawer-backdrop,
+  .nursego-modal-panel, .nursego-drawer-panel { animation: none !important; }
+  .nursego-page-enter, .nursego-page-enter > * > * { animation: none !important; }
+  .nursego-page-enter .grid > * { transition: none !important; }
+}
