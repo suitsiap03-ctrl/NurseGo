@@ -205,12 +205,15 @@ export const NurseAlerts: React.FC<NurseAlertsProps> = ({ onSelectPatient }) => 
             ].map((item) => (
               <button key={item.value} type="button" onClick={() => setLevelFilter(item.value)}
                 aria-pressed={levelFilter === item.value}
-                className={`shrink-0 px-3 py-2 rounded-lg text-xs font-semibold border transition-all duration-200 ${levelFilter === item.value
-                  ? item.value === 'darurat' ? 'bg-rose-600 border-rose-600 text-white shadow-sm'
-                    : item.value === 'urgent' ? 'bg-orange-500 border-orange-500 text-white shadow-sm'
-                    : item.value === 'waspada' ? 'bg-amber-400 border-amber-400 text-slate-900 shadow-sm'
-                    : 'bg-slate-800 border-slate-800 text-white shadow-sm'
-                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>
+                className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 ${levelFilter === item.value
+                  ? item.value === 'darurat' ? 'bg-rose-600 border-rose-700 text-white shadow-[0_3px_10px_rgba(225,29,72,.24)] ring-2 ring-rose-200'
+                    : item.value === 'urgent' ? 'bg-orange-500 border-orange-600 text-white shadow-[0_3px_10px_rgba(249,115,22,.22)] ring-2 ring-orange-200'
+                    : item.value === 'waspada' ? 'bg-amber-300 border-amber-500 text-amber-950 shadow-[0_3px_10px_rgba(245,158,11,.2)] ring-2 ring-amber-100'
+                    : 'bg-emerald-700 border-emerald-800 text-white shadow-sm ring-2 ring-emerald-100'
+                  : item.value === 'darurat' ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
+                    : item.value === 'urgent' ? 'bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100'
+                    : item.value === 'waspada' ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100'}`}>
                 {item.label}
               </button>
             ))}
@@ -228,9 +231,15 @@ export const NurseAlerts: React.FC<NurseAlertsProps> = ({ onSelectPatient }) => 
             ].map((item) => (
               <button key={item.value} type="button" onClick={() => setStatusFilter(item.value)}
                 aria-pressed={statusFilter === item.value}
-                className={`min-w-0 px-1.5 sm:px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold border transition-all duration-200 ${statusFilter === item.value
-                  ? 'bg-teal-700 border-teal-700 text-white shadow-sm'
-                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>
+                className={`min-w-0 px-1.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-extrabold border transition-all duration-200 ${statusFilter === item.value
+                  ? item.value === 'aktif' ? 'bg-rose-600 border-rose-700 text-white shadow-sm ring-2 ring-rose-100'
+                    : item.value === 'ditinjau' ? 'bg-sky-600 border-sky-700 text-white shadow-sm ring-2 ring-sky-100'
+                    : item.value === 'selesai' ? 'bg-emerald-700 border-emerald-800 text-white shadow-sm ring-2 ring-emerald-100'
+                    : 'bg-emerald-700 border-emerald-800 text-white shadow-sm ring-2 ring-emerald-100'
+                  : item.value === 'aktif' ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
+                    : item.value === 'ditinjau' ? 'bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100'
+                    : item.value === 'selesai' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100'}`}>
                 {item.label}
               </button>
             ))}
@@ -257,16 +266,16 @@ export const NurseAlerts: React.FC<NurseAlertsProps> = ({ onSelectPatient }) => 
               const isResolving = resolvingId === al.id;
 
               return (
-                <div key={al.id} className="p-5 space-y-3 hover:bg-slate-50/50 transition-colors">
+                <div key={al.id} className={`p-5 space-y-3 border-l-4 transition-colors hover:bg-slate-50/70 ${isDarurat ? 'border-l-rose-500 bg-rose-50/35' : isUrgent ? 'border-l-orange-500 bg-orange-50/30' : 'border-l-amber-400 bg-amber-50/25'}`}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center flex-wrap gap-2">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                           isDarurat
-                            ? 'bg-rose-100 text-rose-800'
+                            ? 'bg-rose-100 text-rose-800 ring-1 ring-rose-300'
                             : isUrgent
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                            ? 'bg-orange-100 text-orange-800 ring-1 ring-orange-300'
+                            : 'bg-amber-100 text-amber-900 ring-1 ring-amber-300'
                         }`}
                       >
                         {al.alert_level}
@@ -279,10 +288,10 @@ export const NurseAlerts: React.FC<NurseAlertsProps> = ({ onSelectPatient }) => 
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
                           al.status === 'aktif'
-                            ? 'bg-rose-50 text-rose-700'
+                            ? 'bg-rose-100 text-rose-800 ring-1 ring-rose-200'
                             : al.status === 'ditinjau'
-                            ? 'bg-amber-50 text-amber-700'
-                            : 'bg-emerald-50 text-emerald-700'
+                            ? 'bg-sky-100 text-sky-800 ring-1 ring-sky-200'
+                            : 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200'
                         }`}
                       >
                         {al.status}
