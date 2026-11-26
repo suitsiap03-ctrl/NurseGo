@@ -798,7 +798,7 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
           .eq('nurse_id', user.id);
         if (updErr) {
           throw new Error(
-            `Fungsi \`end_nurse_patient_assignment\` belum terpasang di Supabase dan pembaruan langsung ditolak (${updErr.message}). Jalankan migrasi \`004_live_sync_consent_rpcs_and_mvp.sql\`.`
+            `Pembaruan status pendampingan belum dapat dilakukan (${updErr.message}). Silakan coba kembali nanti.`
           );
         }
       } else if (data && !data.success) {
