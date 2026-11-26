@@ -97,6 +97,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const RECOVERY_PORTAL_STORAGE_KEY = 'nursego_recovery_portal_ctx';
 const ACTIVE_RECOVERY_UID_KEY = 'nursego_active_recovery_uid';
+const DEMO_SESSION_STORAGE_KEY = 'nursego_demo_session';
 
 function saveRecoveryPortalHint(portal: UserRole) {
   try {
@@ -540,9 +541,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
 
           setSession(initialSession);
-          setUser(initialSession?.user || null);
-          setIsDemoMode(false);
           if (initialSession?.user) {
+            try { localStorage.removeItem(DEMO_SESSION_STORAGE_KEY); } catch { /* ignore */ }
+            setUser(initialSession.user);
+            setIsDemoMode(false);
             handledInitialUserRef.current = initialSession.user.id;
             const resolvedRole = await fetchUserProfile(
               initialSession.user.id,
@@ -550,6 +552,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             );
             if (mounted && recoveryDetected && (resolvedRole === 'nurse' || resolvedRole === 'patient')) {
               setRecoveryPortal(resolvedRole);
+            }
+          } else {
+            let demoRole: 'nurse' | 'patient' | null = null;
+            try {
+              const savedDemoRole = localStorage.getItem(DEMO_SESSION_STORAGE_KEY);
+              if (savedDemoRole === 'nurse' || savedDemoRole === 'patient') demoRole = savedDemoRole;
+            } catch { /* ignore unavailable storage */ }
+            if (demoRole === 'nurse') {
+              const demoUser = {
+                id: DEMO_NURSE.id, email: DEMO_NURSE.email, app_metadata: {},
+                user_metadata: { role: 'nurse', full_name: DEMO_NURSE.full_name },
+                aud: 'authenticated', created_at: new Date().toISOString(),
+              } as unknown as User;
+              setUser(demoUser);
+              setProfile(DEMO_NURSE);
+              setNurseProfile(DEMO_NURSE.nurse_profile);
+              setPatientProfile(null);
+              setPatientSurgery(null);
+              setRole('nurse');
+              setIsDemoMode(true);
+            } else if (demoRole === 'patient') {
+              const demoPat = DEMO_PATIENTS[0];
+              const demoUser = {
+                id: demoPat.profile.id, email: demoPat.profile.email, app_metadata: {},
+                user_metadata: { role: 'patient', full_name: demoPat.profile.full_name },
+                aud: 'authenticated', created_at: new Date().toISOString(),
+              } as unknown as User;
+              setUser(demoUser);
+              setProfile(demoPat.profile);
+              setPatientProfile(demoPat.patient_profile);
+              setPatientSurgery(demoPat.surgery);
+              setNurseProfile(null);
+              setRole('patient');
+              setIsDemoMode(true);
+            } else {
+              setUser(null);
+              setIsDemoMode(false);
             }
           }
         }
@@ -597,12 +636,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      if (
-        event === 'INITIAL_SESSION' &&
-        newSession?.user?.id &&
-        handledInitialUserRef.current === newSession.user.id
-      ) {
-        handledInitialUserRef.current = null;
+      // Initial state is restored once by initAuth() (including persisted demo mode).
+      // Ignore the duplicate INITIAL_SESSION event to avoid clearing restored state.
+      if (event === 'INITIAL_SESSION') {
+        if (newSession?.user?.id && handledInitialUserRef.current === newSession.user.id) {
+          handledInitialUserRef.current = null;
+        }
         return;
       }
 
@@ -704,6 +743,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return { success: false, error: msg };
         }
         setIsDemoMode(false);
+        try { localStorage.removeItem(DEMO_SESSION_STORAGE_KEY); } catch { /* ignore */ }
       }
 
       return { success: true };
@@ -1129,12 +1169,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setPatientSurgery(null);
       setRole(null);
       setIsDemoMode(false);
+      try { localStorage.removeItem(DEMO_SESSION_STORAGE_KEY); } catch { /* ignore */ }
       setAuthError(null);
     }
   };
 
   const loginAsDemo = (demoRole: 'nurse' | 'patient') => {
     setAuthError(null);
+    try { localStorage.setItem(DEMO_SESSION_STORAGE_KEY, demoRole); } catch { /* ignore */ }
     setIsDemoMode(true);
     if (demoRole === 'nurse') {
       const demoUser = {
