@@ -75,8 +75,8 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({
       setError('Tautan pengaturan ulang kata sandi tidak berlaku atau sudah kedaluwarsa. Silakan minta tautan baru.');
       return;
     }
-    if (newPassword.length < 6) {
-      setError('Kata sandi baru minimal 6 karakter.');
+    if (newPassword.length < 8) {
+      setError('Kata sandi baru minimal 8 karakter.');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -187,7 +187,7 @@ export const PasswordRecoveryModal: React.FC<PasswordRecoveryModalProps> = ({
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimal 6 karakter"
+                    placeholder="Minimal 8 karakter"
                     leftIcon={<Lock className="w-4 h-4" />}
                     className="w-full pl-10 py-3 bg-slate-50/80 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/15 focus:border-teal-500 transition"
                   />
