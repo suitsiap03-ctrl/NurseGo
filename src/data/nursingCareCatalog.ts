@@ -271,7 +271,7 @@ export function getSurgeryCareEntry(surgeryName?: string | null) {
   const value = (surgeryName || '').toLowerCase();
   if (value.includes('apend') || value.includes('append')) return SURGERY_CARE_CATALOG.apendektomi;
   if (value.includes('sectio') || value.includes('caesar') || value.includes('sesar') || value.includes('sc)')) return SURGERY_CARE_CATALOG['sectio-caesarea'];
-  if (value.includes('hernia')) return SURGERY_CARE_CATALOG.herniorafi;
+  if (value.includes('hernio') || value.includes('hernia')) return SURGERY_CARE_CATALOG.herniorafi;
   if (value.includes('knee') || value.includes('tkr')) return SURGERY_CARE_CATALOG.tkr;
   if (value.includes('orif') || value.includes('fraktur')) return SURGERY_CARE_CATALOG.orif;
   if (value.includes('koles') || value.includes('chole') || value.includes('empedu')) return SURGERY_CARE_CATALOG.kolesistektomi;
