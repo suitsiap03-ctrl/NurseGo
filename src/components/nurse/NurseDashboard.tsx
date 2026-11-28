@@ -101,8 +101,19 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
     lastLoadAtRef.current = Date.now();
 
     if (isDemoMode) {
-      const demoVitals = DEMO_PATIENTS.flatMap((dp) => dp.historicalVitals || []);
-      const demoPain = DEMO_PATIENTS.flatMap((dp) => dp.historicalPain || []);
+      // Demo charts use the same complete record stream as the patient cards:
+      // historical records plus each patient's latest submitted measurement.
+      // Deduplicate by record ID so the same measurement is never plotted twice.
+      const demoVitals = DEMO_PATIENTS
+        .flatMap((dp) => [...(dp.historicalVitals || []), ...(dp.latestVitals ? [dp.latestVitals] : [])])
+        .filter((record, index, records) =>
+          records.findIndex((item) => item.id === record.id) === index
+        );
+      const demoPain = DEMO_PATIENTS
+        .flatMap((dp) => [...(dp.historicalPain || []), ...(dp.latestPain ? [dp.latestPain] : [])])
+        .filter((record, index, records) =>
+          records.findIndex((item) => item.id === record.id) === index
+        );
       const demoAppts = DEMO_PATIENTS.flatMap((dp) => dp.appointments || []);
 
       const demoPatientsList = DEMO_PATIENTS.map((dp) => {
