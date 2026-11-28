@@ -189,7 +189,7 @@ export const PatientList: React.FC<PatientListProps> = ({
         merged.sort((a: any, b: any) => {
           const rank = (p: string) => p === 'A' ? 4 : p === 'B' ? 3 : p === 'C' ? 2 : 1;
           const severity = (p: string | null) => p === 'darurat' ? 3 : p === 'urgent' ? 2 : p === 'waspada' ? 1 : 0;
-          return rank(b.triagePriority) - rank(a.triagePriority) || severity(b.highestAlert) - severity(a.highestAlert);
+          return severity(b.highestAlert) - severity(a.highestAlert) || rank(b.triagePriority) - rank(a.triagePriority);
         });
         setPatients(merged);
       } else {
