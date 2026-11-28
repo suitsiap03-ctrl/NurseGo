@@ -15,6 +15,7 @@ import { useRealtimeSubscription } from '../../hooks/useRealtimeSubscription';
 import { fetchNurseRelationships } from '../../lib/nurseRelationships';
 import { DEMO_PATIENTS, DEMO_VITALS, DEMO_ALERTS } from '../../data/mockData';
 import { formatLocalDate, getLocalDateInputValue } from '../../lib/dateUtils';
+import { evaluateClinicalMonitoring, getABCPriority } from '../../lib/clinicalRules';
 import { NurseDashboardCharts } from './NurseDashboardCharts';
 import {
   Users,
@@ -109,10 +110,22 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
         const pAlerts = DEMO_ALERTS.filter(
           (a) => a.patient_id === dp.profile.id && a.status === 'aktif'
         );
+        const latestVital = dp.latestVitals || pVitals[0];
+        const triagePriority = getABCPriority({
+          vitals: latestVital,
+          symptoms: dp.latestSymptoms,
+          wound: dp.latestWound,
+        });
+        const derivedAlert = evaluateClinicalMonitoring({
+          vitals: latestVital,
+          pain: dp.latestPain,
+          symptoms: dp.latestSymptoms,
+          wound: dp.latestWound,
+        });
         let highestAlert: string | null = null;
-        if (pAlerts.some((a) => a.alert_level === 'darurat')) highestAlert = 'darurat';
-        else if (pAlerts.some((a) => a.alert_level === 'urgent')) highestAlert = 'urgent';
-        else if (pAlerts.some((a) => a.alert_level === 'waspada')) highestAlert = 'waspada';
+        if (pAlerts.some((a) => a.alert_level === 'darurat') || derivedAlert?.alertLevel === 'darurat') highestAlert = 'darurat';
+        else if (pAlerts.some((a) => a.alert_level === 'urgent') || derivedAlert?.alertLevel === 'urgent') highestAlert = 'urgent';
+        else if (pAlerts.some((a) => a.alert_level === 'waspada') || derivedAlert?.alertLevel === 'waspada') highestAlert = 'waspada';
 
         return {
           assignmentId: `demo-${dp.profile.id}`,
@@ -121,10 +134,19 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
           email: dp.profile.email,
           phone: dp.profile.phone,
           surgery: dp.surgery,
-          latestVital: pVitals[0],
+          latestVital,
+          latestSymptoms: dp.latestSymptoms,
+          latestWound: dp.latestWound,
+          latestPain: dp.latestPain,
+          triagePriority,
           activeAlerts: pAlerts,
           highestAlert,
         };
+      }).sort((a, b) => {
+        const rank = (priority: string) => priority === 'A' ? 4 : priority === 'B' ? 3 : priority === 'C' ? 2 : 1;
+        const severity = (level: string | null) => level === 'darurat' ? 3 : level === 'urgent' ? 2 : level === 'waspada' ? 1 : 0;
+        return rank(b.triagePriority) - rank(a.triagePriority) ||
+          severity(b.highestAlert) - severity(a.highestAlert);
       });
 
       const todayStr = getLocalDateInputValue();
@@ -249,7 +271,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
           .limit(250),
         supabase
           .from('symptom_records')
-          .select('id, patient_id, recorded_at')
+          .select('*')
           .in('patient_id', patientIds)
           .order('recorded_at', { ascending: false })
           .limit(250),
@@ -342,12 +364,26 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
         const p = profMap.get(r.patient_id);
         const surg = (surgRes.data || []).find((s: any) => s.patient_id === r.patient_id);
         const latestVit = vitalsList.find((v) => v.patient_id === r.patient_id);
+        const latestPain = painList.find((v) => v.patient_id === r.patient_id);
+        const latestSymptom = symList.find((v) => v.patient_id === r.patient_id);
+        const latestWound = woundList.find((v) => v.patient_id === r.patient_id);
         const patientAlerts = activeAlertsList.filter((a) => a.patient_id === r.patient_id);
+        const triagePriority = getABCPriority({
+          vitals: latestVit,
+          symptoms: latestSymptom,
+          wound: latestWound,
+        });
+        const derivedAlert = evaluateClinicalMonitoring({
+          vitals: latestVit,
+          pain: latestPain,
+          symptoms: latestSymptom,
+          wound: latestWound,
+        });
 
         let highestAlert: string | null = null;
-        if (patientAlerts.some((a) => a.alert_level === 'darurat')) highestAlert = 'darurat';
-        else if (patientAlerts.some((a) => a.alert_level === 'urgent')) highestAlert = 'urgent';
-        else if (patientAlerts.some((a) => a.alert_level === 'waspada')) highestAlert = 'waspada';
+        if (patientAlerts.some((a) => a.alert_level === 'darurat') || derivedAlert?.alertLevel === 'darurat') highestAlert = 'darurat';
+        else if (patientAlerts.some((a) => a.alert_level === 'urgent') || derivedAlert?.alertLevel === 'urgent') highestAlert = 'urgent';
+        else if (patientAlerts.some((a) => a.alert_level === 'waspada') || derivedAlert?.alertLevel === 'waspada') highestAlert = 'waspada';
 
         return {
           assignmentId: r.id,
@@ -361,24 +397,22 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
           assignedAt: r.assigned_at,
           surgery: surg,
           latestVital: latestVit,
+          latestPain,
+          latestSymptoms: latestSymptom,
+          latestWound,
+          triagePriority,
           activeAlerts: patientAlerts,
           highestAlert,
         };
       });
 
-      const triageScore = (alerts: any[]) => {
-        const titles = alerts.map((alert) => String(alert.title || ''));
-        if (titles.some((title) => title.includes('[A — AIRWAY]'))) return 4;
-        if (titles.some((title) => title.includes('[B — BREATHING]'))) return 3;
-        if (titles.some((title) => title.includes('[C — CIRCULATION]'))) return 2;
-        if (alerts.length > 0) return 1;
-        return 0;
-      };
+      const triageScore = (priority: string) => priority === 'A' ? 4 : priority === 'B' ? 3 : priority === 'C' ? 2 : 1;
       const severityScore = (level: string | null) =>
         level === 'darurat' ? 3 : level === 'urgent' ? 2 : level === 'waspada' ? 1 : 0;
       mergedPatients.sort((a, b) =>
-        triageScore(b.activeAlerts) - triageScore(a.activeAlerts) ||
-        severityScore(b.highestAlert) - severityScore(a.highestAlert)
+        triageScore(b.triagePriority) - triageScore(a.triagePriority) ||
+        severityScore(b.highestAlert) - severityScore(a.highestAlert) ||
+        new Date(b.latestVital?.recorded_at || 0).getTime() - new Date(a.latestVital?.recorded_at || 0).getTime()
       );
 
       setPatients(mergedPatients);
@@ -849,6 +883,9 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
                         <div className="flex items-center flex-wrap gap-2">
                           <span className="font-semibold text-sm text-slate-900">
                             {patient.fullName}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${patient.triagePriority === 'A' ? 'bg-rose-100 text-rose-800' : patient.triagePriority === 'B' ? 'bg-orange-100 text-orange-800' : patient.triagePriority === 'C' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}`}>
+                            {patient.triagePriority === 'D' ? 'D — PRIORITAS LAIN' : `${patient.triagePriority} — ${patient.triagePriority === 'A' ? 'AIRWAY' : patient.triagePriority === 'B' ? 'BREATHING' : 'CIRCULATION'}`}
                           </span>
                           {alertLevel === 'darurat' && (
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">
