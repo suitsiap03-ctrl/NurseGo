@@ -152,14 +152,14 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       ? selectedPatientId
       : 'all';
 
-  // Include the entire current day: the previous implementation ended at 00:00,
-  // which silently excluded every measurement recorded later today.
-  const dateWindow = useMemo(() => {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    start.setDate(start.getDate() - (rangeDays - 1));
-    return { start: start.getTime(), end: now.getTime() };
-  }, [rangeDays]);
+  // Recalculate the window on every render. A memoized "now" becomes stale:
+  // Realtime can deliver a new record whose timestamp is later than the old end,
+  // causing the newest measurement to be silently filtered out.
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(startOfToday);
+  start.setDate(start.getDate() - (rangeDays - 1));
+  const dateWindow = { start: start.getTime(), end: now.getTime() };
 
   const scopedVitals = useMemo(() => vitals
     .filter((record) => {
@@ -461,6 +461,12 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       </div>
 
       <div className="mt-4 min-w-0 rounded-xl border border-slate-100 bg-slate-50/50 p-2 sm:p-4">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-2 text-[10px] text-slate-500">
+          <span>{chartMode === 'activity' ? 'Data seluruh pasien' : 'Data pasien terpilih'}</span>
+          <span className="tabular-nums">
+            {scopedVitals.length} data tanda vital · {scopedPain.length} data nyeri · {scopedAlerts.length} peringatan
+          </span>
+        </div>
         {chartMode === 'vitals' && effectivePatientId !== 'all' && (
           <div className="mb-2 px-2 text-xs font-semibold text-slate-700">
             {selectedPatientName}
