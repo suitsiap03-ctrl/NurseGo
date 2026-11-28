@@ -188,7 +188,7 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
     [scopedVitals, scopedPain, scopedAlerts, rangeDays]
   );
 
-  const trendData = useMemo(() => {
+  const trendData = useMemo<Array<Record<string, any>>>(() => {
     if (effectivePatientId === 'all') return [];
     if (vitalMetric === 'pain') {
       return scopedPain.map((record) => {
