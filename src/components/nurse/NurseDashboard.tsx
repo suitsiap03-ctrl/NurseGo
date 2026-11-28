@@ -759,7 +759,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
             {hasAlertsFailure
               ? alertsError || 'Data peringatan tidak tersedia'
               : activeAlertsCount > 0
-              ? `${activeAlertsList.filter((a) => a.alert_level === 'darurat').length} darurat · ${activeAlertsList.filter((a) => a.alert_level === 'urgent').length} urgent`
+              ? `${activeAlertsList.filter((a) => a.alert_level === 'darurat').length} darurat · ${activeAlertsList.filter((a) => a.alert_level === 'urgent').length} perlu perhatian segera`
               : 'Tidak ada peringatan klinis aktif'}
           </p>
         </div>
@@ -819,7 +819,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-teal-600" />
                 <h2 className="text-sm font-semibold text-slate-900">
-                  Daftar Pasien Berdasarkan Prioritas
+                  Prioritas Pasien
                 </h2>
               </div>
               <div className="relative w-full sm:w-64">
@@ -1018,79 +1018,6 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
 
         {/* Right Column */}
         <div className="space-y-6 min-w-0">
-          {/* Peringatan Klinis */}
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-rose-600" />
-                <h2 className="text-sm font-semibold text-slate-900">Peringatan Klinis</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => onNavigateTab('peringatan')}
-                className="text-xs text-teal-600 hover:text-teal-700 font-medium"
-              >
-                Lihat Semua
-              </button>
-            </div>
-
-            {isInitialLoading ? (
-              <div className="p-6 text-center text-xs text-slate-400">Memuat peringatan...</div>
-            ) : hasAlertsFailure ? (
-              <div className="p-5 text-center text-xs text-rose-700 bg-rose-50/50 space-y-2">
-                <p>{alertsError || relationsError}</p>
-                <button
-                  type="button"
-                  onClick={() => loadDashboardData()}
-                  className="px-2.5 py-1 bg-rose-100 hover:bg-rose-200 rounded font-semibold"
-                >
-                  Coba Lagi
-                </button>
-              </div>
-            ) : activeAlertsList.length === 0 ? (
-              <div className="p-6 text-center text-xs text-slate-400">
-                Tidak ada peringatan aktif saat ini.
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100">
-                {activeAlertsList.slice(0, 4).map((al) => {
-                  const isDarurat = al.alert_level === 'darurat';
-                  const isUrgent = al.alert_level === 'urgent';
-                  return (
-                    <button
-                      key={al.id}
-                      type="button"
-                      onClick={() => onSelectPatient(al.patient_id)}
-                      className="w-full text-left p-3.5 space-y-1 hover:bg-slate-50 transition-colors"
-                    >
-                      <div className="flex items-center justify-between text-xs gap-2">
-                        <span
-                          className={`font-semibold uppercase tracking-wider text-[10px] px-1.5 py-0.5 rounded truncate ${
-                            isDarurat
-                              ? 'bg-rose-100 text-rose-800'
-                              : isUrgent
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}
-                        >
-                          {al.alert_level} · {getPatientNameById(al.patient_id)}
-                        </span>
-                        <span className="text-[10px] text-slate-400 shrink-0">
-                          {new Date(al.created_at).toLocaleTimeString('id-ID', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-xs font-medium text-slate-800 line-clamp-2">{al.title}</p>
-                      <p className="text-[11px] text-slate-500 line-clamp-2">{al.description}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
           {/* Jadwal Kontrol Mendatang */}
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-200 flex items-center justify-between">
