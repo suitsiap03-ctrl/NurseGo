@@ -53,13 +53,21 @@ export function useRealtimeSubscription(
     });
 
     channel.subscribe((status) => {
-      if (status === 'CHANNEL_ERROR') {
-        console.warn(`Realtime channel error on ${channelName}`);
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        console.warn(`Realtime channel status on ${channelName}: ${status}`);
       }
     });
 
+    // Realtime is the fast path. Polling is a safety net for environments where
+    // Postgres changes are not enabled for a table/publication or mobile clients
+    // temporarily lose their channel while backgrounded.
+    const fallbackRefresh = setInterval(() => {
+      if (document.visibilityState === 'visible') triggerRefresh();
+    }, 15000);
+
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
+      clearInterval(fallbackRefresh);
       supabase.removeChannel(channel);
     };
   }, [channelName, tablesKey, enabled]);
