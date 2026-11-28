@@ -16,6 +16,7 @@ import { fetchNurseRelationships } from '../../lib/nurseRelationships';
 import { DEMO_PATIENTS, DEMO_VITALS, DEMO_ALERTS } from '../../data/mockData';
 import { MVP_SURGERY_DEFINITIONS, matchMvpDefinition } from '../../lib/surgeryTemplates';
 import { formatLocalDate, parseLocalDate } from '../../lib/dateUtils';
+import { getABCPriority } from '../../lib/clinicalRules';
 import { PatientInvitation, RelationshipSummary } from '../../types/database';
 import {
   Users,
@@ -65,30 +66,35 @@ export const PatientList: React.FC<PatientListProps> = ({
     if (!user) return;
 
     if (isDemoMode) {
-      setPatients(
-        DEMO_PATIENTS.map((dp) => {
-          const pVitals = DEMO_VITALS.filter((v) => v.patient_id === dp.profile.id);
-          const pAlerts = DEMO_ALERTS.filter((a) => a.patient_id === dp.profile.id && a.status === 'aktif');
-          let highestAlert: string | null = null;
-          if (pAlerts.some((a) => a.alert_level === 'darurat')) highestAlert = 'darurat';
-          else if (pAlerts.some((a) => a.alert_level === 'urgent')) highestAlert = 'urgent';
-          else if (pAlerts.some((a) => a.alert_level === 'waspada')) highestAlert = 'waspada';
-          return {
-            id: dp.profile.id,
-            fullName: dp.profile.full_name,
-            email: dp.profile.email,
-            phone: dp.profile.phone,
-            gender: dp.patient_profile.gender || '-',
-            age: dp.patient_profile.date_of_birth
-              ? `${new Date().getFullYear() - new Date(dp.patient_profile.date_of_birth).getFullYear()} thn`
-              : '-',
-            surgery: dp.surgery,
-            latestVital: pVitals[0],
-            activeAlerts: pAlerts,
-            highestAlert,
-          };
-        })
-      );
+      const demoList = DEMO_PATIENTS.map((dp) => {
+        const latestVital = dp.latestVitals || DEMO_VITALS.find((v) => v.patient_id === dp.profile.id);
+        const pAlerts = DEMO_ALERTS.filter((a) => a.patient_id === dp.profile.id && a.status === 'aktif');
+        let highestAlert: string | null = null;
+        if (pAlerts.some((a) => a.alert_level === 'darurat')) highestAlert = 'darurat';
+        else if (pAlerts.some((a) => a.alert_level === 'urgent')) highestAlert = 'urgent';
+        else if (pAlerts.some((a) => a.alert_level === 'waspada')) highestAlert = 'waspada';
+        return {
+          id: dp.profile.id,
+          fullName: dp.profile.full_name,
+          email: dp.profile.email,
+          phone: dp.profile.phone,
+          gender: dp.patient_profile.gender || '-',
+          age: dp.patient_profile.date_of_birth
+            ? `${new Date().getFullYear() - new Date(dp.patient_profile.date_of_birth).getFullYear()} thn`
+            : '-',
+          surgery: dp.surgery,
+          latestVital,
+          activeAlerts: pAlerts,
+          highestAlert,
+          triagePriority: getABCPriority({ vitals: latestVital, symptoms: dp.latestSymptoms, wound: dp.latestWound }),
+        };
+      }).sort((a, b) => {
+        const rank = (p: string) => p === 'A' ? 4 : p === 'B' ? 3 : p === 'C' ? 2 : 1;
+        const severity = (p: string | null) => p === 'darurat' ? 3 : p === 'urgent' ? 2 : p === 'waspada' ? 1 : 0;
+        return rank(b.triagePriority) - rank(a.triagePriority) ||
+          severity(b.highestAlert) - severity(a.highestAlert);
+      });
+      setPatients(demoList);
       setPendingConsentIncoming([]);
       setPendingConsentOutgoing([]);
       setPendingInvitations([]);
@@ -120,6 +126,8 @@ export const PatientList: React.FC<PatientListProps> = ({
           { data: surgeries, error: surgErr },
           { data: vitals, error: vitErr },
           { data: alerts, error: alErr },
+          { data: symptoms, error: symErr },
+          { data: wounds, error: woundErr },
         ] = await Promise.all([
           supabase.from('profiles').select('*').in('id', patientIds),
           supabase.from('patient_profiles').select('*').in('id', patientIds),
@@ -130,9 +138,11 @@ export const PatientList: React.FC<PatientListProps> = ({
             .order('surgery_date', { ascending: false }),
           supabase.from('vital_sign_records').select('*').in('patient_id', patientIds).order('recorded_at', { ascending: false }),
           supabase.from('patient_alerts').select('*').in('patient_id', patientIds).eq('status', 'aktif'),
+          supabase.from('symptom_records').select('*').in('patient_id', patientIds).order('recorded_at', { ascending: false }),
+          supabase.from('wound_records').select('*').in('patient_id', patientIds).order('recorded_at', { ascending: false }),
         ]);
 
-        const subErr = profErr || pProfErr || surgErr || vitErr || alErr;
+        const subErr = profErr || pProfErr || surgErr || vitErr || alErr || symErr || woundErr;
         if (subErr) {
           setErrorMsg((prev) => prev || `Sebagian data pasien gagal dimuat: ${subErr.message}`);
         }
@@ -142,6 +152,8 @@ export const PatientList: React.FC<PatientListProps> = ({
           const pProf = patientProfiles?.find((p: any) => p.id === assign.patient_id);
           const surg = surgeries?.find((s: any) => s.patient_id === assign.patient_id);
           const latestVit = vitals?.find((v: any) => v.patient_id === assign.patient_id);
+          const latestSymptom = symptoms?.find((v: any) => v.patient_id === assign.patient_id);
+          const latestWound = wounds?.find((v: any) => v.patient_id === assign.patient_id);
           const pAlerts = alerts?.filter((a: any) => a.patient_id === assign.patient_id) || [];
 
           let highestAlert: string | null = null;
@@ -165,12 +177,20 @@ export const PatientList: React.FC<PatientListProps> = ({
             age,
             surgery: surg,
             latestVital: latestVit,
+            latestSymptoms: latestSymptom,
+            latestWound,
             activeAlerts: pAlerts,
             highestAlert,
+            triagePriority: getABCPriority({ vitals: latestVit, symptoms: latestSymptom, wound: latestWound }),
             assignedAt: assign.assigned_at,
           };
         });
 
+        merged.sort((a: any, b: any) => {
+          const rank = (p: string) => p === 'A' ? 4 : p === 'B' ? 3 : p === 'C' ? 2 : 1;
+          const severity = (p: string | null) => p === 'darurat' ? 3 : p === 'urgent' ? 2 : p === 'waspada' ? 1 : 0;
+          return rank(b.triagePriority) - rank(a.triagePriority) || severity(b.highestAlert) - severity(a.highestAlert);
+        });
         setPatients(merged);
       } else {
         setPatients([]);
@@ -501,7 +521,12 @@ export const PatientList: React.FC<PatientListProps> = ({
                         {p.gender === 'L' ? 'Laki-laki' : p.gender === 'P' ? 'Perempuan' : '-'} · {p.age}
                       </div>
                     </div>
-                    {renderAlertBadge(p.highestAlert)}
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded font-bold text-[10px] ${p.triagePriority === 'A' ? 'bg-rose-100 text-rose-800' : p.triagePriority === 'B' ? 'bg-orange-100 text-orange-800' : p.triagePriority === 'C' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>
+                        {p.triagePriority === 'A' ? 'A — AIRWAY' : p.triagePriority === 'B' ? 'B — BREATHING' : p.triagePriority === 'C' ? 'C — CIRCULATION' : 'STABIL / NON-ABC'}
+                      </span>
+                      {p.highestAlert && <span className="text-[9px] text-slate-500">{p.highestAlert.toUpperCase()}</span>}
+                    </div>
                   </div>
                   <div className="text-slate-700 font-medium">
                     {p.surgery?.surgery_type?.name || 'Pasca Operasi'}
