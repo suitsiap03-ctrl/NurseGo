@@ -257,7 +257,11 @@ export interface NursingCarePlan {
   interventions: string; // SIKI
   procedure_protocol?: string | null;
   implementation: string; // Implementasi
-  evaluation: string; // SOAP Evaluasi
+  evaluation: string; // SOAP legacy summary
+  soap_s?: string | null;
+  soap_o?: string | null;
+  soap_a?: string | null;
+  soap_p?: string | null;
   created_at: string;
   updated_at?: string;
   patient?: Profile;
