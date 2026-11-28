@@ -1,7 +1,7 @@
 /**
  * Nurse Alerts Center for NurseGo
  *
- * - 3-level alert triage: Waspada, Urgent, Darurat
+ * - 3-level alert triage: Waspada, Perlu Perhatian Segera, Darurat
  * - Realtime subscription to `patient_alerts`
  * - Sends persistent notification to patient when nurse updates alert status
  */
@@ -172,7 +172,7 @@ export const NurseAlerts: React.FC<NurseAlertsProps> = ({ onSelectPatient }) => 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-xs">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">
-            Pusat Peringatan & Triage Klinis
+            Daftar Peringatan Pasien
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Mendeteksi dini perubahan parameter tanda vital, nyeri, luka, dan kondisi umum pasien pascaoperasi.
@@ -205,7 +205,7 @@ export const NurseAlerts: React.FC<NurseAlertsProps> = ({ onSelectPatient }) => 
             {[
               { value: 'all', label: 'Semua' },
               { value: 'darurat', label: 'Darurat' },
-              { value: 'urgent', label: 'Urgent' },
+              { value: 'urgent', label: 'Perlu Perhatian Segera' },
               { value: 'waspada', label: 'Waspada' },
             ].map((item) => (
               <button key={item.value} type="button" onClick={() => setLevelFilter(item.value)}
