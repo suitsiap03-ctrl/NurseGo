@@ -403,7 +403,7 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
     setGoalsOutcomes('');
     setInterventions('');
     setSelectedCareTemplateId('');
-    setProcedureProtocol(getSurgerySop(surgery?.surgery_type?.name)?.steps.map((step, index) => `${index + 1}. ${step}`).join('\\n') || '');
+    setProcedureProtocol(getSurgerySop(surgery?.surgery_type?.name)?.steps.map((step, index) => `${index + 1}. ${step}`).join('\n') || '');
     setImplementation('');
     setEvaluation('');
   };
@@ -1406,9 +1406,9 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                   setSelectedCareTemplateId(e.target.value);
                   if (template) {
                     setNursingDiagnosis(template.diagnosisDraft);
-                    setGoalsOutcomes(`${template.outcomeName} (${template.outcomeCode})\\nKriteria hasil: ${template.outcomeIndicators.join('; ')}\\nTarget dan waktu evaluasi ditetapkan berdasarkan kondisi pasien.`);
+                    setGoalsOutcomes(`${template.outcomeName} (${template.outcomeCode})\nKriteria hasil: ${template.outcomeIndicators.join('; ')}\nTarget dan waktu evaluasi ditetapkan berdasarkan kondisi pasien.`);
                     const groups = template.interventionGroups;
-                    setInterventions(`${template.interventionName} (${template.interventionCode})\\nObservasi: ${groups.observasi.join('; ')}\\nTerapeutik: ${groups.terapeutik.join('; ')}\\nEdukasi: ${groups.edukasi.join('; ')}\\nKolaborasi: ${groups.kolaborasi.join('; ')}`);
+                    setInterventions(`${template.interventionName} (${template.interventionCode})\nObservasi: ${groups.observasi.join('; ')}\nTerapeutik: ${groups.terapeutik.join('; ')}\nEdukasi: ${groups.edukasi.join('; ')}\nKolaborasi: ${groups.kolaborasi.join('; ')}`);
                   }
                 }} className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg">
                   <option value="">Pilih diagnosis yang sesuai hasil pengkajian</option>
@@ -1438,7 +1438,7 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                   <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} placeholder="Catat tindakan yang benar-benar dilakukan dan respons pasien." className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">6. Evaluasi (SOAP)</label>
+                  <label className="block font-semibold text-slate-700 mb-1">7. Evaluasi (SOAP)</label>
                   <textarea rows={2} value={evaluation} onChange={(e) => setEvaluation(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
               </div>
