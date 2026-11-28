@@ -278,31 +278,31 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
           .select('*')
           .in('patient_id', patientIds)
           .order('recorded_at', { ascending: false })
-          .limit(250),
+          .limit(1000),
         supabase
           .from('pain_records')
           .select('*')
           .in('patient_id', patientIds)
           .order('recorded_at', { ascending: false })
-          .limit(250),
+          .limit(1000),
         supabase
           .from('symptom_records')
           .select('*')
           .in('patient_id', patientIds)
           .order('recorded_at', { ascending: false })
-          .limit(250),
+          .limit(1000),
         supabase
           .from('wound_records')
           .select('*')
           .in('patient_id', patientIds)
           .order('recorded_at', { ascending: false })
-          .limit(250),
+          .limit(1000),
         supabase
           .from('patient_alerts')
           .select('*')
           .in('patient_id', patientIds)
           .order('created_at', { ascending: false })
-          .limit(250),
+          .limit(1000),
         supabase
           .from('patient_appointments')
           .select('*')
