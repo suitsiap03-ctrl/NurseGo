@@ -304,11 +304,11 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
             </div>
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Tujuan & Luaran (SLKI)</label>
-              <textarea rows={2} value={goalsOutcomes} onChange={(e) => setGoalsOutcomes(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+              <textarea rows={4} value={goalsOutcomes} onChange={(e) => setGoalsOutcomes(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
             </div>
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Intervensi (SIKI)</label>
-              <textarea rows={2} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+              <textarea rows={6} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
             </div>
             <div>
               <label className="block font-semibold text-slate-700 mb-1">Panduan SOP Pascaoperasi (otomatis sesuai jenis operasi)</label>
@@ -406,8 +406,14 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
                   )}
                   <div>
                     <strong>Intervensi (SIKI):</strong>
-                    <p className="text-[11px] text-slate-600 mt-0.5">{cp.interventions || '-'}</p>
+                    <p className="text-[11px] text-slate-600 mt-0.5 whitespace-pre-line">{cp.interventions || '-'}</p>
                   </div>
+                  {cp.procedure_protocol && (
+                    <div className="md:col-span-2">
+                      <strong>Panduan SOP:</strong>
+                      <p className="text-[11px] text-slate-600 mt-0.5 whitespace-pre-line">{cp.procedure_protocol}</p>
+                    </div>
+                  )}
                   {cp.implementation && (
                     <div>
                       <strong>Implementasi:</strong>
