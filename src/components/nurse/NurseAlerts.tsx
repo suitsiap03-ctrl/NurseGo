@@ -160,6 +160,16 @@ export const NurseAlerts: React.FC<NurseAlertsProps> = ({ onSelectPatient }) => 
     const matchLevel = levelFilter === 'all' || a.alert_level === levelFilter;
     const matchStatus = statusFilter === 'all' || a.status === statusFilter;
     return matchLevel && matchStatus;
+  }).sort((a, b) => {
+    const rank = (title: string) =>
+      title.includes('[A — AIRWAY]') ? 4 :
+      title.includes('[B — BREATHING]') ? 3 :
+      title.includes('[C — CIRCULATION]') ? 2 : 1;
+    const severity = (level: string) =>
+      level === 'darurat' ? 3 : level === 'urgent' ? 2 : level === 'waspada' ? 1 : 0;
+    return rank(String(b.title || '')) - rank(String(a.title || '')) ||
+      severity(String(b.alert_level || '')) - severity(String(a.alert_level || '')) ||
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   return (
