@@ -12,6 +12,7 @@ import { getSupabase } from '../../lib/supabaseClient';
 import { useRealtimeSubscription } from '../../hooks/useRealtimeSubscription';
 import { fetchNurseRelationships } from '../../lib/nurseRelationships';
 import { DEMO_PATIENTS } from '../../data/mockData';
+import { getCareDiagnosisTemplate, getCareDiagnosisTemplates, getSurgerySop } from '../../data/nursingCareCatalog';
 import { FileText, RefreshCw, ArrowRight, Plus, Search, AlertCircle } from 'lucide-react';
 
 interface NurseDocumentationProps {
@@ -22,7 +23,7 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
   const { user, isDemoMode } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
   const [carePlans, setCarePlans] = useState<any[]>([]);
-  const [assignedPatients, setAssignedPatients] = useState<{ id: string; full_name: string }[]>([]);
+  const [assignedPatients, setAssignedPatients] = useState<{ id: string; full_name: string; surgery_name?: string }[]>([]);
   const [search, setSearch] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -33,8 +34,10 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
   const [objectiveData, setObjectiveData] = useState('');
   const [assessment, setAssessment] = useState('');
   const [nursingDiagnosis, setNursingDiagnosis] = useState('');
+  const [selectedCareTemplateId, setSelectedCareTemplateId] = useState('');
   const [goalsOutcomes, setGoalsOutcomes] = useState('');
   const [interventions, setInterventions] = useState('');
+  const [procedureProtocol, setProcedureProtocol] = useState('');
   const [implementation, setImplementation] = useState('');
   const [evaluation, setEvaluation] = useState('');
   const [saving, setSaving] = useState(false);
@@ -50,7 +53,7 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
         }))
       );
       setCarePlans(demoPlans);
-      setAssignedPatients(DEMO_PATIENTS.map((dp) => ({ id: dp.profile.id, full_name: dp.profile.full_name })));
+      setAssignedPatients(DEMO_PATIENTS.map((dp) => ({ id: dp.profile.id, full_name: dp.profile.full_name, surgery_name: dp.surgery?.surgery_type?.name })));
       setLoading(false);
       return;
     }
@@ -77,21 +80,23 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
       const allPatientIds = Array.from(new Set([...assignIds, ...cpPatientIds]));
 
       let profiles: any[] = [];
+      let surgeries: any[] = [];
       if (allPatientIds.length > 0) {
-        const { data: profData, error: profErr } = await supabase
-          .from('profiles')
-          .select('id, full_name, email')
-          .in('id', allPatientIds);
-        if (profErr) {
-          setErrorMsg(`Sebagian data nama pasien gagal dimuat: ${profErr.message}`);
-        }
+        const [{ data: profData, error: profErr }, { data: surgeryData, error: surgeryErr }] = await Promise.all([
+          supabase.from('profiles').select('id, full_name, email').in('id', allPatientIds),
+          supabase.from('patient_surgeries').select('patient_id, surgery_date, surgery_type:surgery_types(name)').in('patient_id', allPatientIds).order('surgery_date', { ascending: false }),
+        ]);
+        if (profErr) setErrorMsg(`Sebagian data nama pasien gagal dimuat: ${profErr.message}`);
+        if (surgeryErr) setErrorMsg(`Jenis operasi pasien belum dapat dimuat: ${surgeryErr.message}`);
         profiles = profData || [];
+        surgeries = surgeryData || [];
       }
 
       setAssignedPatients(
         assignIds.map((pid: string) => {
           const p = profiles.find((pr) => pr.id === pid);
-          return { id: pid, full_name: p?.full_name || 'Pasien' };
+          const surgery = surgeries.find((item) => item.patient_id === pid);
+          return { id: pid, full_name: p?.full_name || 'Pasien', surgery_name: surgery?.surgery_type?.name };
         })
       );
       setSelectedPatientId((prev) => (assignIds.includes(prev) ? prev : assignIds[0] || ''));
@@ -138,8 +143,11 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
         objective_data: objectiveData.trim() || null,
         assessment: assessment.trim(),
         nursing_diagnosis: nursingDiagnosis.trim(),
+        diagnosis_code: getCareDiagnosisTemplate(selectedCareTemplateId)?.code || null,
+        diagnosis_label: getCareDiagnosisTemplate(selectedCareTemplateId)?.name || nursingDiagnosis.trim(),
         goals_outcomes: goalsOutcomes.trim(),
         interventions: interventions.trim(),
+        procedure_protocol: procedureProtocol.trim() || null,
         implementation: implementation.trim(),
         evaluation: evaluation.trim(),
       };
@@ -173,6 +181,7 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
       setObjectiveData('');
       setAssessment('');
       setNursingDiagnosis('');
+      setSelectedCareTemplateId('');
       setGoalsOutcomes('');
       setInterventions('');
       setImplementation('');
@@ -184,6 +193,14 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
       setSaving(false);
     }
   };
+
+  const selectedPatient = assignedPatients.find((patient) => patient.id === selectedPatientId);
+
+  useEffect(() => {
+    const sop = getSurgerySop(selectedPatient?.surgery_name);
+    setProcedureProtocol(sop ? sop.steps.map((step, index) => `${index + 1}. ${step}`).join('\\n') : '');
+    setSelectedCareTemplateId('');
+  }, [selectedPatientId, assignedPatients]);
 
   const filtered = carePlans.filter(
     (cp) =>
@@ -248,15 +265,29 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
             </select>
           </div>
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Diagnosis Keperawatan (SDKI) *</label>
-            <input
-              type="text"
+            <label className="block font-semibold text-slate-700 mb-1">Pilih Diagnosis Keperawatan (SDKI) *</label>
+            <select
               required
-              value={nursingDiagnosis}
-              onChange={(e) => setNursingDiagnosis(e.target.value)}
-              placeholder="Nyeri Akut b.d Agen Pencedera Fisik"
-              className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg"
-            />
+              value={selectedCareTemplateId}
+              onChange={(e) => {
+                const template = getCareDiagnosisTemplate(e.target.value);
+                setSelectedCareTemplateId(e.target.value);
+                if (template) {
+                  setNursingDiagnosis(template.diagnosisDraft);
+                  setGoalsOutcomes(`${template.outcomeName} (${template.outcomeCode})\\nKriteria hasil: ${template.outcomeIndicators.join('; ')}\\nTarget dan waktu evaluasi ditetapkan berdasarkan kondisi pasien.`);
+                  const groups = template.interventionGroups;
+                  setInterventions(`${template.interventionName} (${template.interventionCode})\\nObservasi: ${groups.observasi.join('; ')}\\nTerapeutik: ${groups.terapeutik.join('; ')}\\nEdukasi: ${groups.edukasi.join('; ')}\\nKolaborasi: ${groups.kolaborasi.join('; ')}`);
+                }
+              }}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg"
+            >
+              <option value="">Pilih diagnosis berdasarkan hasil pengkajian</option>
+              {getCareDiagnosisTemplates(selectedPatient?.surgery_name).map((template) => (
+                <option key={template.id} value={template.id}>{template.code} · {template.name}</option>
+              ))}
+            </select>
+            {nursingDiagnosis && <p className="mt-2 text-[11px] text-slate-600">{nursingDiagnosis}</p>}
+            {selectedCareTemplateId && <p className="mt-1 text-[11px] text-amber-700">{getCareDiagnosisTemplate(selectedCareTemplateId)?.clinicalCheck}</p>}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -280,8 +311,13 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
               <textarea rows={2} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Implementasi</label>
-              <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+              <label className="block font-semibold text-slate-700 mb-1">Panduan SOP Pascaoperasi (otomatis sesuai jenis operasi)</label>
+              <textarea rows={5} readOnly value={procedureProtocol} className="w-full px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600" />
+              <p className="mt-1 text-[10px] text-slate-500">Panduan edukatif NurseGo, bukan pengganti SOP resmi fasilitas atau instruksi dokter/operator.</p>
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">Implementasi aktual</label>
+              <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} placeholder="Catat tindakan yang benar-benar dilakukan dan respons pasien." className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
             </div>
           </div>
           <div>
