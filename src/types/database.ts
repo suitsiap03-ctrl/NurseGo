@@ -251,8 +251,11 @@ export interface NursingCarePlan {
   subjective_data?: string;
   objective_data?: string;
   nursing_diagnosis: string; // SDKI
+  diagnosis_code?: string | null;
+  diagnosis_label?: string;
   goals_outcomes: string; // SLKI
   interventions: string; // SIKI
+  procedure_protocol?: string | null;
   implementation: string; // Implementasi
   evaluation: string; // SOAP Evaluasi
   created_at: string;
