@@ -17,6 +17,39 @@ export interface EvaluatedAlert {
   clinicalRationale: string[];
 }
 
+export type ABCPriority = 'A' | 'B' | 'C' | 'D';
+
+export function getABCPriority(data: {
+  vitals?: Partial<VitalSignRecord>;
+  symptoms?: Partial<SymptomRecord>;
+  wound?: Partial<WoundRecord>;
+}): ABCPriority {
+  const symptomText = [
+    ...(data.symptoms?.symptoms || []),
+    data.symptoms?.notes || '',
+  ].join(' ').toLowerCase();
+
+  const airwayConcern = /tersedak|jalan napas tersumbat|sumbatan jalan napas|stridor|suara napas.*(mengi|ngorok|berbunyi)|lidah.*bengkak|tenggorokan.*bengkak|sulit berbicara karena gangguan napas/.test(symptomText);
+  if (airwayConcern) return 'A';
+
+  const breathingConcern =
+    /sesak napas|sulit bernapas|napas berat|napas cepat|sianosis|sesak mendadak/.test(symptomText) ||
+    (data.vitals?.oxygen_saturation !== undefined && data.vitals.oxygen_saturation < 95) ||
+    (data.vitals?.respiratory_rate !== undefined &&
+      (data.vitals.respiratory_rate >= 25 || data.vitals.respiratory_rate < 10));
+  if (breathingConcern) return 'B';
+
+  const circulationConcern =
+    Boolean(data.wound?.has_bleeding) ||
+    (data.vitals?.systolic_bp !== undefined && data.vitals.systolic_bp < 90) ||
+    (data.vitals?.heart_rate !== undefined &&
+      (data.vitals.heart_rate > 125 || data.vitals.heart_rate < 50)) ||
+    /perdarahan banyak|darah mengalir|kulit dingin|keringat dingin|pucat sekali|pingsan|tanda syok/.test(symptomText);
+  if (circulationConcern) return 'C';
+
+  return 'D';
+}
+
 export function evaluateClinicalMonitoring(data: {
   vitals?: Partial<VitalSignRecord>;
   pain?: Partial<PainRecord>;
@@ -220,34 +253,14 @@ export function evaluateClinicalMonitoring(data: {
     }
   }
 
-  // ABC primary-survey classification for ordering alerts; not a diagnosis.
-  const symptomText = [
-    ...(data.symptoms?.symptoms || []),
-    data.symptoms?.notes || '',
-  ].join(' ').toLowerCase();
-  const airwayConcern = /tersedak|jalan napas tersumbat|sumbatan jalan napas|stridor|sulit berbicara karena gangguan napas/.test(symptomText);
-  const breathingConcern =
-    /sesak napas|sulit bernapas|napas berat|napas cepat|sianosis/.test(symptomText) ||
-    (data.vitals?.oxygen_saturation !== undefined && data.vitals.oxygen_saturation < 93) ||
-    (data.vitals?.respiratory_rate !== undefined &&
-      (data.vitals.respiratory_rate > 28 || data.vitals.respiratory_rate < 10));
-  const circulationConcern =
-    Boolean(data.wound?.has_bleeding) ||
-    (data.vitals?.systolic_bp !== undefined && data.vitals.systolic_bp < 90) ||
-    (data.vitals?.heart_rate !== undefined &&
-      (data.vitals.heart_rate > 125 || data.vitals.heart_rate < 50));
-
-  let triagePriority: EvaluatedAlert['triagePriority'] = 'D';
-  if (airwayConcern) {
-    triagePriority = 'A';
-    flags.push({ level: 'darurat', source: 'symptom', note: 'Indikasi gangguan jalan napas dari laporan pasien; perlu penilaian langsung segera.' });
-  } else if (breathingConcern) {
-    triagePriority = 'B';
-    if (!flags.some((f) => f.note.toLowerCase().includes('napas') || f.note.toLowerCase().includes('saturasi'))) {
-      flags.push({ level: 'urgent', source: 'symptom', note: 'Keluhan gangguan pernapasan dilaporkan; perlu penilaian segera.' });
-    }
-  } else if (circulationConcern) {
-    triagePriority = 'C';
+  // ABC primary-survey classification is calculated from current patient findings.
+  const triagePriority = getABCPriority(data);
+  if (triagePriority === 'A' && !flags.some((f) => f.level === 'darurat')) {
+    flags.push({ level: 'darurat', source: 'symptom', note: 'Terdapat indikasi gangguan jalan napas; perlu penilaian dan respons darurat segera.' });
+  } else if (triagePriority === 'B' && !flags.some((f) => f.source === 'vital_sign' && /napas|saturasi/i.test(f.note))) {
+    flags.push({ level: 'urgent', source: 'symptom', note: 'Terdapat indikasi gangguan pernapasan berdasarkan keluhan atau tanda vital; perlu penilaian segera.' });
+  } else if (triagePriority === 'C' && !flags.some((f) => f.source === 'wound' && /perdarahan/i.test(f.note))) {
+    flags.push({ level: 'urgent', source: 'symptom', note: 'Terdapat indikasi gangguan sirkulasi/perfusi; perlu penilaian segera.' });
   }
 
   if (flags.length === 0) {
