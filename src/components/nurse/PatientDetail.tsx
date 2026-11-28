@@ -414,7 +414,7 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
     setSubjectiveData(cp.subjective_data || '');
     setObjectiveData(cp.objective_data || '');
     setNursingDiagnosis(cp.nursing_diagnosis || '');
-    setSelectedCareTemplateId('');
+    setSelectedCareTemplateId(getCareDiagnosisTemplates(surgery?.surgery_type?.name).find((template) => template.code === cp.diagnosis_code)?.id || '');
     setGoalsOutcomes(cp.goals_outcomes || '');
     setInterventions(cp.interventions || '');
     setProcedureProtocol(cp.procedure_protocol || '');
