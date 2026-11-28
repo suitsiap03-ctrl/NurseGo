@@ -166,6 +166,25 @@ const COMMON_DIAGNOSES: Record<string, CareDiagnosisTemplate> = {
     },
     clinicalCheck: 'Diagnosis risiko hanya untuk faktor risiko tanpa perdarahan aktual. Perdarahan aktif atau tanda syok adalah kondisi darurat.',
   },
+  falls: {
+    id: 'falls',
+    code: 'D.0143',
+    name: 'Risiko Jatuh',
+    category: 'Keamanan dan Proteksi',
+    diagnosisDraft: 'Risiko Jatuh (D.0143) dibuktikan dengan faktor risiko berupa keterbatasan mobilitas/kelemahan atau gangguan keseimbangan pascaoperasi.',
+    outcomeCode: 'L.14138',
+    outcomeName: 'Tingkat Jatuh — menurun',
+    outcomeIndicators: ['Jatuh saat berdiri, berjalan, berpindah, atau di kamar mandi tidak terjadi', 'Kemampuan menggunakan alat bantu meningkat', 'Lingkungan rumah lebih aman'],
+    interventionCode: 'I.14540',
+    interventionName: 'Pencegahan Jatuh',
+    interventionGroups: {
+      observasi: ['Kaji riwayat jatuh, keseimbangan, kekuatan, pusing saat berdiri, dan efek obat.', 'Nilai risiko lingkungan: lantai licin, pencahayaan, tangga, kamar mandi, dan hambatan berjalan.'],
+      terapeutik: ['Pastikan jalur berjalan bebas hambatan dan penerangan cukup.', 'Pastikan alat bantu sesuai dan digunakan dengan benar.', 'Dampingi perpindahan atau ambulasi bila diperlukan.'],
+      edukasi: ['Anjurkan pasien meminta bantuan saat belum aman berjalan sendiri.', 'Ajarkan penggunaan alas kaki antiselip dan alat bantu sesuai instruksi.', 'Edukasi keluarga untuk menata lingkungan rumah agar aman.'],
+      kolaborasi: ['Kolaborasikan evaluasi fisioterapi dan peninjauan obat yang dapat meningkatkan risiko jatuh.'],
+    },
+    clinicalCheck: 'Pilih bila hasil skrining menunjukkan faktor risiko jatuh. Sesuaikan dengan kemampuan pasien dan lingkungan rumah.',
+  },
   lactation: {
     id: 'lactation',
     code: 'D.0029',
@@ -223,7 +242,7 @@ export const SURGERY_CARE_CATALOG: Record<string, { label: string; diagnosisIds:
   },
   tkr: {
     label: 'Total Knee Replacement (TKR)',
-    diagnosisIds: ['pain', 'infection', 'mobility', 'bleeding', 'knowledge'],
+    diagnosisIds: ['pain', 'infection', 'mobility', 'falls', 'bleeding', 'knowledge'],
     sop: {
       id: 'sop-tkr',
       name: 'Pemantauan pemulihan pasca-TKR',
@@ -234,7 +253,7 @@ export const SURGERY_CARE_CATALOG: Record<string, { label: string; diagnosisIds:
   },
   orif: {
     label: 'ORIF',
-    diagnosisIds: ['pain', 'infection', 'mobility', 'skin', 'bleeding', 'knowledge'],
+    diagnosisIds: ['pain', 'infection', 'mobility', 'falls', 'skin', 'bleeding', 'knowledge'],
     sop: {
       id: 'sop-orif',
       name: 'Pemantauan ekstremitas pasca-ORIF',
