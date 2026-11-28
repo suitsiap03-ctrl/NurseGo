@@ -120,6 +120,10 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
   const [selectedCareTemplateId, setSelectedCareTemplateId] = useState('');
   const [implementation, setImplementation] = useState('');
   const [evaluation, setEvaluation] = useState('');
+  const [soapS, setSoapS] = useState('');
+  const [soapO, setSoapO] = useState('');
+  const [soapA, setSoapA] = useState('');
+  const [soapP, setSoapP] = useState('');
   const [submittingCarePlan, setSubmittingCarePlan] = useState(false);
 
   // Medications (Create + Edit)
@@ -406,6 +410,10 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
     setProcedureProtocol(getSurgerySop(surgery?.surgery_type?.name)?.steps.map((step, index) => `${index + 1}. ${step}`).join('\n') || '');
     setImplementation('');
     setEvaluation('');
+    setSoapS('');
+    setSoapO('');
+    setSoapA('');
+    setSoapP('');
   };
 
   const startEditCarePlan = (cp: NursingCarePlan) => {
@@ -420,6 +428,10 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
     setProcedureProtocol(cp.procedure_protocol || '');
     setImplementation(cp.implementation || '');
     setEvaluation(cp.evaluation || '');
+    setSoapS(cp.soap_s || '');
+    setSoapO(cp.soap_o || '');
+    setSoapA(cp.soap_a || '');
+    setSoapP(cp.soap_p || '');
     setIsAddingCarePlan(true);
   };
 
@@ -451,7 +463,11 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
           interventions: interventions.trim(),
           procedure_protocol: procedureProtocol.trim() || null,
           implementation: implementation.trim(),
-          evaluation: evaluation.trim(),
+          evaluation: [soapS.trim() ? `S: ${soapS.trim()}` : '', soapO.trim() ? `O: ${soapO.trim()}` : '', soapA.trim() ? `A: ${soapA.trim()}` : '', soapP.trim() ? `P: ${soapP.trim()}` : ''].filter(Boolean).join('\n') || evaluation.trim(),
+          soap_s: soapS.trim() || null,
+          soap_o: soapO.trim() || null,
+          soap_a: soapA.trim() || null,
+          soap_p: soapP.trim() || null,
           updated_at: new Date().toISOString(),
         };
         let { error } = await supabase
@@ -492,7 +508,11 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
           interventions: interventions.trim(),
           procedure_protocol: procedureProtocol.trim() || null,
           implementation: implementation.trim(),
-          evaluation: evaluation.trim(),
+          evaluation: [soapS.trim() ? `S: ${soapS.trim()}` : '', soapO.trim() ? `O: ${soapO.trim()}` : '', soapA.trim() ? `A: ${soapA.trim()}` : '', soapP.trim() ? `P: ${soapP.trim()}` : ''].filter(Boolean).join('\n') || evaluation.trim(),
+          soap_s: soapS.trim() || null,
+          soap_o: soapO.trim() || null,
+          soap_a: soapA.trim() || null,
+          soap_p: soapP.trim() || null,
         };
         let { error } = await supabase.from('nursing_care_plans').insert(insertPayload);
 
@@ -1429,17 +1449,40 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                   <textarea rows={6} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">5. Panduan SOP Pascaoperasi (otomatis sesuai jenis operasi)</label>
-                  <textarea rows={5} readOnly value={procedureProtocol} className="w-full px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600" />
-                  <p className="mt-1 text-[10px] text-slate-500">Panduan edukatif NurseGo, bukan pengganti SOP resmi fasilitas atau instruksi dokter/operator.</p>
+                  <label className="block font-semibold text-slate-700 mb-2">5. Panduan Pemantauan Pascaoperasi</label>
+                  <div className="rounded-xl border border-teal-100 bg-teal-50/50 p-4 space-y-3">
+                    <p className="text-[11px] text-slate-600">Panduan ringkas sesuai jenis operasi pasien. Tampilkan seluruh poin tanpa kotak gulir.</p>
+                    <ol className="list-decimal pl-5 space-y-2 text-[11px] leading-relaxed text-slate-700">
+                      {getSurgerySop(surgery?.surgery_type?.name)?.steps.map((step, index) => <li key={index}>{step}</li>)}
+                    </ol>
+                    {getSurgerySop(surgery?.surgery_type?.name)?.escalation?.length ? (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                        <p className="font-bold text-amber-900 mb-1">Tanda bahaya yang perlu dieskalasikan</p>
+                        <ul className="list-disc pl-5 space-y-1 text-[11px] text-amber-900">
+                          {getSurgerySop(surgery?.surgery_type?.name)?.escalation.map((item, index) => <li key={index}>{item}</li>)}
+                        </ul>
+                      </div>
+                    ) : null}
+                    <p className="text-[10px] text-slate-500">Panduan edukatif NurseGo, bukan SOP resmi fasilitas atau pengganti instruksi dokter/operator.</p>
+                  </div>
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">6. Implementasi aktual</label>
+                  <label className="block font-semibold text-slate-700 mb-1">6. Pelaksanaan / Implementasi Keperawatan</label>
                   <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} placeholder="Catat tindakan yang benar-benar dilakukan dan respons pasien." className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">7. Evaluasi (SOAP)</label>
-                  <textarea rows={2} value={evaluation} onChange={(e) => setEvaluation(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+                  <div className="md:col-span-2 space-y-2">
+                    <div>
+                      <p className="font-bold text-slate-800">7. Evaluasi / Catatan Perkembangan (SOAP)</p>
+                      <p className="text-[10px] text-slate-500">Isi berdasarkan respons dan temuan pasien setelah tindakan. S, O, A, dan P merupakan bagian evaluasi; implementasi dicatat pada bagian sebelumnya.</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div><label className="block font-semibold text-slate-700 mb-1">S — Subjektif</label><textarea rows={3} value={soapS} onChange={(e) => setSoapS(e.target.value)} placeholder="Keluhan atau respons yang disampaikan pasien..." className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg" /></div>
+                      <div><label className="block font-semibold text-slate-700 mb-1">O — Objektif</label><textarea rows={3} value={soapO} onChange={(e) => setSoapO(e.target.value)} placeholder="Hasil observasi, pemeriksaan, atau pengukuran..." className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg" /></div>
+                      <div><label className="block font-semibold text-slate-700 mb-1">A — Analisis</label><textarea rows={3} value={soapA} onChange={(e) => setSoapA(e.target.value)} placeholder="Status masalah: teratasi, teratasi sebagian, atau belum teratasi..." className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg" /></div>
+                      <div><label className="block font-semibold text-slate-700 mb-1">P — Perencanaan</label><textarea rows={3} value={soapP} onChange={(e) => setSoapP(e.target.value)} placeholder="Rencana tindak lanjut: lanjutkan, ubah, hentikan, atau tambah..." className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg" /></div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="flex justify-end gap-2">
@@ -1487,9 +1530,17 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                     {cp.procedure_protocol && <div className="md:col-span-2"><strong>Panduan SOP:</strong><p className="mt-0.5 whitespace-pre-line">{cp.procedure_protocol}</p></div>}
                     <div><strong>Implementasi:</strong> <p className="mt-0.5">{cp.implementation || '-'}</p></div>
                   </div>
-                  {cp.evaluation && (
-                    <div className="p-3 bg-teal-50/60 border border-teal-100 rounded-lg text-teal-900">
-                      <strong>Evaluasi (SOAP):</strong> <p className="mt-0.5">{cp.evaluation}</p>
+                  {(cp.soap_s || cp.soap_o || cp.soap_a || cp.soap_p || cp.evaluation) && (
+                    <div className="p-3 bg-teal-50/60 border border-teal-100 rounded-lg text-teal-900 space-y-2">
+                      <strong>Evaluasi / Catatan Perkembangan (SOAP)</strong>
+                      {cp.soap_s || cp.soap_o || cp.soap_a || cp.soap_p ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div><b>S — Subjektif</b><p className="whitespace-pre-line">{cp.soap_s || '-'}</p></div>
+                          <div><b>O — Objektif</b><p className="whitespace-pre-line">{cp.soap_o || '-'}</p></div>
+                          <div><b>A — Analisis</b><p className="whitespace-pre-line">{cp.soap_a || '-'}</p></div>
+                          <div><b>P — Perencanaan</b><p className="whitespace-pre-line">{cp.soap_p || '-'}</p></div>
+                        </div>
+                      ) : <p className="whitespace-pre-line">{cp.evaluation}</p>}
                     </div>
                   )}
                 </div>
