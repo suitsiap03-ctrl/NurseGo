@@ -91,8 +91,8 @@ export const PatientList: React.FC<PatientListProps> = ({
       }).sort((a, b) => {
         const rank = (p: string) => p === 'A' ? 4 : p === 'B' ? 3 : p === 'C' ? 2 : 1;
         const severity = (p: string | null) => p === 'darurat' ? 3 : p === 'urgent' ? 2 : p === 'waspada' ? 1 : 0;
-        return rank(b.triagePriority) - rank(a.triagePriority) ||
-          severity(b.highestAlert) - severity(a.highestAlert);
+        return severity(b.highestAlert) - severity(a.highestAlert) ||
+          rank(b.triagePriority) - rank(a.triagePriority);
       });
       setPatients(demoList);
       setPendingConsentIncoming([]);
@@ -348,8 +348,8 @@ export const PatientList: React.FC<PatientListProps> = ({
     }
     if (highestAlert === 'waspada') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-yellow-100 text-yellow-800">
-          <span className="w-1.5 h-1.5 rounded-full bg-yellow-600" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-amber-100 text-amber-800">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
           WASPADA
         </span>
       );
