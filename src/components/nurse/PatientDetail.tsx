@@ -18,6 +18,7 @@ import { getSupabase, isMissingRpcError } from '../../lib/supabaseClient';
 import { useRealtimeSubscription } from '../../hooks/useRealtimeSubscription';
 import { createNotification } from '../../lib/notifications';
 import { formatLocalDate, parseLocalDate } from '../../lib/dateUtils';
+import { getCareDiagnosisTemplate, getCareDiagnosisTemplates, getSurgerySop } from '../../data/nursingCareCatalog';
 import {
   ArrowLeft,
   HeartPulse,
@@ -115,6 +116,8 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
   const [nursingDiagnosis, setNursingDiagnosis] = useState('');
   const [goalsOutcomes, setGoalsOutcomes] = useState('');
   const [interventions, setInterventions] = useState('');
+  const [procedureProtocol, setProcedureProtocol] = useState('');
+  const [selectedCareTemplateId, setSelectedCareTemplateId] = useState('');
   const [implementation, setImplementation] = useState('');
   const [evaluation, setEvaluation] = useState('');
   const [submittingCarePlan, setSubmittingCarePlan] = useState(false);
@@ -399,6 +402,8 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
     setNursingDiagnosis('');
     setGoalsOutcomes('');
     setInterventions('');
+    setSelectedCareTemplateId('');
+    setProcedureProtocol(getSurgerySop(surgery?.surgery_type?.name)?.steps.map((step, index) => `${index + 1}. ${step}`).join('\\n') || '');
     setImplementation('');
     setEvaluation('');
   };
@@ -409,8 +414,10 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
     setSubjectiveData(cp.subjective_data || '');
     setObjectiveData(cp.objective_data || '');
     setNursingDiagnosis(cp.nursing_diagnosis || '');
+    setSelectedCareTemplateId('');
     setGoalsOutcomes(cp.goals_outcomes || '');
     setInterventions(cp.interventions || '');
+    setProcedureProtocol(cp.procedure_protocol || '');
     setImplementation(cp.implementation || '');
     setEvaluation(cp.evaluation || '');
     setIsAddingCarePlan(true);
@@ -438,8 +445,11 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
           subjective_data: sTrim || null,
           objective_data: oTrim || null,
           nursing_diagnosis: nursingDiagnosis.trim(),
+          diagnosis_code: getCareDiagnosisTemplate(selectedCareTemplateId)?.code || null,
+          diagnosis_label: getCareDiagnosisTemplate(selectedCareTemplateId)?.name || nursingDiagnosis.trim(),
           goals_outcomes: goalsOutcomes.trim(),
           interventions: interventions.trim(),
+          procedure_protocol: procedureProtocol.trim() || null,
           implementation: implementation.trim(),
           evaluation: evaluation.trim(),
           updated_at: new Date().toISOString(),
@@ -476,8 +486,11 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
           subjective_data: sTrim || null,
           objective_data: oTrim || null,
           nursing_diagnosis: nursingDiagnosis.trim(),
+          diagnosis_code: getCareDiagnosisTemplate(selectedCareTemplateId)?.code || null,
+          diagnosis_label: getCareDiagnosisTemplate(selectedCareTemplateId)?.name || nursingDiagnosis.trim(),
           goals_outcomes: goalsOutcomes.trim(),
           interventions: interventions.trim(),
+          procedure_protocol: procedureProtocol.trim() || null,
           implementation: implementation.trim(),
           evaluation: evaluation.trim(),
         };
@@ -1387,8 +1400,24 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                 </div>
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">2. Diagnosis Keperawatan (SDKI) *</label>
-                <input type="text" required value={nursingDiagnosis} onChange={(e) => setNursingDiagnosis(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+                <label className="block font-semibold text-slate-700 mb-1">2. Pilih Diagnosis Keperawatan (SDKI) *</label>
+                <select required value={selectedCareTemplateId} onChange={(e) => {
+                  const template = getCareDiagnosisTemplate(e.target.value);
+                  setSelectedCareTemplateId(e.target.value);
+                  if (template) {
+                    setNursingDiagnosis(template.diagnosisDraft);
+                    setGoalsOutcomes(`${template.outcomeName} (${template.outcomeCode})\\nKriteria hasil: ${template.outcomeIndicators.join('; ')}\\nTarget dan waktu evaluasi ditetapkan berdasarkan kondisi pasien.`);
+                    const groups = template.interventionGroups;
+                    setInterventions(`${template.interventionName} (${template.interventionCode})\\nObservasi: ${groups.observasi.join('; ')}\\nTerapeutik: ${groups.terapeutik.join('; ')}\\nEdukasi: ${groups.edukasi.join('; ')}\\nKolaborasi: ${groups.kolaborasi.join('; ')}`);
+                  }
+                }} className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg">
+                  <option value="">Pilih diagnosis yang sesuai hasil pengkajian</option>
+                  {getCareDiagnosisTemplates(surgery?.surgery_type?.name).map((template) => (
+                    <option key={template.id} value={template.id}>{template.code} · {template.name}</option>
+                  ))}
+                </select>
+                {nursingDiagnosis && <p className="mt-2 text-[11px] text-slate-600">{nursingDiagnosis}</p>}
+                {selectedCareTemplateId && <p className="mt-1 text-[11px] text-amber-700">{getCareDiagnosisTemplate(selectedCareTemplateId)?.clinicalCheck}</p>}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
@@ -1400,8 +1429,13 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                   <textarea rows={2} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">5. Implementasi</label>
-                  <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+                  <label className="block font-semibold text-slate-700 mb-1">5. Panduan SOP Pascaoperasi (otomatis sesuai jenis operasi)</label>
+                  <textarea rows={5} readOnly value={procedureProtocol} className="w-full px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600" />
+                  <p className="mt-1 text-[10px] text-slate-500">Panduan edukatif NurseGo, bukan pengganti SOP resmi fasilitas atau instruksi dokter/operator.</p>
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">6. Implementasi aktual</label>
+                  <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} placeholder="Catat tindakan yang benar-benar dilakukan dan respons pasien." className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">6. Evaluasi (SOAP)</label>
@@ -1450,6 +1484,7 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                       <div><strong>Data Objektif (O):</strong> <p className="mt-0.5">{cp.objective_data}</p></div>
                     )}
                     <div><strong>Intervensi:</strong> <p className="mt-0.5">{cp.interventions || '-'}</p></div>
+                    {cp.procedure_protocol && <div className="md:col-span-2"><strong>Panduan SOP:</strong><p className="mt-0.5 whitespace-pre-line">{cp.procedure_protocol}</p></div>}
                     <div><strong>Implementasi:</strong> <p className="mt-0.5">{cp.implementation || '-'}</p></div>
                   </div>
                   {cp.evaluation && (
