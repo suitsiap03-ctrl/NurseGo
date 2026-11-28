@@ -1441,12 +1441,33 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">3. Tujuan & Luaran (SLKI)</label>
-                  <textarea rows={4} value={goalsOutcomes} onChange={(e) => setGoalsOutcomes(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+                  <label className="block font-semibold text-slate-700 mb-1">3. Luaran Keperawatan (SLKI)</label>
+                  {getCareDiagnosisTemplate(selectedCareTemplateId) ? (
+                    <div className="rounded-xl border border-sky-100 bg-sky-50/60 p-4 space-y-2">
+                      <p className="font-bold text-sky-950">{getCareDiagnosisTemplate(selectedCareTemplateId)?.outcomeName}</p>
+                      <p className="text-[11px] font-semibold text-slate-600">Kode: {getCareDiagnosisTemplate(selectedCareTemplateId)?.outcomeCode}</p>
+                      <ul className="list-disc pl-5 space-y-1 text-[11px] text-slate-700">
+                        {getCareDiagnosisTemplate(selectedCareTemplateId)?.outcomeIndicators.map((item, index) => <li key={index}>{item}</li>)}
+                      </ul>
+                      <p className="text-[10px] text-slate-500">Target nilai dan waktu pencapaian ditetapkan per pasien berdasarkan hasil pengkajian.</p>
+                    </div>
+                  ) : <p className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-[11px] text-slate-500">Pilih diagnosis terlebih dahulu untuk menampilkan luaran yang sesuai.</p>}
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">4. Intervensi (SIKI)</label>
-                  <textarea rows={6} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+                  <label className="block font-semibold text-slate-700 mb-1">4. Intervensi Keperawatan (SIKI)</label>
+                  {getCareDiagnosisTemplate(selectedCareTemplateId) ? (
+                    <div className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-4 space-y-3">
+                      <div><p className="font-bold text-indigo-950">{getCareDiagnosisTemplate(selectedCareTemplateId)?.interventionName}</p><p className="text-[11px] text-slate-500">Kode: {getCareDiagnosisTemplate(selectedCareTemplateId)?.interventionCode}</p></div>
+                      {(['observasi', 'terapeutik', 'edukasi', 'kolaborasi'] as const).map((group) => (
+                        <div key={group}>
+                          <p className="font-semibold text-slate-700 capitalize">{group}</p>
+                          <ul className="list-disc pl-5 space-y-1 text-[11px] text-slate-700">
+                            {getCareDiagnosisTemplate(selectedCareTemplateId)?.interventionGroups[group].map((item, index) => <li key={index}>{item}</li>)}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ) : <p className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-[11px] text-slate-500">Pilih diagnosis terlebih dahulu untuk menampilkan intervensi yang sesuai.</p>}
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-2">5. Panduan Pemantauan Pascaoperasi</label>
@@ -1468,7 +1489,7 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">6. Pelaksanaan / Implementasi Keperawatan</label>
-                  <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} placeholder="Catat tindakan yang benar-benar dilakukan dan respons pasien." className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+                  <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} placeholder="Tuliskan tindakan yang benar-benar dilaksanakan, waktu pelaksanaan, dan respons langsung pasien. Contoh: membantu pasien berjalan 5 meter dengan walker; pasien toleransi baik." className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
                   <div className="md:col-span-2 space-y-2">
