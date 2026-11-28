@@ -152,11 +152,13 @@ export const NurseDashboardCharts: React.FC<NurseDashboardChartsProps> = ({
       ? selectedPatientId
       : 'all';
 
+  // Include the entire current day: the previous implementation ended at 00:00,
+  // which silently excluded every measurement recorded later today.
   const dateWindow = useMemo(() => {
-    const end = new Date();
-    const start = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     start.setDate(start.getDate() - (rangeDays - 1));
-    return { start: start.getTime(), end: end.getTime() };
+    return { start: start.getTime(), end: now.getTime() };
   }, [rangeDays]);
 
   const scopedVitals = useMemo(() => vitals
