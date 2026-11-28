@@ -145,8 +145,8 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
       }).sort((a, b) => {
         const rank = (priority: string) => priority === 'A' ? 4 : priority === 'B' ? 3 : priority === 'C' ? 2 : 1;
         const severity = (level: string | null) => level === 'darurat' ? 3 : level === 'urgent' ? 2 : level === 'waspada' ? 1 : 0;
-        return rank(b.triagePriority) - rank(a.triagePriority) ||
-          severity(b.highestAlert) - severity(a.highestAlert);
+        return severity(b.highestAlert) - severity(a.highestAlert) ||
+          rank(b.triagePriority) - rank(a.triagePriority);
       });
 
       const todayStr = getLocalDateInputValue();
@@ -410,8 +410,8 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
       const severityScore = (level: string | null) =>
         level === 'darurat' ? 3 : level === 'urgent' ? 2 : level === 'waspada' ? 1 : 0;
       mergedPatients.sort((a, b) =>
-        triageScore(b.triagePriority) - triageScore(a.triagePriority) ||
         severityScore(b.highestAlert) - severityScore(a.highestAlert) ||
+        triageScore(b.triagePriority) - triageScore(a.triagePriority) ||
         new Date(b.latestVital?.recorded_at || 0).getTime() - new Date(a.latestVital?.recorded_at || 0).getTime()
       );
 
@@ -895,7 +895,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
                             </span>
                           )}
                           {alertLevel === 'waspada' && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
                               WASPADA
                             </span>
                           )}
