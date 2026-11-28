@@ -40,6 +40,10 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
   const [procedureProtocol, setProcedureProtocol] = useState('');
   const [implementation, setImplementation] = useState('');
   const [evaluation, setEvaluation] = useState('');
+  const [soapS, setSoapS] = useState('');
+  const [soapO, setSoapO] = useState('');
+  const [soapA, setSoapA] = useState('');
+  const [soapP, setSoapP] = useState('');
   const [saving, setSaving] = useState(false);
 
   const fetchCarePlans = useCallback(async () => {
@@ -149,7 +153,11 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
         interventions: interventions.trim(),
         procedure_protocol: procedureProtocol.trim() || null,
         implementation: implementation.trim(),
-        evaluation: evaluation.trim(),
+        evaluation: [soapS.trim() ? `S: ${soapS.trim()}` : '', soapO.trim() ? `O: ${soapO.trim()}` : '', soapA.trim() ? `A: ${soapA.trim()}` : '', soapP.trim() ? `P: ${soapP.trim()}` : ''].filter(Boolean).join('\n') || evaluation.trim(),
+        soap_s: soapS.trim() || null,
+        soap_o: soapO.trim() || null,
+        soap_a: soapA.trim() || null,
+        soap_p: soapP.trim() || null,
       };
 
       let { error } = await supabase.from('nursing_care_plans').insert(fullPayload);
@@ -186,6 +194,10 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
       setInterventions('');
       setImplementation('');
       setEvaluation('');
+      setSoapS('');
+      setSoapO('');
+      setSoapA('');
+      setSoapP('');
       fetchCarePlans();
     } catch (err: any) {
       setErrorMsg(`Gagal menyimpan dokumentasi: ${err.message}`);
@@ -315,19 +327,37 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
               <label className="block font-semibold text-slate-700 mb-1">Intervensi (SIKI)</label>
               <textarea rows={6} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
             </div>
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Panduan SOP Pascaoperasi (otomatis sesuai jenis operasi)</label>
-              <textarea rows={5} readOnly value={procedureProtocol} className="w-full px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600" />
-              <p className="mt-1 text-[10px] text-slate-500">Panduan edukatif NurseGo, bukan pengganti SOP resmi fasilitas atau instruksi dokter/operator.</p>
+            <div className="md:col-span-2">
+              <label className="block font-semibold text-slate-700 mb-2">Panduan Pemantauan Pascaoperasi</label>
+              <div className="rounded-xl border border-teal-100 bg-teal-50/50 p-4 space-y-3">
+                <p className="text-[11px] text-slate-600">Panduan ringkas sesuai jenis operasi pasien. Seluruh poin ditampilkan langsung.</p>
+                <ol className="list-decimal pl-5 space-y-2 text-[11px] leading-relaxed text-slate-700">
+                  {getSurgerySop(selectedPatient?.surgery_name)?.steps.map((step, index) => <li key={index}>{step}</li>)}
+                </ol>
+                {getSurgerySop(selectedPatient?.surgery_name)?.escalation?.length ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <p className="font-bold text-amber-900 mb-1">Tanda bahaya yang perlu dieskalasikan</p>
+                    <ul className="list-disc pl-5 space-y-1 text-[11px] text-amber-900">
+                      {getSurgerySop(selectedPatient?.surgery_name)?.escalation.map((item, index) => <li key={index}>{item}</li>)}
+                    </ul>
+                  </div>
+                ) : null}
+                <p className="text-[10px] text-slate-500">Panduan edukatif NurseGo, bukan SOP resmi fasilitas atau pengganti instruksi dokter/operator.</p>
+              </div>
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Implementasi aktual</label>
+              <label className="block font-semibold text-slate-700 mb-1">Pelaksanaan / Implementasi Keperawatan</label>
               <textarea rows={2} value={implementation} onChange={(e) => setImplementation(e.target.value)} placeholder="Catat tindakan yang benar-benar dilakukan dan respons pasien." className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
             </div>
           </div>
-          <div>
-            <label className="block font-semibold text-slate-700 mb-1">Evaluasi & Rencana Tindak Lanjut (P/SOAP)</label>
-            <textarea rows={2} value={evaluation} onChange={(e) => setEvaluation(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+          <div className="space-y-2">
+            <div><p className="font-bold text-slate-800">Evaluasi / Catatan Perkembangan (SOAP)</p><p className="text-[10px] text-slate-500">Catat respons pasien setelah tindakan. Implementasi dicatat terpisah pada bagian pelaksanaan.</p></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div><label className="block font-semibold text-slate-700 mb-1">S — Subjektif</label><textarea rows={3} value={soapS} onChange={(e) => setSoapS(e.target.value)} placeholder="Keluhan atau respons pasien..." className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg" /></div>
+              <div><label className="block font-semibold text-slate-700 mb-1">O — Objektif</label><textarea rows={3} value={soapO} onChange={(e) => setSoapO(e.target.value)} placeholder="Hasil observasi atau pengukuran..." className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg" /></div>
+              <div><label className="block font-semibold text-slate-700 mb-1">A — Analisis</label><textarea rows={3} value={soapA} onChange={(e) => setSoapA(e.target.value)} placeholder="Status masalah dibandingkan luaran..." className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg" /></div>
+              <div><label className="block font-semibold text-slate-700 mb-1">P — Perencanaan</label><textarea rows={3} value={soapP} onChange={(e) => setSoapP(e.target.value)} placeholder="Rencana tindak lanjut..." className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg" /></div>
+            </div>
           </div>
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => setIsCreating(false)} className="px-3 py-1.5 text-slate-600">Batal</button>
@@ -427,10 +457,17 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
                   )}
                 </div>
 
-                {cp.evaluation && (
-                  <div className="text-xs text-teal-900 bg-teal-50/70 p-2.5 rounded-lg border border-teal-100">
-                    <strong>Evaluasi (SOAP):</strong>
-                    <p className="text-[11px] mt-0.5">{cp.evaluation}</p>
+                {(cp.soap_s || cp.soap_o || cp.soap_a || cp.soap_p || cp.evaluation) && (
+                  <div className="text-xs text-teal-900 bg-teal-50/70 p-3 rounded-lg border border-teal-100 space-y-2">
+                    <strong>Evaluasi / Catatan Perkembangan (SOAP)</strong>
+                    {cp.soap_s || cp.soap_o || cp.soap_a || cp.soap_p ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div><b>S — Subjektif</b><p className="whitespace-pre-line">{cp.soap_s || '-'}</p></div>
+                        <div><b>O — Objektif</b><p className="whitespace-pre-line">{cp.soap_o || '-'}</p></div>
+                        <div><b>A — Analisis</b><p className="whitespace-pre-line">{cp.soap_a || '-'}</p></div>
+                        <div><b>P — Perencanaan</b><p className="whitespace-pre-line">{cp.soap_p || '-'}</p></div>
+                      </div>
+                    ) : <p className="whitespace-pre-line">{cp.evaluation}</p>}
                   </div>
                 )}
 
