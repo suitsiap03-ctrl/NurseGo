@@ -55,6 +55,8 @@ export function evaluateClinicalMonitoring(data: {
   pain?: Partial<PainRecord>;
   symptoms?: Partial<SymptomRecord>;
   wound?: Partial<WoundRecord>;
+  previousVitals?: Partial<VitalSignRecord>[];
+  surgeryType?: string;
 }): EvaluatedAlert | null {
   const flags: { level: AlertLevel; source: 'vital_sign' | 'pain' | 'symptom' | 'wound' | 'general'; note: string }[] = [];
 
@@ -253,6 +255,79 @@ export function evaluateClinicalMonitoring(data: {
     }
   }
 
+  // 5. Trend monitoring: compare the latest observation with the immediately preceding record.
+  // A trend is a prompt for reassessment, not a diagnosis or a standalone emergency criterion.
+  const previous = data.previousVitals?.[0];
+  const current = data.vitals;
+  if (previous && current) {
+    const changes: string[] = [];
+    if (current.body_temperature !== undefined && previous.body_temperature !== undefined &&
+        current.body_temperature - previous.body_temperature >= 0.8) changes.push('suhu meningkat');
+    if (current.heart_rate !== undefined && previous.heart_rate !== undefined &&
+        current.heart_rate - previous.heart_rate >= 20) changes.push('nadi meningkat');
+    if (current.respiratory_rate !== undefined && previous.respiratory_rate !== undefined &&
+        current.respiratory_rate - previous.respiratory_rate >= 5) changes.push('frekuensi napas meningkat');
+    if (current.oxygen_saturation !== undefined && previous.oxygen_saturation !== undefined &&
+        previous.oxygen_saturation - current.oxygen_saturation >= 3) changes.push('saturasi oksigen menurun');
+    if (current.systolic_bp !== undefined && previous.systolic_bp !== undefined &&
+        previous.systolic_bp - current.systolic_bp >= 20) changes.push('tekanan darah sistolik menurun');
+
+    if (changes.length >= 2) {
+      flags.push({ level: 'urgent', source: 'vital_sign', note: `Perubahan tanda vital memburuk dibanding pemantauan sebelumnya: ${changes.join(', ')}.` });
+    } else if (changes.length === 1) {
+      flags.push({ level: 'waspada', source: 'vital_sign', note: `Terdapat perubahan tren tanda vital: ${changes[0]}; perlu pemantauan ulang.` });
+    }
+  }
+
+  // 6. Clinical concern / red flags: universal warning signs plus operation-specific concerns.
+  const allReportedText = [
+    ...(data.symptoms?.symptoms || []),
+    data.symptoms?.notes || '',
+    data.wound?.notes || '',
+  ].join(' ').toLowerCase();
+  if (/tidak responsif|sulit dibangunkan|penurunan kesadaran|kejang|nyeri dada berat|sesak mendadak|perdarahan banyak|darah mengalir deras/.test(allReportedText)) {
+    flags.push({ level: 'darurat', source: 'symptom', note: 'Dilaporkan tanda bahaya umum yang memerlukan respons kegawatdaruratan segera.' });
+  }
+
+  const surgery = (data.surgeryType || '').toLowerCase();
+  const surgeryRedFlags: { match: RegExp; note: string }[] = [];
+  if (/sectio|caes|sesar|sc/.test(surgery)) {
+    surgeryRedFlags.push(
+      { match: /perdarahan nifas banyak|perdarahan vagina banyak|darah.*(membasahi|penuh).*pembalut|sakit kepala hebat|pandangan kabur|nyeri ulu hati berat/, note: 'Terdapat keluhan tanda bahaya pascapersalinan/SC.' }
+    );
+  } else if (/total knee|tkr|orif/.test(surgery)) {
+    surgeryRedFlags.push(
+      { match: /betis.*(bengkak|nyeri)|tungkai.*(dingin|pucat|kebiruan)|anggota gerak.*(mati rasa|kebas)|nyeri.*(tiba-tiba|semakin hebat)/, note: 'Terdapat keluhan tanda bahaya pada ekstremitas pascaoperasi ortopedi.' }
+    );
+  } else if (/apend|append/.test(surgery)) {
+    surgeryRedFlags.push(
+      { match: /perut.*(semakin nyeri|mengeras|membesar)|muntah terus|tidak bisa kentut/, note: 'Terdapat keluhan tanda bahaya abdomen pascaapendektomi.' }
+    );
+  } else if (/hernia|hernior/.test(surgery)) {
+    surgeryRedFlags.push(
+      { match: /benjolan.*(nyeri|keras|tidak bisa masuk)|muntah terus|perut.*membesar|tidak bisa kentut/, note: 'Terdapat keluhan tanda bahaya pascaherniorafi.' }
+    );
+  } else if (/koles|chole/.test(surgery)) {
+    surgeryRedFlags.push(
+      { match: /mata.*kuning|kulit.*kuning|nyeri perut.*(semakin berat|hebat)|muntah terus/, note: 'Terdapat keluhan tanda bahaya pascakolesistektomi.' }
+    );
+  } else if (/mastek/.test(surgery)) {
+    surgeryRedFlags.push(
+      { match: /payudara.*(membengkak cepat|membesar mendadak)|bengkak.*(cepat|mendadak)|perdarahan.*area operasi/, note: 'Terdapat keluhan tanda bahaya pascamastektomi.' }
+    );
+  }
+  for (const redFlag of surgeryRedFlags) {
+    if (redFlag.match.test(allReportedText)) {
+      flags.push({ level: 'urgent', source: 'symptom', note: redFlag.note });
+      break;
+    }
+  }
+
+  // 7. Patient/family/nurse concern can raise the need for reassessment.
+  if (/memburuk|tidak seperti biasanya|lebih lemah dari kemarin|tampak sangat lemas|keluarga khawatir|perawat khawatir/.test(allReportedText)) {
+    flags.push({ level: 'urgent', source: 'symptom', note: 'Ada laporan perubahan kondisi atau kekhawatiran klinis dari pasien, keluarga, atau perawat.' });
+  }
+
   // ABC primary-survey classification is calculated from current patient findings.
   const triagePriority = getABCPriority(data);
   if (triagePriority === 'A' && !flags.some((f) => f.level === 'darurat')) {
@@ -281,16 +356,10 @@ export function evaluateClinicalMonitoring(data: {
   // Select primary trigger source
   const primaryFlag = flags.find((f) => f.level === finalLevel) || flags[0];
 
-  const priorityLabel = {
-    A: 'A — AIRWAY',
-    B: 'B — BREATHING',
-    C: 'C — CIRCULATION',
-    D: 'PRIORITAS LAIN',
-  }[triagePriority];
   const titleMap: Record<AlertLevel, string> = {
-    darurat: `[${priorityLabel}] Peringatan Darurat: Kondisi Pascaoperasi Memerlukan Penanganan Segera`,
-    urgent: `[${priorityLabel}] Peringatan Urgent: Perubahan Kondisi Pasien Perlu Ditinjau Perawat Segera`,
-    waspada: `[${priorityLabel}] Peringatan Waspada: Terdeteksi Parameter Pemantauan yang Perlu Diperhatikan`,
+    darurat: 'Peringatan Darurat: Kondisi Pasien Memerlukan Penanganan Segera',
+    urgent: 'Perlu Perhatian Segera: Kondisi Pasien Perlu Ditinjau Perawat',
+    waspada: 'Waspada: Terdapat Perubahan yang Perlu Dipantau',
   };
 
   const rationales = flags.map((f) => `[${f.level.toUpperCase()}] ${f.note}`);
