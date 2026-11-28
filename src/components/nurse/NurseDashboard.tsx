@@ -116,8 +116,13 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
           symptoms: dp.latestSymptoms,
           wound: dp.latestWound,
         });
+        const demoHistory = [...(dp.historicalVitals || [])].sort((a, b) =>
+          new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime()
+        );
         const derivedAlert = evaluateClinicalMonitoring({
           vitals: latestVital,
+          previousVitals: demoHistory,
+          surgeryType: dp.surgery?.surgery_type?.name || dp.surgery?.surgery_type?.code,
           pain: dp.latestPain,
           symptoms: dp.latestSymptoms,
           wound: dp.latestWound,
@@ -373,8 +378,13 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
           symptoms: latestSymptom,
           wound: latestWound,
         });
+        const previousVitals = vitalsList
+          .filter((v) => v.patient_id === r.patient_id && v.id !== latestVit?.id)
+          .slice(0, 3);
         const derivedAlert = evaluateClinicalMonitoring({
           vitals: latestVit,
+          previousVitals,
+          surgeryType: surg?.surgery_type?.name || surg?.surgery_type?.code,
           pain: latestPain,
           symptoms: latestSymptom,
           wound: latestWound,
