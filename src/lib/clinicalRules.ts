@@ -10,6 +10,7 @@ import { AlertLevel, VitalSignRecord, PainRecord, SymptomRecord, WoundRecord } f
 
 export interface EvaluatedAlert {
   alertLevel: AlertLevel;
+  triagePriority: 'A' | 'B' | 'C' | 'D';
   title: string;
   description: string;
   triggerSource: 'vital_sign' | 'pain' | 'symptom' | 'wound' | 'general';
@@ -219,6 +220,36 @@ export function evaluateClinicalMonitoring(data: {
     }
   }
 
+  // ABC primary-survey classification for ordering alerts; not a diagnosis.
+  const symptomText = [
+    ...(data.symptoms?.symptoms || []),
+    data.symptoms?.notes || '',
+  ].join(' ').toLowerCase();
+  const airwayConcern = /tersedak|jalan napas tersumbat|sumbatan jalan napas|stridor|sulit berbicara karena gangguan napas/.test(symptomText);
+  const breathingConcern =
+    /sesak napas|sulit bernapas|napas berat|napas cepat|sianosis/.test(symptomText) ||
+    (data.vitals?.oxygen_saturation !== undefined && data.vitals.oxygen_saturation < 93) ||
+    (data.vitals?.respiratory_rate !== undefined &&
+      (data.vitals.respiratory_rate > 28 || data.vitals.respiratory_rate < 10));
+  const circulationConcern =
+    Boolean(data.wound?.has_bleeding) ||
+    (data.vitals?.systolic_bp !== undefined && data.vitals.systolic_bp < 90) ||
+    (data.vitals?.heart_rate !== undefined &&
+      (data.vitals.heart_rate > 125 || data.vitals.heart_rate < 50));
+
+  let triagePriority: EvaluatedAlert['triagePriority'] = 'D';
+  if (airwayConcern) {
+    triagePriority = 'A';
+    flags.push({ level: 'darurat', source: 'symptom', note: 'Indikasi gangguan jalan napas dari laporan pasien; perlu penilaian langsung segera.' });
+  } else if (breathingConcern) {
+    triagePriority = 'B';
+    if (!flags.some((f) => f.note.toLowerCase().includes('napas') || f.note.toLowerCase().includes('saturasi'))) {
+      flags.push({ level: 'urgent', source: 'symptom', note: 'Keluhan gangguan pernapasan dilaporkan; perlu penilaian segera.' });
+    }
+  } else if (circulationConcern) {
+    triagePriority = 'C';
+  }
+
   if (flags.length === 0) {
     return null;
   }
@@ -237,16 +268,23 @@ export function evaluateClinicalMonitoring(data: {
   // Select primary trigger source
   const primaryFlag = flags.find((f) => f.level === finalLevel) || flags[0];
 
+  const priorityLabel = {
+    A: 'A — AIRWAY',
+    B: 'B — BREATHING',
+    C: 'C — CIRCULATION',
+    D: 'PRIORITAS LAIN',
+  }[triagePriority];
   const titleMap: Record<AlertLevel, string> = {
-    darurat: 'Peringatan Darurat: Kondisi Pascaoperasi Memerlukan Penanganan Segera',
-    urgent: 'Peringatan Urgent: Perubahan Kondisi Pasien Perlu Ditinjau Perawat Segera',
-    waspada: 'Peringatan Waspada: Terdeteksi Parameter Pemantauan yang Perlu Diperhatikan',
+    darurat: `[${priorityLabel}] Peringatan Darurat: Kondisi Pascaoperasi Memerlukan Penanganan Segera`,
+    urgent: `[${priorityLabel}] Peringatan Urgent: Perubahan Kondisi Pasien Perlu Ditinjau Perawat Segera`,
+    waspada: `[${priorityLabel}] Peringatan Waspada: Terdeteksi Parameter Pemantauan yang Perlu Diperhatikan`,
   };
 
   const rationales = flags.map((f) => `[${f.level.toUpperCase()}] ${f.note}`);
 
   return {
     alertLevel: finalLevel,
+    triagePriority,
     title: titleMap[finalLevel],
     description: rationales.join(' | '),
     triggerSource: primaryFlag.source,
