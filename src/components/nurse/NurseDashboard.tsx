@@ -884,9 +884,6 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
                           <span className="font-semibold text-sm text-slate-900">
                             {patient.fullName}
                           </span>
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${patient.triagePriority === 'A' ? 'bg-rose-100 text-rose-800' : patient.triagePriority === 'B' ? 'bg-orange-100 text-orange-800' : patient.triagePriority === 'C' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}`}>
-                            {patient.triagePriority === 'D' ? 'D — PRIORITAS LAIN' : `${patient.triagePriority} — ${patient.triagePriority === 'A' ? 'AIRWAY' : patient.triagePriority === 'B' ? 'BREATHING' : 'CIRCULATION'}`}
-                          </span>
                           {alertLevel === 'darurat' && (
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">
                               DARURAT
@@ -894,7 +891,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
                           )}
                           {alertLevel === 'urgent' && (
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
-                              URGENT
+                              PERLU PERHATIAN SEGERA
                             </span>
                           )}
                           {alertLevel === 'waspada' && (
