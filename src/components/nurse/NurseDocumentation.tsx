@@ -198,7 +198,7 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
 
   useEffect(() => {
     const sop = getSurgerySop(selectedPatient?.surgery_name);
-    setProcedureProtocol(sop ? sop.steps.map((step, index) => `${index + 1}. ${step}`).join('\\n') : '');
+    setProcedureProtocol(sop ? sop.steps.map((step, index) => `${index + 1}. ${step}`).join('\n') : '');
     setSelectedCareTemplateId('');
   }, [selectedPatientId, assignedPatients]);
 
@@ -274,9 +274,9 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
                 setSelectedCareTemplateId(e.target.value);
                 if (template) {
                   setNursingDiagnosis(template.diagnosisDraft);
-                  setGoalsOutcomes(`${template.outcomeName} (${template.outcomeCode})\\nKriteria hasil: ${template.outcomeIndicators.join('; ')}\\nTarget dan waktu evaluasi ditetapkan berdasarkan kondisi pasien.`);
+                  setGoalsOutcomes(`${template.outcomeName} (${template.outcomeCode})\nKriteria hasil: ${template.outcomeIndicators.join('; ')}\nTarget dan waktu evaluasi ditetapkan berdasarkan kondisi pasien.`);
                   const groups = template.interventionGroups;
-                  setInterventions(`${template.interventionName} (${template.interventionCode})\\nObservasi: ${groups.observasi.join('; ')}\\nTerapeutik: ${groups.terapeutik.join('; ')}\\nEdukasi: ${groups.edukasi.join('; ')}\\nKolaborasi: ${groups.kolaborasi.join('; ')}`);
+                  setInterventions(`${template.interventionName} (${template.interventionCode})\nObservasi: ${groups.observasi.join('; ')}\nTerapeutik: ${groups.terapeutik.join('; ')}\nEdukasi: ${groups.edukasi.join('; ')}\nKolaborasi: ${groups.kolaborasi.join('; ')}`);
                 }
               }}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg"
