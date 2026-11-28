@@ -277,7 +277,7 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
           .limit(250),
         supabase
           .from('wound_records')
-          .select('id, patient_id, recorded_at')
+          .select('*')
           .in('patient_id', patientIds)
           .order('recorded_at', { ascending: false })
           .limit(250),
