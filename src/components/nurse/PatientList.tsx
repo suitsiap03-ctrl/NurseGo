@@ -342,7 +342,7 @@ export const PatientList: React.FC<PatientListProps> = ({
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-[10px] bg-amber-100 text-amber-800">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
-          URGENT
+          PERLU PERHATIAN SEGERA
         </span>
       );
     }
@@ -521,12 +521,7 @@ export const PatientList: React.FC<PatientListProps> = ({
                         {p.gender === 'L' ? 'Laki-laki' : p.gender === 'P' ? 'Perempuan' : '-'} · {p.age}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded font-bold text-[10px] ${p.triagePriority === 'A' ? 'bg-rose-100 text-rose-800' : p.triagePriority === 'B' ? 'bg-orange-100 text-orange-800' : p.triagePriority === 'C' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>
-                        {p.triagePriority === 'A' ? 'A — AIRWAY' : p.triagePriority === 'B' ? 'B — BREATHING' : p.triagePriority === 'C' ? 'C — CIRCULATION' : 'STABIL / NON-ABC'}
-                      </span>
-                      {p.highestAlert && <span className="text-[9px] text-slate-500">{p.highestAlert.toUpperCase()}</span>}
-                    </div>
+                    {renderAlertBadge(p.highestAlert)}
                   </div>
                   <div className="text-slate-700 font-medium">
                     {p.surgery?.surgery_type?.name || 'Pasca Operasi'}
@@ -608,12 +603,7 @@ export const PatientList: React.FC<PatientListProps> = ({
                           )}
                         </td>
                         <td className="py-3.5 px-4">
-                          <div className="flex flex-col items-start gap-1">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded font-bold text-[10px] ${p.triagePriority === 'A' ? 'bg-rose-100 text-rose-800' : p.triagePriority === 'B' ? 'bg-orange-100 text-orange-800' : p.triagePriority === 'C' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>
-                              {p.triagePriority === 'A' ? 'A — AIRWAY' : p.triagePriority === 'B' ? 'B — BREATHING' : p.triagePriority === 'C' ? 'C — CIRCULATION' : 'STABIL / NON-ABC'}
-                            </span>
-                            {p.highestAlert && <span className="text-[9px] text-slate-500">{p.highestAlert.toUpperCase()}</span>}
-                          </div>
+                          {renderAlertBadge(p.highestAlert)}
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           <button
