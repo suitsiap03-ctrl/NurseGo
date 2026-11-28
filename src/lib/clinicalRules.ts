@@ -291,7 +291,7 @@ export function evaluateClinicalMonitoring(data: {
 
   const surgery = (data.surgeryType || '').toLowerCase();
   const surgeryRedFlags: { match: RegExp; note: string }[] = [];
-  if (/sectio|caes|sesar|sc/.test(surgery)) {
+  if (/sectio|caes|sesar/.test(surgery)) {
     surgeryRedFlags.push(
       { match: /perdarahan nifas banyak|perdarahan vagina banyak|darah.*(membasahi|penuh).*pembalut|sakit kepala hebat|pandangan kabur|nyeri ulu hati berat/, note: 'Terdapat keluhan tanda bahaya pascapersalinan/SC.' }
     );
