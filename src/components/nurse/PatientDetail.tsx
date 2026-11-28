@@ -1422,11 +1422,11 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">3. Tujuan & Luaran (SLKI)</label>
-                  <textarea rows={2} value={goalsOutcomes} onChange={(e) => setGoalsOutcomes(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+                  <textarea rows={4} value={goalsOutcomes} onChange={(e) => setGoalsOutcomes(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">4. Intervensi (SIKI)</label>
-                  <textarea rows={2} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
+                  <textarea rows={6} value={interventions} onChange={(e) => setInterventions(e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg" />
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">5. Panduan SOP Pascaoperasi (otomatis sesuai jenis operasi)</label>
