@@ -366,13 +366,20 @@ export const NurseDashboard: React.FC<NurseDashboardProps> = ({
         };
       });
 
-      const priorityScore = (level: string | null) => {
-        if (level === 'darurat') return 3;
-        if (level === 'urgent') return 2;
-        if (level === 'waspada') return 1;
+      const triageScore = (alerts: any[]) => {
+        const titles = alerts.map((alert) => String(alert.title || ''));
+        if (titles.some((title) => title.includes('[A — AIRWAY]'))) return 4;
+        if (titles.some((title) => title.includes('[B — BREATHING]'))) return 3;
+        if (titles.some((title) => title.includes('[C — CIRCULATION]'))) return 2;
+        if (alerts.length > 0) return 1;
         return 0;
       };
-      mergedPatients.sort((a, b) => priorityScore(b.highestAlert) - priorityScore(a.highestAlert));
+      const severityScore = (level: string | null) =>
+        level === 'darurat' ? 3 : level === 'urgent' ? 2 : level === 'waspada' ? 1 : 0;
+      mergedPatients.sort((a, b) =>
+        triageScore(b.activeAlerts) - triageScore(a.activeAlerts) ||
+        severityScore(b.highestAlert) - severityScore(a.highestAlert)
+      );
 
       setPatients(mergedPatients);
     } catch (err: any) {
