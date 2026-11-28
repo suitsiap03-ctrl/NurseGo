@@ -585,8 +585,10 @@ export const PatientDetail: React.FC<PatientDetailProps> = ({
         if (error) throw error;
         showToast('success', 'Data obat berhasil diperbarui.');
       } else {
+        if (!user?.id) throw new Error('Sesi perawat tidak ditemukan. Silakan masuk kembali.');
         const { error } = await supabase.from('patient_medications').insert({
           patient_id: patientId,
+          nurse_id: user.id,
           medication_name: medName.trim(),
           dosage: medDosage.trim(),
           frequency: medFrequency.trim(),
