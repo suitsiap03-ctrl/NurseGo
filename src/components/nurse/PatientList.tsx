@@ -607,7 +607,14 @@ export const PatientList: React.FC<PatientListProps> = ({
                             <span className="text-slate-400 italic">Belum melapor</span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4">{renderAlertBadge(p.highestAlert)}</td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-col items-start gap-1">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded font-bold text-[10px] ${p.triagePriority === 'A' ? 'bg-rose-100 text-rose-800' : p.triagePriority === 'B' ? 'bg-orange-100 text-orange-800' : p.triagePriority === 'C' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>
+                              {p.triagePriority === 'A' ? 'A — AIRWAY' : p.triagePriority === 'B' ? 'B — BREATHING' : p.triagePriority === 'C' ? 'C — CIRCULATION' : 'STABIL / NON-ABC'}
+                            </span>
+                            {p.highestAlert && <span className="text-[9px] text-slate-500">{p.highestAlert.toUpperCase()}</span>}
+                          </div>
+                        </td>
                         <td className="py-3.5 px-4 text-right">
                           <button
                             onClick={() => onSelectPatient(p.id)}
