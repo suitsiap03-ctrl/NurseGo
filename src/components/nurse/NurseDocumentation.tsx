@@ -264,6 +264,11 @@ export const NurseDocumentation: React.FC<NurseDocumentationProps> = ({ onSelect
               ))}
             </select>
           </div>
+          {selectedPatient?.surgery_name && (
+            <p className="text-[11px] text-teal-800 bg-teal-50 border border-teal-100 rounded-lg px-3 py-2">
+              Jenis operasi pasien: <strong>{selectedPatient.surgery_name}</strong>. Daftar diagnosis dan panduan SOP disesuaikan dengan data operasi ini.
+            </p>
+          )}
           <div>
             <label className="block font-semibold text-slate-700 mb-1">Pilih Diagnosis Keperawatan (SDKI) *</label>
             <select
